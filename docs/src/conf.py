@@ -33,11 +33,11 @@ release = '0.9.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode',
-    'autoapi.extension'
+    'sphinx.ext.viewcode'
 ]
 
-autoapi_dirs = ['./ops_vis']
+#     'autoapi.extension'
+# autoapi_dirs = ['./ops_vis']
 
 # autosummary_generate = True
 
