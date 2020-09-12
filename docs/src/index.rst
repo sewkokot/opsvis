@@ -7,22 +7,23 @@ Welcome to ``ops_vis``'s documentation!
 =======================================
 
 .. toctree::
-    :maxdepth: 2
-    :caption: Contents:
+   :maxdepth: 2
+   :caption: Contents:
 
-    plot_model
-    plot_defo
-    plot_mode_shape
-    section_force_diagram_2d
-    section_force_diagram_3d
-    plot_stress_2d
-    plot_extruded_model_rect_section_3d
-    anim_defo
-    anim_mode
-    plot_fiber_section
-    fib_sec_list_to_cmds
-    quad_sig_out_per_node
-    examples
+   plot_model
+   plot_defo
+   plot_mode_shape
+   section_force_diagram_2d
+   section_force_diagram_3d
+   plot_stress_2d
+   plot_extruded_model_rect_section_3d
+   anim_defo
+   anim_mode
+   plot_fiber_section
+   fib_sec_list_to_cmds
+   quad_sig_out_per_node
+   examples
+
 
 The ``ops_vis`` postprocessing and plotting module is meant to be used
 with Opensees Python (OpenSeesPy). First read the

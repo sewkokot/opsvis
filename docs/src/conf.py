@@ -12,7 +12,7 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('..'))
+sys.path.insert(0, os.path.abspath('./ops_vis'))
 
 
 # -- Project information -----------------------------------------------------
@@ -33,8 +33,11 @@ release = '0.9.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'autoapi.extension'
 ]
+
+autoapi_dirs = ['./ops_vis']
 
 # autosummary_generate = True
 
