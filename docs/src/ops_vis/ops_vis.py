@@ -370,6 +370,69 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off):
 
         plt.axis('equal')
 
+    # 2d triangle (tri6n) elements plot_model
+    elif nen == 6:
+
+        for node_tag in node_tags:
+            x_crd = ops.nodeCoord(node_tag)[0]
+            y_crd = ops.nodeCoord(node_tag)[1]
+            if x_crd > max_x_crd:
+                max_x_crd = x_crd
+            if y_crd > max_y_crd:
+                max_y_crd = y_crd
+
+        max_crd = np.amax([max_x_crd, max_y_crd])
+        _offset = 0.005 * max_crd
+        _offnl = 0.003 * max_crd
+
+        for i, ele_tag in enumerate(ele_tags):
+            nd1, nd2, nd3, nd4, nd5, nd6 = ops.eleNodes(ele_tag)
+
+            # element x, y coordinates
+            ex = np.array([ops.nodeCoord(nd1)[0],
+                           ops.nodeCoord(nd2)[0],
+                           ops.nodeCoord(nd3)[0],
+                           ops.nodeCoord(nd4)[0],
+                           ops.nodeCoord(nd5)[0],
+                           ops.nodeCoord(nd6)[0]])
+            ey = np.array([ops.nodeCoord(nd1)[1],
+                           ops.nodeCoord(nd2)[1],
+                           ops.nodeCoord(nd3)[1],
+                           ops.nodeCoord(nd4)[1],
+                           ops.nodeCoord(nd5)[1],
+                           ops.nodeCoord(nd6)[1]])
+
+            # location of label
+            xt = sum(ex)/nen
+            yt = sum(ey)/nen
+
+            # plt.plot(np.append(ex, ex[0]), np.append(ey, ey[0]), 'bo-')
+            plt.plot(np.append(ex[:3], ex[0]), np.append(ey[:3], ey[0]), 'b-',
+                     lw=0.4)
+
+            if element_labels:
+                va = 'center'
+                ha = 'center'
+                plt.text(xt, yt, f'{ele_tag}', va=va, ha=ha, color='red')
+
+        if node_labels:
+            for node_tag in node_tags:
+                if not offset_nd_label == 'above':
+                    offset_nd_label_x, offset_nd_label_y = _offnl, _offnl
+                    va = 'bottom'
+                    # va = 'center'
+                    ha = 'left'
+                else:
+                    offset_nd_label_x, offset_nd_label_y = 0.0, _offnl
+                    va = 'bottom'
+                    ha = 'center'
+
+                plt.text(ops.nodeCoord(node_tag)[0]+offset_nd_label_x,
+                         ops.nodeCoord(node_tag)[1]+offset_nd_label_y,
+                         f'{node_tag}', va=va, ha=ha, color='blue')
+
+        plt.axis('equal')
+
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                    az_el, fig_wi_he, fig_lbrt):
@@ -1066,6 +1129,76 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_undefo, interpFlag,
                                x[3], x[7], x[0]]),
                      np.array([y[0], y[4], y[1], y[5], y[2], y[6],
                                y[3], y[7], y[0]]), 'b.-')
+
+        plt.axis('equal')
+
+    # 2d triangle (tri6n) elements plot_defo
+    elif nen == 6:
+        for ele_tag in ele_tags:
+            nd1, nd2, nd3, nd4, nd5, nd6 = ops.eleNodes(ele_tag)
+
+            # element x, y coordinates
+            ex = np.array([ops.nodeCoord(nd1)[0],
+                           ops.nodeCoord(nd2)[0],
+                           ops.nodeCoord(nd3)[0],
+                           ops.nodeCoord(nd4)[0],
+                           ops.nodeCoord(nd5)[0],
+                           ops.nodeCoord(nd6)[0]])
+            ey = np.array([ops.nodeCoord(nd1)[1],
+                           ops.nodeCoord(nd2)[1],
+                           ops.nodeCoord(nd3)[1],
+                           ops.nodeCoord(nd4)[1],
+                           ops.nodeCoord(nd5)[1],
+                           ops.nodeCoord(nd6)[1]])
+
+            if modeNo:
+                ed = np.array([ops.nodeEigenvector(nd1, modeNo)[0],
+                               ops.nodeEigenvector(nd1, modeNo)[1],
+                               ops.nodeEigenvector(nd2, modeNo)[0],
+                               ops.nodeEigenvector(nd2, modeNo)[1],
+                               ops.nodeEigenvector(nd3, modeNo)[0],
+                               ops.nodeEigenvector(nd3, modeNo)[1],
+                               ops.nodeEigenvector(nd4, modeNo)[0],
+                               ops.nodeEigenvector(nd4, modeNo)[1],
+                               ops.nodeEigenvector(nd5, modeNo)[0],
+                               ops.nodeEigenvector(nd5, modeNo)[1],
+                               ops.nodeEigenvector(nd6, modeNo)[0],
+                               ops.nodeEigenvector(nd6, modeNo)[1]])
+            else:
+                ed = np.array([ops.nodeDisp(nd1)[0],
+                               ops.nodeDisp(nd1)[1],
+                               ops.nodeDisp(nd2)[0],
+                               ops.nodeDisp(nd2)[1],
+                               ops.nodeDisp(nd3)[0],
+                               ops.nodeDisp(nd3)[1],
+                               ops.nodeDisp(nd4)[0],
+                               ops.nodeDisp(nd4)[1],
+                               ops.nodeDisp(nd5)[0],
+                               ops.nodeDisp(nd5)[1],
+                               ops.nodeDisp(nd6)[0],
+                               ops.nodeDisp(nd6)[1]])
+
+            if unDefoFlag:
+                plt.plot(np.array([ex[0], ex[3], ex[1], ex[4], ex[2], ex[5],
+                                   ex[0]]),
+                         np.array([ey[0], ey[3], ey[1], ey[4], ey[2], ey[5],
+                                   ey[0]]),
+                         fmt_undefo)
+
+            # xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
+            # xdi, ydi = beam_disp_ends(ex, ey, ed, sfac)
+            # # interpolated displacement field
+            # plt.plot(xcdi, ycdi, 'b.-')
+            # # translations of ends only
+            # plt.plot(xdi, ydi, 'ro')
+
+            # test it with one element
+            x = ex+sfac*ed[[0, 2, 4, 6, 8, 10]]
+            y = ey+sfac*ed[[1, 3, 5, 7, 9, 11]]
+            plt.plot(np.array([x[0], x[3], x[1], x[4], x[2], x[5],
+                               x[0]]),
+                     np.array([y[0], y[3], y[1], y[4], y[2], y[5],
+                               y[0]]), 'b.-')
 
         plt.axis('equal')
 
@@ -2891,7 +3024,7 @@ def section_force_diagram_3d(sf_type, Ew, sfac=1., nep=17,
     return minVal, maxVal
 
 
-def quad_sig_out_per_node():
+def sig_out_per_node_quad():
     """Return a 2d numpy array of stress components per OpenSees node.
 
     Three first stress components (sxx, syy, sxy) are calculated and
@@ -2905,7 +3038,7 @@ def quad_sig_out_per_node():
             Size (n_nodes x 7).
 
     Examples:
-        sig_out = opsv.quad_sig_out_per_node()
+        sig_out = opsv.sig_out_per_node_quad()
 
     Notes:
        s1, s2: principal stresses
@@ -2935,7 +3068,7 @@ def quad_sig_out_per_node():
                               sig_ip_el[3:6],
                               sig_ip_el[6:9],
                               sig_ip_el[9:12]]))
-        sigM_nd = quad_extrapolate_ip_to_node(sigM_ip)
+        sigM_nd = extrapolate_ip_to_node_quad(sigM_ip)
         # sxx
         sig_out[ind1, 0] += sigM_nd[0, 0]
         sig_out[ind2, 0] += sigM_nd[1, 0]
@@ -2973,7 +3106,7 @@ def quad_sig_out_per_node():
     return sig_out
 
 
-def quad_sig_out_per_node_9n():
+def sig_out_per_node_quad9n():
     """Return a 2d numpy array of stress components per OpenSees node.
 
     Three first stress components (sxx, syy, sxy) are calculated and
@@ -2987,7 +3120,7 @@ def quad_sig_out_per_node_9n():
             Size (n_nodes x 7).
 
     Examples:
-        sig_out = opsv.quad_sig_out_per_node()
+        sig_out = opsv.sig_out_per_node_quad()
 
     Notes:
        s1, s2: principal stresses
@@ -3028,7 +3161,7 @@ def quad_sig_out_per_node_9n():
                               sig_ip_el[18:21],
                               sig_ip_el[21:24],
                               sig_ip_el[24:27]]))
-        sigM_nd = quad_9n_extrapolate_ip_to_node(sigM_ip)
+        sigM_nd = extrapolate_ip_to_node_quad9n(sigM_ip)
         # sxx
         sig_out[ind1, 0] += sigM_nd[0, 0]
         sig_out[ind2, 0] += sigM_nd[1, 0]
@@ -3081,7 +3214,7 @@ def quad_sig_out_per_node_9n():
     return sig_out
 
 
-def quad_sig_out_per_node_8n():
+def sig_out_per_node_quad8n():
     """Return a 2d numpy array of stress components per OpenSees node.
 
     Three first stress components (sxx, syy, sxy) are calculated and
@@ -3095,7 +3228,7 @@ def quad_sig_out_per_node_8n():
             Size (n_nodes x 7).
 
     Examples:
-        sig_out = opsv.quad_sig_out_per_node()
+        sig_out = opsv.sig_out_per_node_quad()
 
     Notes:
        s1, s2: principal stresses
@@ -3133,8 +3266,9 @@ def quad_sig_out_per_node_8n():
                               sig_ip_el[12:15],
                               sig_ip_el[15:18],
                               sig_ip_el[18:21],
-                              sig_ip_el[21:24]]))
-        sigM_nd = quad_8n_extrapolate_ip_to_node(sigM_ip)
+                              sig_ip_el[21:24],
+                              sig_ip_el[24:27]]))
+        sigM_nd = extrapolate_ip_to_node_quad8n(sigM_ip)
         # sxx
         sig_out[ind1, 0] += sigM_nd[0, 0]
         sig_out[ind2, 0] += sigM_nd[1, 0]
@@ -3184,7 +3318,31 @@ def quad_sig_out_per_node_8n():
     return sig_out
 
 
-def quad_extrapolate_ip_to_node(yip):
+def extrapolate_ip_to_node_tri6n(yip):
+    """Exprapolate from 3 integration points to 6 nodes of a tri6n element.
+
+    The integration points are at (2/3, 1/6), (1/6, 2/3), (1/6, 1/6).
+    Other possible 3 Gauss points are (1/2, 1/2), (1/2, 0), (0, 1/2).
+
+    Integration points of Gauss quadrature.
+    Usefull for : stress components (sxx, syy, sxy)
+
+    yip - either a single vector (6,) or array (6,3) /sxx syy sxy/
+          or array (6, n)
+    """
+
+    W = np.array([[1.6666666666666667, -0.3333333333333333, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333,  1.6666666666666667, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333, -0.3333333333333333,  1.6666666666666667],  # noqa: E501
+                  [0.6666666666666667,  0.6666666666666667, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333,  0.6666666666666667,  0.6666666666666667],  # noqa: E501
+                  [0.6666666666666667, -0.3333333333333333,  0.6666666666666667]])  # noqa: E501
+    ynp = W @ yip
+
+    return ynp
+
+
+def extrapolate_ip_to_node_quad(yip):
     """
     Exprapolate values at 4 integration points to 4 nodes of a quad element.
 
@@ -3196,16 +3354,16 @@ def quad_extrapolate_ip_to_node(yip):
     """
 
     xep = np.sqrt(3.)/2
-    X = np.array([[1.+xep, -1/2., 1.-xep, -1/2.],
+    W = np.array([[1.+xep, -1/2., 1.-xep, -1/2.],
                   [-1/2., 1.+xep, -1/2., 1.-xep],
                   [1.-xep, -1/2., 1.+xep, -1/2.],
                   [-1/2., 1.-xep, -1/2., 1.+xep]])
 
-    ynp = X @ yip
+    ynp = W @ yip
     return ynp
 
 
-def quad_9n_extrapolate_ip_to_node(yip):
+def extrapolate_ip_to_node_quad9n(yip):
     """
     Exprapolate values at 9 integration points to 9 nodes of a quad element.
 
@@ -3216,96 +3374,23 @@ def quad_9n_extrapolate_ip_to_node(yip):
           or array (4, n)
     """
 
-    a = 1./np.sqrt(0.6)
-    a10 = 1 - a*a
-    a9 = a10 * a10
-    a11, a12 = 1 + a, 1 - a
-    a1, a2, a3 = a11 * a11, a11 * a12, a12 * a12
-    a4, a5 = a10 * a11, a10 * a12
+    W = np.array([[2.1869398183909485, 0.2777777777777778, 0.0352824038312731, 0.2777777777777778, -0.9858870384674904, -0.1252240726436203, -0.1252240726436203, -0.9858870384674904, 0.4444444444444444],  # noqa: E501
+                  [0.2777777777777778, 2.1869398183909485, 0.2777777777777778, 0.0352824038312731, -0.9858870384674904, -0.9858870384674904, -0.1252240726436203, -0.1252240726436203, 0.4444444444444444],  # noqa: E501
+                  [0.0352824038312731, 0.2777777777777778, 2.1869398183909485, 0.2777777777777778, -0.1252240726436203, -0.9858870384674904, -0.9858870384674904, -0.1252240726436203, 0.4444444444444444],  # noqa: E501
+                  [0.2777777777777778, 0.0352824038312731, 0.2777777777777778, 2.1869398183909485, -0.1252240726436203, -0.1252240726436203, -0.9858870384674904, -0.9858870384674904, 0.4444444444444444],  # noqa: E501
+                  [0., 0., 0., 0., 1.4788305577012359, 0., 0.1878361089654305, 0., -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 1.4788305577012359, 0., 0.1878361089654305, -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0.1878361089654305, 0., 1.4788305577012359, 0., -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 0.1878361089654305, 0., 1.4788305577012359, -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 0., 0., 0., 1.]])
 
-    # 1
-    n5, n6, n7, n8 = a4/2-a9/2, a5/2-a9/2, a5/2-a9/2, a4/2-a9/2
-    n1 = a1/4 - (n8 + n5)/2 - a9/4
-    n2 = a2/4 - (n5 + n6)/2 - a9/4
-    n3 = a3/4 - (n6 + n7)/2 - a9/4
-    n4 = a2/4 - (n7 + n8)/2 - a9/4
-
-    r1 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a9])
-
-    # 2
-    n5, n6, n7, n8 = a4/2-a9/2, a4/2-a9/2, a5/2-a9/2, a5/2-a9/2
-    n1 = a2/4 - (n8 + n5)/2 - a9/4
-    n2 = a1/4 - (n5 + n6)/2 - a9/4
-    n3 = a2/4 - (n6 + n7)/2 - a9/4
-    n4 = a3/4 - (n7 + n8)/2 - a9/4
-
-    r2 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a9])
-
-    # 3
-    n5, n6, n7, n8 = a5/2-a9/2, a4/2-a9/2, a4/2-a9/2, a5/2-a9/2
-    n1 = a3/4 - (n8 + n5)/2 - a9/4
-    n2 = a2/4 - (n5 + n6)/2 - a9/4
-    n3 = a1/4 - (n6 + n7)/2 - a9/4
-    n4 = a2/4 - (n7 + n8)/2 - a9/4
-
-    r3 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a9])
-
-    # 4
-    n5, n6, n7, n8 = a5/2-a9/2, a5/2-a9/2, a4/2-a9/2, a4/2-a9/2
-    n1 = a2/4 - (n8 + n5)/2 - a9/4
-    n2 = a3/4 - (n5 + n6)/2 - a9/4
-    n3 = a2/4 - (n6 + n7)/2 - a9/4
-    n4 = a1/4 - (n7 + n8)/2 - a9/4
-
-    r4 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a9])
-
-    # 5
-    n5, n6, n7, n8 = a11/2-a10/2, a10/2-a10/2, a12/2-a10/2, a10/2-a10/2
-    n1 = a11/4 - (n8 + n5)/2 - a10/4
-    n2 = a11/4 - (n5 + n6)/2 - a10/4
-    n3 = a12/4 - (n6 + n7)/2 - a10/4
-    n4 = a12/4 - (n7 + n8)/2 - a10/4
-
-    r5 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a10])
-
-    # 6
-    n5, n6, n7, n8 = a10/2-a10/2, a11/2-a10/2, a10/2-a10/2, a12/2-a10/2
-    n1 = a12/4 - (n8 + n5)/2 - a10/4
-    n2 = a11/4 - (n5 + n6)/2 - a10/4
-    n3 = a11/4 - (n6 + n7)/2 - a10/4
-    n4 = a12/4 - (n7 + n8)/2 - a10/4
-
-    r6 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a10])
-
-    # 7
-    n5, n6, n7, n8 = a12/2-a10/2, a10/2-a10/2, a11/2-a10/2, a10/2-a10/2
-    n1 = a12/4 - (n8 + n5)/2 - a10/4
-    n2 = a12/4 - (n5 + n6)/2 - a10/4
-    n3 = a11/4 - (n6 + n7)/2 - a10/4
-    n4 = a11/4 - (n7 + n8)/2 - a10/4
-
-    r7 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a10])
-
-    # 8
-    n5, n6, n7, n8 = a10/2-a10/2, a12/2-a10/2, a10/2-a10/2, a11/2-a10/2
-    n1 = a11/4 - (n8 + n5)/2 - a10/4
-    n2 = a12/4 - (n5 + n6)/2 - a10/4
-    n3 = a12/4 - (n6 + n7)/2 - a10/4
-    n4 = a11/4 - (n7 + n8)/2 - a10/4
-
-    r8 = np.array([n1, n2, n3, n4, n5, n6, n7, n8, a10])
-
-    r9 = np.array([0., 0., 0., 0., 0., 0., 0., 0., 1.])
-
-    X = np.vstack((r1, r2, r3, r4, r5, r6, r7, r8, r9))
-
-    ynp = X @ yip
+    ynp = W @ yip
     # ynp = 1.0
 
     return ynp
 
 
-def quad_8n_extrapolate_ip_to_node(yip):
+def extrapolate_ip_to_node_quad8n(yip):
     """
     Exprapolate values at 8 integration points to 8 nodes of a quad element.
 
@@ -3316,23 +3401,16 @@ def quad_8n_extrapolate_ip_to_node(yip):
           or array (4, n)
     """
 
-    a = 1./np.sqrt(0.6)
-    a0 = 1 - a**2
-    a4, a5 = -(1-a)**2*(1+2*a)/4, -(1+a)**2*(1-2*a)/4
-    a7 = -a0/4
-    a11, a12 = a0*(1+a)/2, a0*(1-a)/2
-    a1, a2, a3 = (1+a)/2, (1-a)/2, (1-a**2)/2
+    W = np.array([[2.0758287072798374, 0.1666666666666666, -0.075828707279838,  0.1666666666666666, -0.7636648162452683, 0.0969981495786018, 0.0969981495786018, -0.7636648162452683, 0.],  # noqa: E501
+                  [0.1666666666666666, 2.0758287072798374, 0.1666666666666666, -0.075828707279838, -0.7636648162452683, -0.7636648162452683, 0.0969981495786018, 0.0969981495786018, 0.],  # noqa: E501
+                  [-0.075828707279838,  0.1666666666666666, 2.0758287072798374, 0.1666666666666666, 0.0969981495786018, -0.7636648162452683, -0.7636648162452683, 0.0969981495786018, 0.],  # noqa: E501
+                  [0.1666666666666666, -0.075828707279838,  0.1666666666666666, 2.0758287072798374, 0.0969981495786018, 0.0969981495786018, -0.7636648162452683, -0.7636648162452683, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 1.1454972243679027, -0.3333333333333333, -0.1454972243679028, -0.3333333333333333, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.3333333333333333, 1.1454972243679027, -0.3333333333333333, -0.1454972243679028, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.1454972243679028, -0.3333333333333333, 1.1454972243679027, -0.3333333333333333, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.3333333333333333, -0.1454972243679028, -0.3333333333333333, 1.1454972243679027, 0.]])  # noqa: E501
 
-    X = np.array([[a5, a7, a4, a7, a11, a12, a12, a11],
-                  [a7, a5, a7, a4, a11, a11, a12, a12],
-                  [a4, a7, a5, a7, a12, a11, a11, a12],
-                  [a7, a4, a7, a5, a12, a12, a11, a11],
-                  [a7, a7, a7, a7, a1, a3, a2, a3],
-                  [a7, a7, a7, a7, a3, a1, a3, a2],
-                  [a7, a7, a7, a7, a2, a3, a1, a3],
-                  [a7, a7, a7, a7, a3, a2, a3, a1]])
-
-    ynp = X @ yip
+    ynp = W @ yip
     # ynp = 1.0
 
     return ynp
@@ -3351,12 +3429,12 @@ def quad_interpolate_node_to_ip(ynp):
     jsz = 1./6.
     jtr = 1./3.
     p2 = jsz * np.sqrt(3.)
-    X = np.array([[jtr+p2, jsz, jtr-p2, jsz],
+    W = np.array([[jtr+p2, jsz, jtr-p2, jsz],
                   [jsz, jtr+p2, jsz, jtr-p2],
                   [jtr-p2, jsz, jtr+p2, jsz],
                   [jsz, jtr-p2, jsz, jtr+p2]])
 
-    yip = X @ ynp
+    yip = W @ ynp
     return yip
 
 
@@ -3480,7 +3558,7 @@ def quad_sig_out_per_ele():
                               sig_ip_el[3:6],
                               sig_ip_el[6:9],
                               sig_ip_el[9:12]]))
-        sigM_nd = quad_extrapolate_ip_to_node(sigM_ip)
+        sigM_nd = extrapolate_ip_to_node_quad(sigM_ip)
         eles_ips_sig_out[i, :, :3] = sigM_ip
         eles_nds_sig_out[i, :, :3] = sigM_nd
 
@@ -3580,13 +3658,13 @@ def plot_mesh_8n_2d(nds_crd, eles_conn, lw=0.4, ec='k'):
         plt.fill(x, y, edgecolor=ec, lw=lw, fill=False)
 
 
-def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
+def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis', levels=50):
     """
     Plot stress distribution of a 2d elements of a 2d model.
 
     Args:
         nds_val (ndarray): the values of a stress component, which can
-            be extracted from sig_out array (see quad_sig_out_per_node
+            be extracted from sig_out array (see sig_out_per_node_quad
             function)
 
         mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.
@@ -3596,7 +3674,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
     Usage:
         ::
 
-            sig_out = opsv.quad_sig_out_per_node()
+            sig_out = opsv.sig_out_per_node_quad()
             j, jstr = 3, 'vmis'
             nds_val = sig_out[:, j]
             opsv.plot_stress_2d(nds_val)
@@ -3607,7 +3685,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
 
     See also:
 
-    :ref:`ops_vis_quad_sig_out_per_node`
+    :ref:`ops_vis_sig_out_per_node_quad`
     """
 
     node_tags, ele_tags = ops.getNodeTags(), ops.getEleTags()
@@ -3619,7 +3697,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
     for i, node_tag in enumerate(node_tags):
         nds_crd[i] = ops.nodeCoord(node_tag)
 
-    # from utils / quad_sig_out_per_node
+    # from utils / sig_out_per_node_quad
     # fixme: if this can be simplified
     # index (starts from 0) to node_tag correspondence
     # (a) data in np.array of integers
@@ -3650,7 +3728,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
                                       nds_crd_all[:, 1],
                                       tris_conn)
 
-    plt.tricontourf(triangulation, nds_val_all, 50, cmap=cmap)
+    plt.tricontourf(triangulation, nds_val_all, levels=levels, cmap=cmap)
 
     # 2. plot original mesh (quad) without subdivision into triangles
     if mesh_outline:
@@ -3660,7 +3738,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='viridis'):
     plt.axis('equal')
 
 
-def plot_stress_9n_2d(nds_val, cmap='viridis'):
+def plot_stress_9n_2d(nds_val, cmap='viridis', levels=50):
 
     node_tags, ele_tags = ops.getNodeTags(), ops.getEleTags()
     n_nodes, n_eles = len(node_tags), len(ele_tags)
@@ -3671,7 +3749,7 @@ def plot_stress_9n_2d(nds_val, cmap='viridis'):
     for i, node_tag in enumerate(node_tags):
         nds_crd[i] = ops.nodeCoord(node_tag)
 
-    # from utils / quad_sig_out_per_node
+    # from utils / sig_out_per_node_quad
     # fixme: if this can be simplified
     # index (starts from 0) to node_tag correspondence
     # (a) data in np.array of integers
@@ -3703,7 +3781,7 @@ def plot_stress_9n_2d(nds_val, cmap='viridis'):
                                       nds_crd[:, 1],
                                       tris_conn)
 
-    plt.tricontourf(triangulation, nds_val, 50, cmap=cmap)
+    plt.tricontourf(triangulation, nds_val, levels=levels, cmap=cmap)
 
     # 2. plot original mesh (quad) without subdivision into triangles
     plot_mesh_9n_2d(nds_crd, quads_conn)
@@ -3712,7 +3790,7 @@ def plot_stress_9n_2d(nds_val, cmap='viridis'):
     plt.axis('equal')
 
 
-def plot_stress_8n_2d(nds_val, cmap='viridis'):
+def plot_stress_8n_2d(nds_val, cmap='viridis', levels=50):
 
     node_tags, ele_tags = ops.getNodeTags(), ops.getEleTags()
     n_nodes, n_eles = len(node_tags), len(ele_tags)
@@ -3723,7 +3801,7 @@ def plot_stress_8n_2d(nds_val, cmap='viridis'):
     for i, node_tag in enumerate(node_tags):
         nds_crd[i] = ops.nodeCoord(node_tag)
 
-    # from utils / quad_sig_out_per_node
+    # from utils / sig_out_per_node_quad
     # fixme: if this can be simplified
     # index (starts from 0) to node_tag correspondence
     # (a) data in np.array of integers
@@ -3760,7 +3838,7 @@ def plot_stress_8n_2d(nds_val, cmap='viridis'):
                                       nds_crd_all[:, 1],
                                       tris_conn)
 
-    plt.tricontourf(triangulation, nds_val_all, 50, cmap=cmap)
+    plt.tricontourf(triangulation, nds_val_all, levels=levels, cmap=cmap)
 
     # 2. plot original mesh (quad) without subdivision into triangles
     plot_mesh_8n_2d(nds_crd, quads_conn)
@@ -4123,9 +4201,9 @@ def quads_to_8tris_8n(quads_conn, nds_crd, nds_val):
         # nds_c_crd[i] = np.array([np.sum(nds_crd[[n0, n1, n2, n3], 0])/4.,
         #                          np.sum(nds_crd[[n0, n1, n2, n3], 1])/4.])
         # nds_c_val[i] = np.sum(nds_val[[n0, n1, n2, n3]])/4.
-        nds_c_crd[i] = quad_8n_val_at_center(nds_crd[[n0, n1, n2, n3,
+        nds_c_crd[i] = quad8n_val_at_center(nds_crd[[n0, n1, n2, n3,
                                                       n4, n5, n6, n7]])
-        nds_c_val[i] = quad_8n_val_at_center(nds_val[[n0, n1, n2, n3,
+        nds_c_val[i] = quad8n_val_at_center(nds_val[[n0, n1, n2, n3,
                                                       n4, n5, n6, n7]])
 
         # triangles connectivity
@@ -4190,7 +4268,7 @@ def quads_to_8tris_9n(quads_conn):
     return tris_conn
 
 
-def quad_8n_val_at_center(vals):
+def quad8n_val_at_center(vals):
     """
     Calculate values at the center of 8-node quad element.
 
