@@ -12,6 +12,7 @@ Welcome to ``ops_vis``'s documentation!
 
    plot_model
    plot_defo
+   plot_supports_and_loads_2d
    plot_mode_shape
    section_force_diagram_2d
    section_force_diagram_3d
@@ -24,6 +25,8 @@ Welcome to ``ops_vis``'s documentation!
    quad_sig_out_per_node
    examples
 
+Since October 2021, ``ops_vis`` is no longer distributed with the main
+OpenSeesPy, and therefore must be installed separately with ``pip``.
 
 The ``ops_vis`` postprocessing and plotting module is meant to be used
 with Opensees Python (OpenSeesPy). First read the
@@ -40,9 +43,11 @@ we can lower the bar in teaching and learning OpenSees at earlier
 years of civil engineering studies. However the visualization features
 for OpenSees can also be helpful for research studies.
 
-Note that OpenSeesPy contains another plotting module called
-``Get_Rendering``, however ``ops_vis`` is an alternative with some
-distinct features, which for example allow us to plot:
+Note that there are other OpenSeesPy visualization modules (for example
+``Get_Rendering``), however ``ops_vis`` is an alternative with some
+distinct features (on the other hand the ``Get_Rendering`` has other
+features that ``ops_vis`` does not have), which for example allow us
+to plot:
 
 - interpolated deformation of frame structures,
 - stresses of triangular and (four, eight and nine-node) quadrilateral
@@ -52,7 +57,13 @@ distinct features, which for example allow us to plot:
 - models with extruded cross sections
 - animation of mode shapes.
 
-To use ``ops_vis`` in OpenSees Python
+Installation
+
+``pip install opsvis``
+
+Note the name of the PyPi package is without the underscore ``_``.
+
+To use ``ops_vis`` in OpenSeesPy
 scripts, your ``.py`` file should start as follows: ::
 
 	import openseespy.opensees as ops
@@ -61,13 +72,14 @@ scripts, your ``.py`` file should start as follows: ::
 
 	# ... your OpenSeesPy model and analysis commands ...
 	opsv.plot_model()
-	opsv.plot_defo()
+	sfac = opsv.plot_defo()
 
 The main commands related to various aspects of OpenSees model
 visualization are as follows:
 
 #. :doc:`plot_model`
 #. :doc:`plot_defo`
+#. :doc:`plot_supports_and_loads_2d`
 #. :doc:`plot_mode_shape`
 #. :doc:`section_force_diagram_2d`
 #. :doc:`section_force_diagram_3d`
