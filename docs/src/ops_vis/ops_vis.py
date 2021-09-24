@@ -3748,7 +3748,7 @@ def get_Ew_data_from_ops_domain():
             Pt, Pa, aL = ele_load_data
             Ew[ele_load_tag].append(['-beamPoint', Pt, aL, Pa])
         else:
-
+            print(f'ele_load_type:\n{ele_load_type} - Unknown element load Error')
 
     return Ew
 

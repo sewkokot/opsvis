@@ -9,7 +9,7 @@ Example ``.py`` file can be downloaded :download:`here <examples/demo_plot_fiber
 
 .. image:: /img/fibsec_rc.png
 .. image:: /img/fibsec_wshape.png
-.. image:: /_static/fibsec_circ.png
+.. image:: /img/fibsec_circ.png
 
 .. literalinclude:: examples/demo_plot_fiber_section.py
    :linenos:

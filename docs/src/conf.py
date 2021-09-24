@@ -12,18 +12,17 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./ops_vis'))
 
+sys.path.insert(0, os.path.abspath('./ops_vis'))
 
 # -- Project information -----------------------------------------------------
 
 project = 'ops_vis'
-copyright = '2020, Seweryn Kokot'
+copyright = '2021, Seweryn Kokot'
 author = 'Seweryn Kokot'
 
 # The full version, including alpha/beta/rc tags
-release = '0.9.1'
-
+release = '0.94.5'
 
 # -- General configuration ---------------------------------------------------
 
@@ -35,6 +34,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode'
 ]
+
+napoleon_google_docstring = True
 
 #     'autoapi.extension'
 # autoapi_dirs = ['./ops_vis']
