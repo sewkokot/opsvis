@@ -1,5 +1,5 @@
 
-.. _ops_vis_ex3:
+.. _opsvis_ex3:
 
 ======================================================
 Plot stress distribution of plane stress quad model

@@ -3,10 +3,10 @@
  plot_fiber_section
 =============================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: plot_fiber_section
    :noindex:
 
-See example :ref:`ops_vis_ex4`
+See example :ref:`opsvis_ex4`

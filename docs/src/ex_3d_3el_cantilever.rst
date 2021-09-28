@@ -1,5 +1,5 @@
 
-.. _ops_vis_ex2:
+.. _opsvis_ex2:
 
 ======================================================
 Statics of a 3d 3-element cantilever beam

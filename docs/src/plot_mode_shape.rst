@@ -3,7 +3,7 @@
  plot_mode_shape
 ==========================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: plot_mode_shape

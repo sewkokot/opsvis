@@ -1,5 +1,5 @@
 
-.. _ops_vis_ex4:
+.. _opsvis_ex4:
 
 ======================================================
 Plot steel and reinforced concrete fiber sections

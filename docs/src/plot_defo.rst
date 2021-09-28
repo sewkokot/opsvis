@@ -3,7 +3,7 @@
  plot_defo
 ====================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: plot_defo

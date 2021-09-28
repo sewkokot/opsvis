@@ -1,6 +1,6 @@
 import openseespy.opensees as ops
 # import opensees as ops  # local compilation
-import ops_vis as opsv
+import opsvis as opsv
 
 import numpy as np
 import matplotlib.pyplot as plt

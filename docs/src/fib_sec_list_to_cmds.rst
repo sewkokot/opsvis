@@ -3,10 +3,10 @@
  fib_sec_list_to_cmds
 ===============================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: fib_sec_list_to_cmds
    :noindex:
 
-See example :ref:`ops_vis_ex4`
+See example :ref:`opsvis_ex4`

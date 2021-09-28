@@ -38,7 +38,7 @@ extensions = [
 napoleon_google_docstring = True
 
 #     'autoapi.extension'
-# autoapi_dirs = ['./ops_vis']
+# autoapi_dirs = ['./opsvis']
 
 # autosummary_generate = True
 

@@ -1,4 +1,4 @@
-.. _ops_vis_ex5:
+.. _opsvis_ex5:
 
 =============================================================================
 Animation of dynamic analysis and mode shapes of a 2d Portal Frame

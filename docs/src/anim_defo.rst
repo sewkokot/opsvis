@@ -3,7 +3,7 @@
  anim_defo
 ====================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: anim_defo

@@ -1,9 +1,9 @@
-.. ops_vis documentation master file, created by
+.. opsvis documentation master file, created by
    sphinx-quickstart on Sat Aug 22 13:35:16 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ``ops_vis``'s documentation!
+Welcome to ``opsvis``'s documentation!
 =======================================
 
 .. toctree::
@@ -25,13 +25,13 @@ Welcome to ``ops_vis``'s documentation!
    quad_sig_out_per_node
    examples
 
-Since October 2021, ``ops_vis`` is no longer distributed with the main
+Since October 2021, ``opsvis`` is no longer distributed with the main
 OpenSeesPy, and therefore must be installed separately with ``pip``.
 
-The ``ops_vis`` postprocessing and plotting module is meant to be used
+The ``opsvis`` postprocessing and plotting module is meant to be used
 with Opensees Python (OpenSeesPy). First read the
 `OpenSeesPy documentation <https://openseespydoc.readthedocs.io>`_
-before geting started with ``ops_vis``.
+before geting started with ``opsvis``.
 
 This module can be mainly useful for students when learning the
 fundamentals of structural analysis (interpolated deformation of frame
@@ -44,9 +44,9 @@ years of civil engineering studies. However the visualization features
 for OpenSees can also be helpful for research studies.
 
 Note that there are other OpenSeesPy visualization modules (for example
-``Get_Rendering``), however ``ops_vis`` is an alternative with some
+``Get_Rendering``), however ``opsvis`` is an alternative with some
 distinct features (on the other hand the ``Get_Rendering`` has other
-features that ``ops_vis`` does not have), which for example allow us
+features that ``opsvis`` does not have), which for example allow us
 to plot:
 
 - interpolated deformation of frame structures,
@@ -63,11 +63,11 @@ Installation
 
 Note the name of the PyPi package is without the underscore ``_``.
 
-To use ``ops_vis`` in OpenSeesPy
+To use ``opsvis`` in OpenSeesPy
 scripts, your ``.py`` file should start as follows: ::
 
 	import openseespy.opensees as ops
-	import ops_vis as opsv
+	import opsvis as opsv
 	import matplotlib.pyplot as plt
 
 	# ... your OpenSeesPy model and analysis commands ...

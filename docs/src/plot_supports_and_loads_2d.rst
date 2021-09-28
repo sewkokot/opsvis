@@ -3,7 +3,7 @@
  plot_supports_and_loads_2d
 ===========================
 
-.. automodule:: ops_vis
+.. automodule:: opsvis
    :noindex:
 
 .. autofunction:: plot_supports_and_loads_2d
