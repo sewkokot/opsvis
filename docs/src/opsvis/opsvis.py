@@ -2461,10 +2461,10 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
 
     Notes:
         ``fib_sec_list`` can be reused by means of a python helper function
-            ``ops_vis.fib_sec_list_to_cmds(fib_sec_list_1)``
+            ``opsvis.fib_sec_list_to_cmds(fib_sec_list_1)``
 
     See also:
-        ``ops_vis.fib_sec_list_to_cmds()``
+        ``opsvis.fib_sec_list_to_cmds()``
     """
 
     fig, ax = plt.subplots()
@@ -2599,7 +2599,7 @@ def fib_sec_list_to_cmds(fib_sec_list):
 
     See also:
 
-    ``ops_vis.plot_fiber_section()``
+    ``opsvis.plot_fiber_section()``
 
     """
     for dat in fib_sec_list:
@@ -3748,7 +3748,8 @@ def get_Ew_data_from_ops_domain():
             Pt, Pa, aL = ele_load_data
             Ew[ele_load_tag].append(['-beamPoint', Pt, aL, Pa])
         else:
-            print(f'ele_load_type:\n{ele_load_type} - Unknown element load Error')
+            print(f'\nWarning! ele_load_type:\n{ele_load_type} - Unknown element load Error')
+
 
     return Ew
 
@@ -4892,7 +4893,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
 
     See also:
 
-    :ref:`ops_vis_sig_out_per_node`
+    :ref:`opsvis_sig_out_per_node`
     """
 
     node_tags, ele_tags = ops.getNodeTags(), ops.getEleTags()
@@ -5518,7 +5519,7 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50):
 
     See also:
 
-    :ref:`ops_vis_sig_out_per_node`
+    :ref:`opsvis_sig_out_per_node`
     """
 
     # az_el - azimut, elevation used for 3d plots only
