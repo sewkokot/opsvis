@@ -61,15 +61,14 @@ ops.printModel()
 
 # 1. plot model with tag lebels
 
-szer, wys = 16., 10.
-
-fig = plt.figure(figsize=(szer/2.54, wys/2.54))
-fig.subplots_adjust(left=.08, bottom=.08, right=.985, top=.94)
-ax1 = plt.subplot(111)
-
 opsv.plot_model()
 
-# 2. plot deformed model
+# 2. plot supports and loads
+
+plt.figure()
+opsv.plot_supports_and_loads_2d()
+
+# 3. plot deformed model
 
 sfac = 80.
 
@@ -80,7 +79,7 @@ opsv.plot_defo(sfac, 5, interpFlag=0, fmt_nodes='bo-')
 opsv.plot_defo(sfac, 3, endDispFlag=0, fmt_interp='r.--')
 opsv.plot_defo(sfac, 2, fmt_interp='g.-')
 
-# 3. plot N, V, M forces diagrams
+# 4. plot N, V, M forces diagrams
 
 sfacN, sfacV, sfacM = 5.e-5, 5.e-5, 5.e-5
 

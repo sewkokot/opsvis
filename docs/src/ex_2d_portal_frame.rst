@@ -8,6 +8,7 @@
 Example ``.py`` file can be downloaded :download:`here </examples/demo_portal_frame.py>`:
 
 .. image:: /img/portal_frame_model.png
+.. image:: /img/portal_frame_loads_supports.png
 .. image:: /img/portal_frame_defo.png
 .. image:: /img/portal_frame_N.png
 .. image:: /img/portal_frame_V.png
