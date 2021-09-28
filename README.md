@@ -16,7 +16,7 @@ package and module to import is without the underscore.
 
 ## Documentation
 
-https://ops-vis.readthedocs.io/en/latest/
+https://opsvis.readthedocs.io/en/latest/
 
 ## OpenSeesPy documentation
 
