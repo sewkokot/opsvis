@@ -6,9 +6,9 @@ OpenSeesPy (OpenSees) postprocessing and visualization module
 
 `pip install opsvis`
 
-Note the previous name of this module was `ops_vis`, but to avoid
-issues with PyPi and readthedocs naming conventions, than name of the
-module is is without the underscore.
+Note: The previous name of this module was `ops_vis`, but to avoid
+issues with PyPi and readthedocs naming conventions, the name of the
+package and module to import is without the underscore.
 
 ## Usage
 
