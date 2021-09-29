@@ -1,5 +1,5 @@
-import openseespy.opensees as ops
-# import opensees as ops  # local compilation
+# import openseespy.opensees as ops
+import opensees as ops  # local compilation
 import opsvis as opsv
 
 import matplotlib.pyplot as plt
@@ -70,33 +70,28 @@ ops.analysis('Static')
 ops.analyze(1)
 
 # - plot model
-plt.figure()
 opsv.plot_model()
 plt.axis('equal')
 
 # - plot deformation
 plt.figure()
 opsv.plot_defo()
-# opsv.plot_defo(sfac, unDefoFlag=1, fmt_undefo='g:')
 plt.axis('equal')
 
 # get values at OpenSees nodes
-sig_out = opsv.quad_sig_out_per_node()
+sig_out = opsv.sig_out_per_node()
 print(f'sig_out:\n{sig_out}')
-
-# - visu stress map
 
 # !!! select from sig_out: e.g. vmises
 # j, jstr = 0, 'sxx'
-# j, jstr = 1, 'syy'
+j, jstr = 1, 'syy'
 # j, jstr = 2, 'sxy'
-j, jstr = 3, 'vmis'
+# j, jstr = 3, 'vmis'
 # j, jstr = 4, 's1'
 # j, jstr = 5, 's2'
 # j, jstr = 6, 'alfa'
 
 nds_val = sig_out[:, j]
-# print(f'nds_val:\n{nds_val}')
 
 plt.figure()
 opsv.plot_stress_2d(nds_val)
@@ -104,8 +99,6 @@ opsv.plot_stress_2d(nds_val)
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title(f'{jstr}')
-
-# plt.savefig(f'quads_4x4_{jstr}.png')
 
 # for educational purposes show values at integration points and
 # nodes which can finally be averaged at nodes
@@ -116,22 +109,18 @@ print(f'\neles_nds_crd:\n{eles_nds_crd}')
 print(f'\nnds_crd:\n{nds_crd}')
 print(f'\nquads_conn:\n{quads_conn}')
 
-eles_ips_sig_out, eles_nds_sig_out = opsv.quad_sig_out_per_ele()
+eles_ips_sig_out, eles_nds_sig_out = opsv.sig_out_per_ele_quad()
 
 print(f'\neles_ips_sig_out:\n{eles_ips_sig_out}')
 print(f'\neles_nds_sig_out:\n{eles_nds_sig_out}')
 
 sig_out_indx = j  # same as j, jstr
 
-fig = plt.figure(figsize=(22./2.54, 18./2.54))  # centimeter to inch conversion
-fig.subplots_adjust(left=.08, bottom=.08, right=.985, top=.94)
 opsv.plot_mesh_with_ips_2d(nds_crd, eles_ips_crd, eles_nds_crd, quads_conn,
                            eles_ips_sig_out, eles_nds_sig_out, sig_out_indx)
 
 plt.xlabel('x [m]')
 plt.ylabel('y [m]')
-
-# plt.savefig(f'quads_4x4_{jstr}_ips_nds_vals.png')
 
 plt.show()
 

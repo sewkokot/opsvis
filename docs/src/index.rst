@@ -22,7 +22,7 @@ Welcome to ``opsvis``'s documentation!
    anim_mode
    plot_fiber_section
    fib_sec_list_to_cmds
-   quad_sig_out_per_node
+   sig_out_per_node
    examples
 
 Since October 2021, ``opsvis`` is no longer distributed with the main
@@ -92,7 +92,7 @@ visualization are as follows:
 Helper functions include:
 
 #. :doc:`fib_sec_list_to_cmds`
-#. :doc:`quad_sig_out_per_node`
+#. :doc:`sig_out_per_node`
 
 For examples go to: :doc:`examples`.
 
