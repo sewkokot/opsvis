@@ -58,10 +58,14 @@ to plot:
 - animation of mode shapes.
 
 Installation
+============
 
 ``pip install opsvis``
 
 Note the name of the PyPi package is without the underscore ``_``.
+
+Usage
+=====
 
 To use ``opsvis`` in OpenSeesPy
 scripts, your ``.py`` file should start as follows: ::
@@ -73,6 +77,10 @@ scripts, your ``.py`` file should start as follows: ::
 	# ... your OpenSeesPy model and analysis commands ...
 	opsv.plot_model()
 	sfac = opsv.plot_defo()
+
+
+Commands
+========
 
 The main commands related to various aspects of OpenSees model
 visualization are as follows:
@@ -97,11 +105,12 @@ Helper functions include:
 For examples go to: :doc:`examples`.
 
 Notes:
+======
 
-- matplotlib's ``plt.axis('equal')`` does not work for 3d plots
+* matplotlib's ``plt.axis('equal')`` does not work for 3d plots
   therefore right angles are not guaranteed to be 90 degrees on the
   plots
 
-- ``plot_fiber_section`` is inspired by Matlab ``plotSection.zip``
+* ``plot_fiber_section`` is inspired by Matlab ``plotSection.zip``
   written by D. Vamvatsikos available at
   http://users.ntua.gr/divamva/software.html
