@@ -56,7 +56,7 @@ az_el = (-60., 30.)
 fig_wi_he = (16., 10.)
 
 
-class ele_tag:
+class EleClassTag:
     """ELE_TAG constants defined in SRC/classTags.h"""
     truss = 12
     CorotTruss = 14
@@ -80,7 +80,7 @@ class ele_tag:
     SSPbrick = 121
 
 
-class load_tag:
+class LoadTag:
     """LOAD_TAG constants defined in SRC/classTags.h"""
     Beam2dUniformLoad = 3
     Beam2dUniformLoad_ndata = 2
@@ -2909,7 +2909,6 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
     L = np.sqrt(Lxy @ Lxy)
 
     nlf = len(pl)
-
     xl = np.linspace(0., L, nep)
     one = np.ones(nep)
 
@@ -2917,7 +2916,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
     for ele_load_data_i in ele_load_data:
         ele_load_type = ele_load_data_i[0]
 
-        if nlf == 2:  # trusses
+        if nlf == 1:  # trusses
             N_1 = pl[0]
         elif nlf == 6:  # plane frames
             # N_1, V_1, M_1 = pl[0], pl[1], pl[2]
@@ -2937,7 +2936,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
                 if nlf == 6:
                     s = np.zeros((nep, 3))
-                elif nlf == 2:
+                elif nlf == 1:
                     s = np.zeros((nep, 1))
 
                 N = -1.*(N_1 * one + Wx * xl)
@@ -3172,11 +3171,6 @@ def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
 
     for ele_tag in ele_tags:
 
-        # by default no element load
-        eload_data = [['-beamUniform', 0., 0.]]
-        if ele_tag in Ew:
-            eload_data = Ew[ele_tag]
-
         nd1, nd2 = ops.eleNodes(ele_tag)
 
         # element x, y coordinates
@@ -3189,16 +3183,39 @@ def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
         L = np.sqrt(Lxy @ Lxy)
         cosa, cosb = Lxy / L
 
-        pl = ops.eleResponse(ele_tag, 'localForces')
+        ele_class_tag = ops.getEleClassTags(ele_tag)[0]
 
-        s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, eload_data)
+        if ele_class_tag == EleClassTag.truss:
+            axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
+            s = -axial_force * np.ones(nep)
+            xl = np.linspace(0., L, nep)
 
-        if sf_type == 'N' or sf_type == 'axial':
-            s = s_all[:, 0]
-        elif sf_type == 'V' or sf_type == 'shear' or sf_type == 'T':
-            s = s_all[:, 1]
-        elif sf_type == 'M' or sf_type == 'moment':
-            s = s_all[:, 2]
+            if axial_force > 0:
+                va = 'top'
+                fmt_color = 'b'
+                fmt_secforce = 'b-'
+            else:
+                va = 'bottom'
+                fmt_color = 'r'
+                fmt_secforce = 'r-'
+
+        else:
+            # by default no element load
+            eload_data = [['-beamUniform', 0., 0.]]
+            if ele_tag in Ew:
+                eload_data = Ew[ele_tag]
+
+            pl = ops.eleResponse(ele_tag, 'localForces')
+
+            s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, eload_data)
+
+            if sf_type == 'N' or sf_type == 'axial':
+                s = s_all[:, 0]
+            elif sf_type == 'V' or sf_type == 'shear' or sf_type == 'T':
+                s = s_all[:, 1]
+            elif sf_type == 'M' or sf_type == 'moment':
+                s = s_all[:, 2]
+
 
         minVal = min(minVal, np.min(s))
         maxVal = max(maxVal, np.max(s))
@@ -3237,6 +3254,11 @@ def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
                      fmt_secforce, solid_capstyle='round',
                      solid_joinstyle='round', dash_capstyle='butt',
                      dash_joinstyle='round')
+
+        if ele_class_tag == EleClassTag.truss:
+            ha = 'center'
+            plt.text(s_p[int(nep/2), 0], s_p[int(nep/2), 1],
+                     f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
 
     return minVal, maxVal
 
@@ -3422,7 +3444,7 @@ def plot_supports_and_loads_2d(nep=17, sfac=False):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     # calculate sfac
     min_x, min_y = np.inf, np.inf
@@ -3637,12 +3659,19 @@ def plot_supports_and_loads_2d(nep=17, sfac=False):
         node_dofs = ops.nodeDOFs(node_tag)
 
         marker_type=''
-        if node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1:
-            marker_type = 'sm'
-        elif node_dofs[0] == -1 and node_dofs[1] == -1:
-            marker_type = '^m'
-        elif node_dofs[0] == -1 or node_dofs[1] == -1:
-            marker_type = 'om'
+
+        if ndim < 3:
+            if node_dofs[0] == -1 and node_dofs[1] == -1:
+                marker_type = '^m'
+            elif node_dofs[0] == -1 or node_dofs[1] == -1:
+                marker_type = 'om'
+        else:
+            if node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1:
+                marker_type = 'sm'
+            elif node_dofs[0] == -1 and node_dofs[1] == -1:
+                marker_type = '^m'
+            elif node_dofs[0] == -1 or node_dofs[1] == -1:
+                marker_type = 'om'
 
         plt.plot(nd_crd[0], nd_crd[1], marker_type, markersize=12)
 
@@ -3727,22 +3756,22 @@ def get_Ew_data_from_ops_domain():
                                            ele_load_tags_all_patterns):
 
         # -beamUniform
-        if ele_load_type == load_tag.Beam2dUniformLoad:
-            iend = ibeg+load_tag.Beam2dUniformLoad_ndata
+        if ele_load_type == LoadTag.Beam2dUniformLoad:
+            iend = ibeg+LoadTag.Beam2dUniformLoad_ndata
             ele_load_data = ele_load_data_all_patterns[ibeg:iend]
             ibeg = iend
             wy, wx = ele_load_data[0], ele_load_data[1]
             Ew[ele_load_tag].append(['-beamUniform', wy, wx])
         # -beamUniform partial
-        elif ele_load_type == load_tag.Beam2dPartialUniformLoad:
-            iend = ibeg+load_tag.Beam2dPartialUniformLoad_ndata
+        elif ele_load_type == LoadTag.Beam2dPartialUniformLoad:
+            iend = ibeg+LoadTag.Beam2dPartialUniformLoad_ndata
             ele_load_data = ele_load_data_all_patterns[ibeg:iend]
             ibeg = iend
             wta, wtb, waa, wab, aL, bL = ele_load_data
             Ew[ele_load_tag].append(['-beamUniform', wta, waa, aL, bL, wtb, wab])
         # -beamPoint
-        elif ele_load_type == load_tag.Beam2dPointLoad:
-            iend = ibeg+load_tag.Beam2dPointLoad_ndata
+        elif ele_load_type == LoadTag.Beam2dPointLoad:
+            iend = ibeg+LoadTag.Beam2dPointLoad_ndata
             ele_load_data = ele_load_data_all_patterns[ibeg:iend]
             ibeg = iend
             Pt, Pa, aL = ele_load_data
