@@ -25,13 +25,17 @@ Welcome to ``opsvis``'s documentation!
    sig_out_per_node
    examples
 
-Since October 2021, ``opsvis`` is no longer distributed with the main
-OpenSeesPy, and therefore must be installed separately with ``pip``.
 
-The ``opsvis`` postprocessing and plotting module is meant to be used
-with Opensees Python (OpenSeesPy). First read the
+Since October 2021, ``opsvis`` is no longer distributed with the main
+OpenSeesPy, and should be installed separately with the ``pip``
+command. Note also that the name has been simplified from ``ops_vis``
+to ``opsvis``.
+
+The ``opsvis`` is an OpenSeesPy postprocessing and visualization module
+written by Seweryn Kokot (Opole University of Technology, Poland).
+
+The ``opsvis`` uses the OpenSeesPy therefore first read the
 `OpenSeesPy documentation <https://openseespydoc.readthedocs.io>`_
-before geting started with ``opsvis``.
 
 This module can be mainly useful for students when learning the
 fundamentals of structural analysis (interpolated deformation of frame
