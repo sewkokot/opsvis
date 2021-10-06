@@ -3121,7 +3121,7 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
     return s, xl
 
 
-def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
+def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                              fmt_secforce=fmt_secforce):
     """Display section forces diagram for 2d beam column model.
 
@@ -3132,10 +3132,6 @@ def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
     Args:
         sf_type (str): type of section force: 'N' - normal force,
             'V' - shear force, 'M' - bending moments.
-
-        Ew (dict): Ew Python dictionary contains information on non-zero
-            element loads, therfore each item of the Python dictionary
-            is in the form: 'ele_tag: ['-beamUniform', Wy, Wx]'.
 
         sfac (float): scale factor by wich the values of section forces are
             multiplied.
@@ -3151,17 +3147,10 @@ def section_force_diagram_2d(sf_type, Ew, sfac=1., nep=17,
     Usage:
     ::
 
-        Wy, Wx = -10.e+3, 0.
-        Ew = {3: ['-beamUniform', Wy, Wx]}
         sfacM = 5.e-5
         plt.figure()
-        minVal, maxVal = opsv.section_force_diagram_2d('M', Ew, sfacM)
+        minVal, maxVal = opsv.section_force_diagram_2d('M', sfacM)
         plt.title('Bending moments')
-
-    Todo:
-
-    Add support for other element loads available in OpenSees: partial
-    (trapezoidal) uniform element load, and 'beamPoint' element load.
     """
 
     maxVal, minVal = -np.inf, np.inf
