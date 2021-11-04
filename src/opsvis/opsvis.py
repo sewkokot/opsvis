@@ -127,11 +127,15 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 plt.text(ops.nodeCoord(nd)[0],
                          ops.nodeCoord(nd)[1],
                         f'{nd}', va='bottom', ha='left', color='blue')
-
-    nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
+        nan=0
+     else:
+        nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
+    
+    #model with only nodes
+    if n==0:
+        pass
     # truss and beam/frame elements plot_model
-    if nen == 2:
+    elif nen == 2:
 
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
@@ -539,11 +543,15 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         ops.nodeCoord(nd)[1],
                         ops.nodeCoord(nd)[2],
                         f'{nd}', va='bottom', ha='left', color='blue')
-    
-    nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
+        nen=0
+    else:
+        nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
+        
+    # model with only nodes 
+    if nen==0:
+        pass
     # truss and beam/frame elements
-    if nen == 2:
+    elif nen == 2:
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
