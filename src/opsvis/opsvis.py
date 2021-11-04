@@ -127,12 +127,12 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 plt.text(ops.nodeCoord(nd)[0],
                          ops.nodeCoord(nd)[1],
                         f'{nd}', va='bottom', ha='left', color='blue')
-        nan=0
-     else:
+        nen=0
+    else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
     
     #model with only nodes
-    if n==0:
+    if nen==0:
         pass
     # truss and beam/frame elements plot_model
     elif nen == 2:
