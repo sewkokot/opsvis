@@ -119,6 +119,14 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
+    
+    if ele_tags==[]: # To draw nodes if elements were not defined by the user
+        for nd in node_tags: 
+            plt.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1],  color='green', marker='o')
+            if node_labels:
+                plt.text(ops.nodeCoord(nd)[0],
+                         ops.nodeCoord(nd)[1],
+                        f'{nd}', va='bottom', ha='left', color='blue')
 
     nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
 
@@ -522,7 +530,16 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
     max_x_crd, max_y_crd, max_z_crd, max_crd = -np.inf, -np.inf, \
         -np.inf, -np.inf
-
+    
+    if ele_tags==[]: # To draw nodes if elements were not defined by the user
+        for nd in node_tags:
+            ax.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1], ops.nodeCoord(nd)[2], color='green', marker='o')
+            if node_labels:
+                ax.text(ops.nodeCoord(nd)[0],
+                        ops.nodeCoord(nd)[1],
+                        ops.nodeCoord(nd)[2],
+                        f'{nd}', va='bottom', ha='left', color='blue')
+    
     nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
 
     # truss and beam/frame elements
