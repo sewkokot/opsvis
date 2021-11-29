@@ -78,6 +78,7 @@ class EleClassTag:
     brick20n = 49
     brick8n = 56
     SSPbrick = 121
+    FourNodeTetrahedron = 179
 
 
 class LoadTag:
@@ -535,23 +536,30 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
     max_x_crd, max_y_crd, max_z_crd, max_crd = -np.inf, -np.inf, \
         -np.inf, -np.inf
     
-    if ele_tags==[]: # To draw nodes if elements were not defined by the user
+    if len(ele_tags) == 0:
         for nd in node_tags:
-            ax.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1], ops.nodeCoord(nd)[2], color='green', marker='o')
+            ax.plot(ops.nodeCoord(nd)[0],
+                    ops.nodeCoord(nd)[1],
+                    ops.nodeCoord(nd)[2],
+                    color='green', marker='o')
             if node_labels:
                 ax.text(ops.nodeCoord(nd)[0],
                         ops.nodeCoord(nd)[1],
                         ops.nodeCoord(nd)[2],
                         f'{nd}', va='bottom', ha='left', color='blue')
-        nen=0
+        nen = 0
+        ele_classtag = None
     else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-        
-    # model with only nodes 
-    if nen==0:
-        pass
+        ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
+      
     # truss and beam/frame elements
-    elif nen == 2:
+    # if nen == 2:
+    if (ele_classtag == EleClassTag.ElasticBeam3d or
+        ele_classtag == EleClassTag.ForceBeamColumn3d or
+        ele_classtag == EleClassTag.DispBeamColumn3d or
+        ele_classtag == EleClassTag.truss):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -613,8 +621,91 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         ops.nodeCoord(node_tag)[2]+_offset,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
-    # quad in 3d
-    elif nen == 4:
+    # tetrahedron
+    elif ele_classtag == EleClassTag.FourNodeTetrahedron:
+
+        for node_tag in node_tags:
+            x_crd = ops.nodeCoord(node_tag)[0]
+            y_crd = ops.nodeCoord(node_tag)[1]
+            z_crd = ops.nodeCoord(node_tag)[2]
+            if x_crd > max_x_crd:
+                max_x_crd = x_crd
+            if y_crd > max_y_crd:
+                max_y_crd = y_crd
+            if z_crd > max_z_crd:
+                max_z_crd = z_crd
+
+            # print(f'x, y, z: {x_crd}, {y_crd}, {z_crd}')
+            # ax.plot([x_crd], [y_crd], [z_crd], 'ro')
+
+        max_crd = np.amax([max_x_crd, max_y_crd, max_z_crd])
+        # print(f'max_x_crd: {max_x_crd}')
+        # print(f'max_y_crd: {max_y_crd}')
+        # print(f'max_z_crd: {max_z_crd}')
+        # print(f'max_crd: {max_crd}')
+        _offset = 0.005 * max_crd
+
+        for i, ele_tag in enumerate(ele_tags):
+            nd1, nd2, nd3, nd4 = ops.eleNodes(ele_tag)
+
+            # element node1-node2, x,  y coordinates
+            ex = np.array([ops.nodeCoord(nd1)[0],
+                           ops.nodeCoord(nd2)[0],
+                           ops.nodeCoord(nd3)[0],
+                           ops.nodeCoord(nd4)[0]])
+            ey = np.array([ops.nodeCoord(nd1)[1],
+                           ops.nodeCoord(nd2)[1],
+                           ops.nodeCoord(nd3)[1],
+                           ops.nodeCoord(nd4)[1]])
+            ez = np.array([ops.nodeCoord(nd1)[2],
+                           ops.nodeCoord(nd2)[2],
+                           ops.nodeCoord(nd3)[2],
+                           ops.nodeCoord(nd4)[2]])
+
+            # location of label
+            xt = sum(ex)/nen
+            yt = sum(ey)/nen
+            zt = sum(ez)/nen
+            # print(f'xt:\n{xt}')
+
+            ax.plot([ex[0], ex[1], ex[2], ex[0]], [ey[0], ey[1], ey[2], ey[0]], [ez[0], ez[1], ez[2], ez[0]], 'b.-')
+            ax.plot([ex[0], ex[1], ex[3], ex[0]], [ey[0], ey[1], ey[3], ey[0]], [ez[0], ez[1], ez[3], ez[0]], 'b.-')
+            ax.plot([ex[0], ex[2], ex[3], ex[0]], [ey[0], ey[2], ey[3], ey[0]], [ez[0], ez[2], ez[3], ez[0]], 'b.-')
+            ax.plot([ex[1], ex[2], ex[3], ex[1]], [ey[1], ey[2], ey[3], ey[1]], [ez[1], ez[2], ez[3], ez[1]], 'b.-')
+
+            # fixme: placement of node_tag labels
+            if element_labels:
+                if ex[1]-ex[0] == 0:
+                    va = 'center'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = _offset, 0.0, 0.0
+                elif ey[1]-ey[0] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, _offset, 0.0
+                elif ez[1]-ez[0] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, 0.0, _offset
+                else:
+                    va = 'bottom'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = 0.03, 0.03, 0.03
+
+                # print(f'{ex}, {ey}, {ez}')
+                # print(f'offset_x/y/z: {offset_x}, {offset_y}, {offset_z}')
+                ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
+                        va=va, ha=ha, color='red')
+
+        if node_labels:
+            for node_tag in node_tags:
+                ax.text(ops.nodeCoord(node_tag)[0]+_offset,
+                        ops.nodeCoord(node_tag)[1]+_offset,
+                        ops.nodeCoord(node_tag)[2]+_offset,
+                        f'{node_tag}', va='bottom', ha='left', color='blue')
+
+    elif ele_classtag == EleClassTag.quad4n:
+    # elif nen == 4:
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -687,7 +778,10 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
     # 8-node brick, 3d model
-    elif nen == 8:
+    # elif nen == 8:
+    elif (ele_classtag == EleClassTag.brick8n or
+          ele_classtag == EleClassTag.SSPbrick):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -779,7 +873,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
     # 20-node brick, 3d model
-    elif nen == 20:
+    # elif nen == 20:
+    elif (ele_classtag == EleClassTag.brick20n):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
