@@ -512,7 +512,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, lw):
+                   az_el, fig_wi_he, fig_lbrt, lw, local_axes):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -613,6 +613,23 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
                 ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
                         va=va, ha=ha, color='red')
+
+            if local_axes:
+                # eo = Eo[i, :]
+                xloc = ops.eleResponse(ele_tag, 'xlocal')
+                yloc = ops.eleResponse(ele_tag, 'ylocal')
+                zloc = ops.eleResponse(ele_tag, 'zlocal')
+                g = np.vstack((xloc, yloc, zloc))
+                L = bar_length(ex, ey, ez)
+                alen = 0.1*L
+
+                # plot local axis directional vectors: workaround quiver = arrow
+                plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
+                           lw=2, length=alen, alpha=.8, normalize=True)
+                plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
+                           lw=2, length=alen, alpha=.8, normalize=True)
+                plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
+                           lw=2, length=alen, alpha=.8, normalize=True)
 
         if node_labels:
             for node_tag in node_tags:
@@ -1010,7 +1027,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                axis_off=0, az_el=az_el, fig_wi_he=fig_wi_he,
-               fig_lbrt=fig_lbrt, lw=0.4):
+               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True):
     """Plot defined model of the structure.
 
     Args:
@@ -1031,6 +1048,12 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         fig_wi_he (tuple): contains width and height of the figure
 
         fig_lbrt (tuple): a tuple contating left, bottom, right and top offsets
+
+        lw (float): the line width of the model
+
+        local_axes (bool): True - show cross section local axes or False.
+            The green, red and blue arrows denote the element axis direction,
+            the z-local axis and the y-local axis.
 
     Usage:
 
@@ -1056,7 +1079,7 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
     elif ndim == 3:
         _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                       az_el, fig_wi_he, fig_lbrt, lw)
+                       az_el, fig_wi_he, fig_lbrt, lw, local_axes)
         if axis_off:
             plt.axis('off')
 
@@ -2403,6 +2426,14 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
 
     else:
         print(f'\nWarning! ndim: {ndim} not supported yet.')
+
+
+def bar_length(ex, ey, ez=np.array([0., 0.])):
+    Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
+    L = np.sqrt(Lxyz @ Lxyz)
+    print(f'Lxyz: {Lxyz}, L: {L}')
+
+    return L
 
 
 def rot_transf_3d(ex, ey, ez, g):
