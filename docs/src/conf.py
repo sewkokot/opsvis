@@ -22,7 +22,7 @@ copyright = '2021, Seweryn Kokot'
 author = 'Seweryn Kokot'
 
 # The full version, including alpha/beta/rc tags
-release = '0.94.5'
+release = '0.94.9'
 
 # -- General configuration ---------------------------------------------------
 
