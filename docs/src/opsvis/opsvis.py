@@ -78,6 +78,7 @@ class EleClassTag:
     brick20n = 49
     brick8n = 56
     SSPbrick = 121
+    FourNodeTetrahedron = 179
 
 
 class LoadTag:
@@ -119,11 +120,23 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-
-    nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
+    
+    if ele_tags==[]: # To draw nodes if elements were not defined by the user
+        for nd in node_tags: 
+            plt.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1],  color='green', marker='o')
+            if node_labels:
+                plt.text(ops.nodeCoord(nd)[0],
+                         ops.nodeCoord(nd)[1],
+                        f'{nd}', va='bottom', ha='left', color='blue')
+        nen=0
+    else:
+        nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
+    
+    #model with only nodes
+    if nen==0:
+        pass
     # truss and beam/frame elements plot_model
-    if nen == 2:
+    elif nen == 2:
 
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
@@ -499,7 +512,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, lw):
+                   az_el, fig_wi_he, fig_lbrt, lw, local_axes):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -522,11 +535,31 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
     max_x_crd, max_y_crd, max_z_crd, max_crd = -np.inf, -np.inf, \
         -np.inf, -np.inf
-
-    nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
+    
+    if len(ele_tags) == 0:
+        for nd in node_tags:
+            ax.plot(ops.nodeCoord(nd)[0],
+                    ops.nodeCoord(nd)[1],
+                    ops.nodeCoord(nd)[2],
+                    color='green', marker='o')
+            if node_labels:
+                ax.text(ops.nodeCoord(nd)[0],
+                        ops.nodeCoord(nd)[1],
+                        ops.nodeCoord(nd)[2],
+                        f'{nd}', va='bottom', ha='left', color='blue')
+        nen = 0
+        ele_classtag = None
+    else:
+        nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
+        ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
+      
     # truss and beam/frame elements
-    if nen == 2:
+    # if nen == 2:
+    if (ele_classtag == EleClassTag.ElasticBeam3d or
+        ele_classtag == EleClassTag.ForceBeamColumn3d or
+        ele_classtag == EleClassTag.DispBeamColumn3d or
+        ele_classtag == EleClassTag.truss):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -581,6 +614,23 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
                         va=va, ha=ha, color='red')
 
+            if local_axes:
+                # eo = Eo[i, :]
+                xloc = ops.eleResponse(ele_tag, 'xlocal')
+                yloc = ops.eleResponse(ele_tag, 'ylocal')
+                zloc = ops.eleResponse(ele_tag, 'zlocal')
+                g = np.vstack((xloc, yloc, zloc))
+                L = bar_length(ex, ey, ez)
+                alen = 0.1*L
+
+                # plot local axis directional vectors: workaround quiver = arrow
+                plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
+                           lw=2, length=alen, alpha=.8, normalize=True)
+                plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
+                           lw=2, length=alen, alpha=.8, normalize=True)
+                plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
+                           lw=2, length=alen, alpha=.8, normalize=True)
+
         if node_labels:
             for node_tag in node_tags:
                 ax.text(ops.nodeCoord(node_tag)[0]+_offset,
@@ -588,8 +638,91 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         ops.nodeCoord(node_tag)[2]+_offset,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
-    # quad in 3d
-    elif nen == 4:
+    # tetrahedron
+    elif ele_classtag == EleClassTag.FourNodeTetrahedron:
+
+        for node_tag in node_tags:
+            x_crd = ops.nodeCoord(node_tag)[0]
+            y_crd = ops.nodeCoord(node_tag)[1]
+            z_crd = ops.nodeCoord(node_tag)[2]
+            if x_crd > max_x_crd:
+                max_x_crd = x_crd
+            if y_crd > max_y_crd:
+                max_y_crd = y_crd
+            if z_crd > max_z_crd:
+                max_z_crd = z_crd
+
+            # print(f'x, y, z: {x_crd}, {y_crd}, {z_crd}')
+            # ax.plot([x_crd], [y_crd], [z_crd], 'ro')
+
+        max_crd = np.amax([max_x_crd, max_y_crd, max_z_crd])
+        # print(f'max_x_crd: {max_x_crd}')
+        # print(f'max_y_crd: {max_y_crd}')
+        # print(f'max_z_crd: {max_z_crd}')
+        # print(f'max_crd: {max_crd}')
+        _offset = 0.005 * max_crd
+
+        for i, ele_tag in enumerate(ele_tags):
+            nd1, nd2, nd3, nd4 = ops.eleNodes(ele_tag)
+
+            # element node1-node2, x,  y coordinates
+            ex = np.array([ops.nodeCoord(nd1)[0],
+                           ops.nodeCoord(nd2)[0],
+                           ops.nodeCoord(nd3)[0],
+                           ops.nodeCoord(nd4)[0]])
+            ey = np.array([ops.nodeCoord(nd1)[1],
+                           ops.nodeCoord(nd2)[1],
+                           ops.nodeCoord(nd3)[1],
+                           ops.nodeCoord(nd4)[1]])
+            ez = np.array([ops.nodeCoord(nd1)[2],
+                           ops.nodeCoord(nd2)[2],
+                           ops.nodeCoord(nd3)[2],
+                           ops.nodeCoord(nd4)[2]])
+
+            # location of label
+            xt = sum(ex)/nen
+            yt = sum(ey)/nen
+            zt = sum(ez)/nen
+            # print(f'xt:\n{xt}')
+
+            ax.plot([ex[0], ex[1], ex[2], ex[0]], [ey[0], ey[1], ey[2], ey[0]], [ez[0], ez[1], ez[2], ez[0]], 'b.-')
+            ax.plot([ex[0], ex[1], ex[3], ex[0]], [ey[0], ey[1], ey[3], ey[0]], [ez[0], ez[1], ez[3], ez[0]], 'b.-')
+            ax.plot([ex[0], ex[2], ex[3], ex[0]], [ey[0], ey[2], ey[3], ey[0]], [ez[0], ez[2], ez[3], ez[0]], 'b.-')
+            ax.plot([ex[1], ex[2], ex[3], ex[1]], [ey[1], ey[2], ey[3], ey[1]], [ez[1], ez[2], ez[3], ez[1]], 'b.-')
+
+            # fixme: placement of node_tag labels
+            if element_labels:
+                if ex[1]-ex[0] == 0:
+                    va = 'center'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = _offset, 0.0, 0.0
+                elif ey[1]-ey[0] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, _offset, 0.0
+                elif ez[1]-ez[0] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, 0.0, _offset
+                else:
+                    va = 'bottom'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = 0.03, 0.03, 0.03
+
+                # print(f'{ex}, {ey}, {ez}')
+                # print(f'offset_x/y/z: {offset_x}, {offset_y}, {offset_z}')
+                ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
+                        va=va, ha=ha, color='red')
+
+        if node_labels:
+            for node_tag in node_tags:
+                ax.text(ops.nodeCoord(node_tag)[0]+_offset,
+                        ops.nodeCoord(node_tag)[1]+_offset,
+                        ops.nodeCoord(node_tag)[2]+_offset,
+                        f'{node_tag}', va='bottom', ha='left', color='blue')
+
+    elif ele_classtag == EleClassTag.quad4n:
+    # elif nen == 4:
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -662,7 +795,10 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
     # 8-node brick, 3d model
-    elif nen == 8:
+    # elif nen == 8:
+    elif (ele_classtag == EleClassTag.brick8n or
+          ele_classtag == EleClassTag.SSPbrick):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -754,7 +890,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                         f'{node_tag}', va='bottom', ha='left', color='blue')
 
     # 20-node brick, 3d model
-    elif nen == 20:
+    # elif nen == 20:
+    elif (ele_classtag == EleClassTag.brick20n):
+
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
             y_crd = ops.nodeCoord(node_tag)[1]
@@ -889,7 +1027,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                axis_off=0, az_el=az_el, fig_wi_he=fig_wi_he,
-               fig_lbrt=fig_lbrt, lw=0.4):
+               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True):
     """Plot defined model of the structure.
 
     Args:
@@ -910,6 +1048,12 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         fig_wi_he (tuple): contains width and height of the figure
 
         fig_lbrt (tuple): a tuple contating left, bottom, right and top offsets
+
+        lw (float): the line width of the model
+
+        local_axes (bool): True - show cross section local axes or False.
+            The green, red and blue arrows denote the element axis direction,
+            the z-local axis and the y-local axis.
 
     Usage:
 
@@ -935,7 +1079,7 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
     elif ndim == 3:
         _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                       az_el, fig_wi_he, fig_lbrt, lw)
+                       az_el, fig_wi_he, fig_lbrt, lw, local_axes)
         if axis_off:
             plt.axis('off')
 
@@ -2282,6 +2426,14 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
 
     else:
         print(f'\nWarning! ndim: {ndim} not supported yet.')
+
+
+def bar_length(ex, ey, ez=np.array([0., 0.])):
+    Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
+    L = np.sqrt(Lxyz @ Lxyz)
+    print(f'Lxyz: {Lxyz}, L: {L}')
+
+    return L
 
 
 def rot_transf_3d(ex, ey, ez, g):
