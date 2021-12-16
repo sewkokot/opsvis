@@ -84,15 +84,15 @@ opsv.plot_defo(sfac, 2, fmt_interp='g.-')
 sfacN, sfacV, sfacM = 5.e-5, 5.e-5, 5.e-5
 
 plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('N', Ew, sfacN)
+minVal, maxVal = opsv.section_force_diagram_2d('N', sfacN)
 plt.title(f'Axial forces, max = {maxVal:.2f}, min = {minVal:.2f}')
 
 plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('T', Ew, sfacV)
+minVal, maxVal = opsv.section_force_diagram_2d('T', sfacV)
 plt.title(f'Shear forces, max = {maxVal:.2f}, min = {minVal:.2f}')
 
 plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('M', Ew, sfacM)
+minVal, maxVal = opsv.section_force_diagram_2d('M', sfacM)
 plt.title(f'Bending moments, max = {maxVal:.2f}, min = {minVal:.2f}')
 
 plt.show()
