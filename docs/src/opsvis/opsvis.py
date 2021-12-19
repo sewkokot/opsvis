@@ -1158,7 +1158,10 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 # interpolated displacement field
                 if interpFlag:
                     xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
-                    plt.plot(xcdi, ycdi, fmt_interp)
+                else:
+                    xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, 2)
+
+                plt.plot(xcdi, ycdi, fmt_interp)
 
                 # translations of ends
                 if endDispFlag:
