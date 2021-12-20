@@ -1159,7 +1159,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 if interpFlag:
                     xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
                 else:
-                    xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, 2)
+                    xcdi, ycdi = beam_disp_ends(ex, ey, ed, sfac)
 
                 plt.plot(xcdi, ycdi, fmt_interp)
 
@@ -1523,8 +1523,7 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                     xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
                                                         ed, sfac, nep)
                 else:
-                    xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
-                                                        ed, sfac, 2)
+                    xcd, ycd, zcd = beam_disp_ends3d(ex, ey, ez, ed, sfac)
 
                 ax.plot(xcd, ycd, zcd, fmt_interp)
                 ax.set_xlabel('X')
