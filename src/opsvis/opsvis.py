@@ -562,7 +562,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
         ele_classtag == EleClassTag.ForceBeamColumn3d or
         ele_classtag == EleClassTag.DispBeamColumn3d or
         ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
-        ele_classtag == EleClassTag.truss):
+        ele_classtag == EleClassTag.truss or
+        ele_classtag == EleClassTag.ZeroLength):
 
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
