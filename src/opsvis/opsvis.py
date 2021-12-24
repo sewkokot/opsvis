@@ -629,12 +629,13 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 alen = 0.1*L
 
                 # plot local axis directional vectors: workaround quiver = arrow
-                plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
-                           lw=2, length=alen, alpha=.8, normalize=True)
-                plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
-                           lw=2, length=alen, alpha=.8, normalize=True)
-                plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
-                           lw=2, length=alen, alpha=.8, normalize=True)
+                if ops.getEleClassTags(ele_tag)!=[19]: #Do not draw for zero length elements
+                    plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
+                               lw=2, length=alen, alpha=.8, normalize=True)
+                    plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
+                               lw=2, length=alen, alpha=.8, normalize=True)
+                    plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
+                               lw=2, length=alen, alpha=.8, normalize=True)
 
         if node_labels:
             for node_tag in node_tags:
