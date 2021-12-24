@@ -68,6 +68,9 @@ class EleClassTag:
     DispBeamColumn3d = 64
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
+    TimoshenkoBeamColumn2d = 63
+    ElasticTimoshenkoBeam2d = 145
+    ElasticTimoshenkoBeam3d = 146
     tri3n = 33
     tri6n = 209
     quad4n = 31
@@ -558,8 +561,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
     if (ele_classtag == EleClassTag.ElasticBeam3d or
         ele_classtag == EleClassTag.ForceBeamColumn3d or
         ele_classtag == EleClassTag.DispBeamColumn3d or
+        ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
         ele_classtag == EleClassTag.truss or
-        ele_classtag==EleClassTag.ZeroLength):
+        ele_classtag == EleClassTag.ZeroLength):
 
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
@@ -1161,7 +1165,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 if interpFlag:
                     xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
                 else:
-                    xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, 2)
+                    xcdi, ycdi = beam_disp_ends(ex, ey, ed, sfac)
 
                 plt.plot(xcdi, ycdi, fmt_interp)
 
@@ -1525,8 +1529,7 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                     xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
                                                         ed, sfac, nep)
                 else:
-                    xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
-                                                        ed, sfac, 2)
+                    xcd, ycd, zcd = beam_disp_ends3d(ex, ey, ez, ed, sfac)
 
                 ax.plot(xcd, ycd, zcd, fmt_interp)
                 ax.set_xlabel('X')
