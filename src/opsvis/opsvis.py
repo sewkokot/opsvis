@@ -68,6 +68,9 @@ class EleClassTag:
     DispBeamColumn3d = 64
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
+    TimoshenkoBeamColumn2d = 63
+    ElasticTimoshenkoBeam2d = 145
+    ElasticTimoshenkoBeam3d = 146
     tri3n = 33
     tri6n = 209
     quad4n = 31
@@ -558,6 +561,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
     if (ele_classtag == EleClassTag.ElasticBeam3d or
         ele_classtag == EleClassTag.ForceBeamColumn3d or
         ele_classtag == EleClassTag.DispBeamColumn3d or
+        ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
         ele_classtag == EleClassTag.truss):
 
         for node_tag in node_tags:
