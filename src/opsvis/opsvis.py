@@ -2443,7 +2443,7 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
 def bar_length(ex, ey, ez=np.array([0., 0.])):
     Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
     L = np.sqrt(Lxyz @ Lxyz)
-    print(f'Lxyz: {Lxyz}, L: {L}')
+    #print(f'Lxyz: {Lxyz}, L: {L}')
 
     return L
 
