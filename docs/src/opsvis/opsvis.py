@@ -37,6 +37,9 @@ fmt_interp = 'b-'  # blue solid line, no markers
 # element end nodes
 fmt_nodes = 'rs'  # red square markers, no line
 
+# initial model
+fmt_model = 'b.-'  # blue solid line, nodes as dot markers
+
 # deformed model
 fmt_defo = 'b-'  # green dashed line, no markers
 
@@ -111,7 +114,7 @@ class LoadTag:
 
 
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                   fig_wi_he, fig_lbrt, lw, nodes_only):
+                   fig_wi_he, fig_lbrt, lw, nodes_only, fmt_model):
 
     fig_wi, fig_he = fig_wi_he
     fleft, fbottom, fright, ftop = fig_lbrt
@@ -163,7 +166,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
             xt = sum(ex)/nen
             yt = sum(ey)/nen
 
-            plt.plot(ex, ey, 'bo-')
+            plt.plot(ex, ey, fmt_model)
 
             if element_labels:
                 if ex[1]-ex[0] == 0:
@@ -229,7 +232,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
             xt = sum(ex)/nen
             yt = sum(ey)/nen
 
-            plt.plot(np.append(ex, ex[0]), np.append(ey, ey[0]), 'bo-', ms=2)
+            plt.plot(np.append(ex, ex[0]), np.append(ey, ey[0]), fmt_model, ms=2)
 
             if element_labels:
                 va = 'center'
@@ -515,7 +518,8 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only):
+                   az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only,
+                   fmt_model):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -595,7 +599,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
             yt = sum(ey)/nen
             zt = sum(ez)/nen
 
-            ax.plot(ex, ey, ez, 'b.-')
+            ax.plot(ex, ey, ez, fmt_model)
 
             # fixme: placement of node_tag labels
             if element_labels:
@@ -769,7 +773,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
             ax.plot(np.append(ex, ex[0]),
                     np.append(ey, ey[0]),
-                    np.append(ez, ez[0]), 'b.-')
+                    np.append(ez, ez[0]), fmt_model)
 
             # fixme: placement of node_tag labels
             if element_labels:
@@ -857,14 +861,14 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
             ax.plot(np.append(ex[0:4], ex[0]),
                     np.append(ey[0:4], ey[0]),
-                    np.append(ez[0:4], ez[0]), 'b.-')
+                    np.append(ez[0:4], ez[0]), fmt_model)
             ax.plot(np.append(ex[4:8], ex[4]),
                     np.append(ey[4:8], ey[4]),
-                    np.append(ez[4:8], ez[4]), 'b.-')
-            ax.plot([ex[0], ex[4]], [ey[0], ey[4]], [ez[0], ez[4]], 'b.-')
-            ax.plot([ex[1], ex[5]], [ey[1], ey[5]], [ez[1], ez[5]], 'b.-')
-            ax.plot([ex[2], ex[6]], [ey[2], ey[6]], [ez[2], ez[6]], 'b.-')
-            ax.plot([ex[3], ex[7]], [ey[3], ey[7]], [ez[3], ez[7]], 'b.-')
+                    np.append(ez[4:8], ez[4]), fmt_model)
+            ax.plot([ex[0], ex[4]], [ey[0], ey[4]], [ez[0], ez[4]], fmt_model)
+            ax.plot([ex[1], ex[5]], [ey[1], ey[5]], [ez[1], ez[5]], fmt_model)
+            ax.plot([ex[2], ex[6]], [ey[2], ey[6]], [ez[2], ez[6]], fmt_model)
+            ax.plot([ex[3], ex[7]], [ey[3], ey[7]], [ez[3], ez[7]], fmt_model)
 
             # fixme: placement of node_tag labels
             if element_labels:
@@ -989,12 +993,12 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 plt.plot(ex[[0+j*4, 8+j*4, 1+j*4, 9+j*4, 2+j*4, 10+j*4, 3+j*4, 11+j*4, 0+j*4]],
                          ey[[0+j*4, 8+j*4, 1+j*4, 9+j*4, 2+j*4, 10+j*4, 3+j*4, 11+j*4, 0+j*4]],
                          ez[[0+j*4, 8+j*4, 1+j*4, 9+j*4, 2+j*4, 10+j*4, 3+j*4, 11+j*4, 0+j*4]],
-                         'b.-', lw=lw, ms=2, mfc='g', mec='g')
+                         fmt_model, lw=lw, ms=2, mfc='g', mec='g')
 
             for j in range(4):
                 plt.plot(ex[[j, 16+j, 4+j]],
                          ey[[j, 16+j, 4+j]],
-                         ez[[j, 16+j, 4+j]], 'b.-',
+                         ez[[j, 16+j, 4+j]], fmt_model,
                          lw=lw, ms=2, mfc='g', mec='g')
 
             # fixme: placement of node_tag labels
@@ -1033,7 +1037,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                axis_off=0, az_el=az_el, fig_wi_he=fig_wi_he,
-               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True, nodes_only=False):
+               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True, nodes_only=False,
+               fmt_model=fmt_model):
     """Plot defined model of the structure.
 
     Args:
@@ -1064,6 +1069,9 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         nodes_only (bool): True - show the nodes only, although the elements
             are defined. Default: False.
 
+        fmt_model (string): Default is 'b.-' to show both element outline and
+            nodes as markers. To hide nodes use 'b-', for example.
+
     Usage:
 
     ``plot_model()`` - plot model with node and element labels.
@@ -1082,13 +1090,14 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
     if ndim == 2:
         _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                       fig_wi_he, fig_lbrt, lw, nodes_only)
+                       fig_wi_he, fig_lbrt, lw, nodes_only, fmt_model)
         if axis_off:
             plt.axis('off')
 
     elif ndim == 3:
         _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                       az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only)
+                       az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only,
+                       fmt_model)
         if axis_off:
             plt.axis('off')
 
