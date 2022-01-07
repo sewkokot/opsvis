@@ -68,6 +68,9 @@ class EleClassTag:
     DispBeamColumn3d = 64
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
+    TimoshenkoBeamColumn2d = 63
+    ElasticTimoshenkoBeam2d = 145
+    ElasticTimoshenkoBeam3d = 146
     tri3n = 33
     tri6n = 209
     quad4n = 31
@@ -108,7 +111,7 @@ class LoadTag:
 
 
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                   fig_wi_he, fig_lbrt, lw):
+                   fig_wi_he, fig_lbrt, lw, nodes_only):
 
     fig_wi, fig_he = fig_wi_he
     fleft, fbottom, fright, ftop = fig_lbrt
@@ -120,9 +123,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-    
-    if ele_tags==[]: # To draw nodes if elements were not defined by the user
-        for nd in node_tags: 
+
+    if ele_tags==[] or nodes_only:
+        for nd in node_tags:
             plt.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1],  color='green', marker='o')
             if node_labels:
                 plt.text(ops.nodeCoord(nd)[0],
@@ -131,9 +134,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
         nen=0
     else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-    
+
     #model with only nodes
-    if nen==0:
+    if nen==0 or nodes_only:
         pass
     # truss and beam/frame elements plot_model
     elif nen == 2:
@@ -512,7 +515,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, lw, local_axes):
+                   az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -535,8 +538,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
     max_x_crd, max_y_crd, max_z_crd, max_crd = -np.inf, -np.inf, \
         -np.inf, -np.inf
-    
-    if len(ele_tags) == 0:
+
+    if len(ele_tags) == 0 or nodes_only:
         for nd in node_tags:
             ax.plot(ops.nodeCoord(nd)[0],
                     ops.nodeCoord(nd)[1],
@@ -552,13 +555,15 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
     else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
         ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
-      
+
     # truss and beam/frame elements
     # if nen == 2:
     if (ele_classtag == EleClassTag.ElasticBeam3d or
         ele_classtag == EleClassTag.ForceBeamColumn3d or
         ele_classtag == EleClassTag.DispBeamColumn3d or
-        ele_classtag == EleClassTag.truss):
+        ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
+        ele_classtag == EleClassTag.truss or
+        ele_classtag == EleClassTag.ZeroLength):
 
         for node_tag in node_tags:
             x_crd = ops.nodeCoord(node_tag)[0]
@@ -624,12 +629,13 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 alen = 0.1*L
 
                 # plot local axis directional vectors: workaround quiver = arrow
-                plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
-                           lw=2, length=alen, alpha=.8, normalize=True)
-                plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
-                           lw=2, length=alen, alpha=.8, normalize=True)
-                plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
-                           lw=2, length=alen, alpha=.8, normalize=True)
+                if ops.getEleClassTags(ele_tag)!=[19]: #Do not draw for zero length elements
+                    plt.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
+                               lw=2, length=alen, alpha=.8, normalize=True)
+                    plt.quiver(xt, yt, zt, g[1, 0], g[1, 1], g[1, 2], color='b',
+                               lw=2, length=alen, alpha=.8, normalize=True)
+                    plt.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
+                               lw=2, length=alen, alpha=.8, normalize=True)
 
         if node_labels:
             for node_tag in node_tags:
@@ -1027,7 +1033,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                axis_off=0, az_el=az_el, fig_wi_he=fig_wi_he,
-               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True):
+               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True, nodes_only=False):
     """Plot defined model of the structure.
 
     Args:
@@ -1055,6 +1061,9 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
             The green, red and blue arrows denote the element axis direction,
             the z-local axis and the y-local axis.
 
+        nodes_only (bool): True - show the nodes only, although the elements
+            are defined. Default: False.
+
     Usage:
 
     ``plot_model()`` - plot model with node and element labels.
@@ -1073,13 +1082,13 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
     if ndim == 2:
         _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                       fig_wi_he, fig_lbrt, lw)
+                       fig_wi_he, fig_lbrt, lw, nodes_only)
         if axis_off:
             plt.axis('off')
 
     elif ndim == 3:
         _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                       az_el, fig_wi_he, fig_lbrt, lw, local_axes)
+                       az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only)
         if axis_off:
             plt.axis('off')
 
@@ -1159,7 +1168,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 if interpFlag:
                     xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
                 else:
-                    xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, 2)
+                    xcdi, ycdi = beam_disp_ends(ex, ey, ed, sfac)
 
                 plt.plot(xcdi, ycdi, fmt_interp)
 
@@ -1522,10 +1531,13 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 if interpFlag:
                     xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
                                                         ed, sfac, nep)
-                    ax.plot(xcd, ycd, zcd, fmt_interp)
-                    ax.set_xlabel('X')
-                    ax.set_ylabel('Y')
-                    ax.set_zlabel('Z')
+                else:
+                    xcd, ycd, zcd = beam_disp_ends3d(ex, ey, ez, ed, sfac)
+
+                ax.plot(xcd, ycd, zcd, fmt_interp)
+                ax.set_xlabel('X')
+                ax.set_ylabel('Y')
+                ax.set_zlabel('Z')
 
                 # translations of ends
                 if endDispFlag:
@@ -2434,7 +2446,7 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
 def bar_length(ex, ey, ez=np.array([0., 0.])):
     Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
     L = np.sqrt(Lxyz @ Lxyz)
-    print(f'Lxyz: {Lxyz}, L: {L}')
+    # print(f'Lxyz: {Lxyz}, L: {L}')
 
     return L
 

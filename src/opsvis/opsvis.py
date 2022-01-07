@@ -111,7 +111,7 @@ class LoadTag:
 
 
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                   fig_wi_he, fig_lbrt, lw):
+                   fig_wi_he, fig_lbrt, lw, nodes_only):
 
     fig_wi, fig_he = fig_wi_he
     fleft, fbottom, fright, ftop = fig_lbrt
@@ -123,9 +123,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-    
-    if ele_tags==[]: # To draw nodes if elements were not defined by the user
-        for nd in node_tags: 
+
+    if ele_tags==[] or nodes_only:
+        for nd in node_tags:
             plt.plot(ops.nodeCoord(nd)[0],ops.nodeCoord(nd)[1],  color='green', marker='o')
             if node_labels:
                 plt.text(ops.nodeCoord(nd)[0],
@@ -134,9 +134,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
         nen=0
     else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-    
+
     #model with only nodes
-    if nen==0:
+    if nen==0 or nodes_only:
         pass
     # truss and beam/frame elements plot_model
     elif nen == 2:
@@ -515,7 +515,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, lw, local_axes):
+                   az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -538,8 +538,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
     max_x_crd, max_y_crd, max_z_crd, max_crd = -np.inf, -np.inf, \
         -np.inf, -np.inf
-    
-    if len(ele_tags) == 0:
+
+    if len(ele_tags) == 0 or nodes_only:
         for nd in node_tags:
             ax.plot(ops.nodeCoord(nd)[0],
                     ops.nodeCoord(nd)[1],
@@ -555,7 +555,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
     else:
         nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
         ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
-      
+
     # truss and beam/frame elements
     # if nen == 2:
     if (ele_classtag == EleClassTag.ElasticBeam3d or
@@ -1033,7 +1033,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                axis_off=0, az_el=az_el, fig_wi_he=fig_wi_he,
-               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True):
+               fig_lbrt=fig_lbrt, lw=0.4, local_axes=True, nodes_only=False):
     """Plot defined model of the structure.
 
     Args:
@@ -1061,6 +1061,9 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
             The green, red and blue arrows denote the element axis direction,
             the z-local axis and the y-local axis.
 
+        nodes_only (bool): True - show the nodes only, although the elements
+            are defined. Default: False.
+
     Usage:
 
     ``plot_model()`` - plot model with node and element labels.
@@ -1079,13 +1082,13 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
     if ndim == 2:
         _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
-                       fig_wi_he, fig_lbrt, lw)
+                       fig_wi_he, fig_lbrt, lw, nodes_only)
         if axis_off:
             plt.axis('off')
 
     elif ndim == 3:
         _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                       az_el, fig_wi_he, fig_lbrt, lw, local_axes)
+                       az_el, fig_wi_he, fig_lbrt, lw, local_axes, nodes_only)
         if axis_off:
             plt.axis('off')
 
