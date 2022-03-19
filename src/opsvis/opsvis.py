@@ -2689,7 +2689,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
 
             if item[1] == 'rect':
                 Iy, Iz, Ky, Kz = item[5], item[6], item[7], item[8]
-                Jy, Jz, Ly, Lz = Ky, Iz, Iy, Kz
+                Jy, Jz, Ly, Lz = Iy, Kz, Ky, Iz
 
             # check for convexity (vector products)
             outIJxIK = (Jy-Iy)*(Kz-Iz) - (Ky-Iy)*(Jz-Iz)
