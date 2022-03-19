@@ -2780,8 +2780,12 @@ def fib_sec_list_to_cmds(fib_sec_list):
     """
     for dat in fib_sec_list:
         if dat[0] == 'section':
-            secTag, GJ = dat[2], dat[4]
-            ops.section('Fiber', secTag, '-GJ', GJ)
+            if len(dat[0]) == 5: # fiber section with GJ
+                secTag, GJ = dat[2], dat[4]
+                ops.section('Fiber', secTag, '-GJ', GJ)
+            else: # fiber section without GJ
+                secTag = dat[2]
+                ops.section('Fiber', secTag)
 
         if dat[0] == 'layer':
             matTag = dat[2]
