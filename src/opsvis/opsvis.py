@@ -2494,7 +2494,7 @@ def beam_defo_interp_2d(ex, ey, u, sfac, nep=17):
     Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
     L = np.sqrt(Lxy @ Lxy)
     if L == 0.: 
-        L = 1
+        L = 1.
     cosa, cosb = Lxy / L
     G = np.array([[cosa,  cosb, 0., 0.,    0.,   0.],
                   [-cosb, cosa, 0., 0.,    0.,   0.],
@@ -3352,6 +3352,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
         Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
         L = np.sqrt(Lxy @ Lxy)
+        if L == 0.:
+            L = 1.
         cosa, cosb = Lxy / L
 
         ele_class_tag = ops.getEleClassTags(ele_tag)[0]
@@ -3379,6 +3381,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             pl = ops.eleResponse(ele_tag, 'localForces')
 
             s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, eload_data)
+            if len(s_all[0]) != 3: break # break for zeroLength elements
 
             if sf_type == 'N' or sf_type == 'axial':
                 s = s_all[:, 0]
