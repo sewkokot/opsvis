@@ -3304,7 +3304,7 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
 
 
 def section_force_diagram_2d(sf_type, sfac=1., nep=17,
-                             fmt_secforce=fmt_secforce):
+                             fmt_secforce=fmt_secforce, ele_list=False):
     """Display section forces diagram for 2d beam column model.
 
     This function plots a section forces diagram for 2d beam column elements
@@ -3326,6 +3326,9 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             marks as in the standard matplotlib plot function.
             (default: fmt_secforce = 'b-'  # blue solid line)
 
+
+        ele_list (list): Plot element list. Default is False (plot all elements)
+
     Usage:
     ::
 
@@ -3336,7 +3339,10 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
     """
 
     maxVal, minVal = -np.inf, np.inf
-    ele_tags = ops.getEleTags()
+    if ele_list == False:
+        ele_tags = ops.getEleTags()
+    else:
+        ele_tags = ele_list
 
     Ew = get_Ew_data_from_ops_domain()
 
