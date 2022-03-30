@@ -200,7 +200,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                          ops.nodeCoord(node_tag)[1]+offset_nd_label_y,
                          f'{node_tag}', va=va, ha=ha, color='blue')
 
-        # plt.axis('equal')
+         plt.axis('equal')
 
     # 2d triangular (tri31) elements plot_model
     elif nen == 3:
