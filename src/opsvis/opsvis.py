@@ -25,6 +25,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
 import matplotlib.tri as tri
+import math
 
 # default settings
 
@@ -1961,12 +1962,12 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
             dxmax = max_x - min_x
             dymax = max_y - min_y
             dlmax = max(dxmax, dymax)
-            edmax = max(max_ux, max_uy)
-            sfac = ratio * dlmax/edmax
-            if sfac > 1000.:
-                print("""\nWarning!\nsfac is quite large - perhaps try to specify \
-sfac value yourself.
-This usually happens when translational DOFs are too small\n\n""")
+            max_u_abs = max(max_ux, max_uy)
+
+            if math.isclose(max_u_abs, 0.0):
+                max_u_abs = max_u_abs_from_beam_defo_interp_2d(nep=nep)
+
+            sfac = ratio * dlmax/max_u_abs
 
         _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                            interpFlag, endDispFlag, fmt_interp,
@@ -1996,8 +1997,12 @@ This usually happens when translational DOFs are too small\n\n""")
             dymax = max_y - min_y
             dzmax = max_z - min_z
             dlmax = max(dxmax, dymax, dzmax)
-            edmax = max(max_ux, max_uy, max_uz)
-            sfac = ratio * dlmax/edmax
+            max_u_abs = max(max_ux, max_uy, max_uz)
+
+            if math.isclose(max_u_abs, 0.0):
+                max_u_abs = max_u_abs_from_beam_defo_interp_3d(nep=nep)
+
+            sfac = ratio * dlmax/max_u_abs
 
         _plot_defo_mode_3d(0, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                            interpFlag, endDispFlag, fmt_interp,
@@ -2294,8 +2299,8 @@ def anim_mode(modeNo, sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
             dxmax = max_x - min_x
             dymax = max_y - min_y
             dlmax = max(dxmax, dymax)
-            edmax = max(max_ux, max_uy)
-            sfac = ratio * dlmax/edmax
+            max_u_abs = max(max_ux, max_uy)
+            sfac = ratio * dlmax/max_u_abs
 
         anim = _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo,
                              fmt_undefo, interpFlag, endDispFlag, fmt_interp,
@@ -2325,8 +2330,8 @@ def anim_mode(modeNo, sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     #         dymax = max_y - min_y
     #         dzmax = max_z - min_z
     #         dlmax = max(dxmax, dymax, dzmax)
-    #         edmax = max(max_ux, max_uy, max_uz)
-    #         sfac = ratio * dlmax/edmax
+    #         max_u_abs = max(max_ux, max_uy, max_uz)
+    #         sfac = ratio * dlmax/max_u_abs
 
     #     _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo,
     #                        fmt_undefo, interpFlag, endDispFlag, fmt_interp,
@@ -2411,8 +2416,8 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
             dxmax = max_x - min_x
             dymax = max_y - min_y
             dlmax = max(dxmax, dymax)
-            edmax = max(max_ux, max_uy)
-            sfac = ratio * dlmax/edmax
+            max_u_abs = max(max_ux, max_uy)
+            sfac = ratio * dlmax/max_u_abs
 
         _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                            interpFlag, endDispFlag, fmt_interp, fmt_nodes)
@@ -2441,8 +2446,8 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
             dymax = max_y - min_y
             dzmax = max_z - min_z
             dlmax = max(dxmax, dymax, dzmax)
-            edmax = max(max_ux, max_uy, max_uz)
-            sfac = ratio * dlmax/edmax
+            max_u_abs = max(max_ux, max_uy, max_uz)
+            sfac = ratio * dlmax/max_u_abs
 
         _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                            interpFlag, endDispFlag, fmt_interp, fmt_nodes,
@@ -5761,3 +5766,152 @@ def _plot_stress_2d(stress_str, mesh_outline, cmap, levels):
 
     nds_val = sig_component_per_node(stress_str)
     plot_stress_2d(nds_val, mesh_outline, cmap, levels)
+
+
+def max_u_abs_from_beam_defo_interp_2d(nep):
+    """
+    Find maximum displacement from the interpolated tranverse deformation.
+
+    Useful if the translational nodal displacement are small and transverse
+    deformation is due to nodal rotations.
+    """
+
+    max_u_abs = 0.0
+
+    ele_tags = ops.getEleTags()
+    print(f'ele_tags:\n{ele_tags}')
+
+    for i, ele_tag in enumerate(ele_tags):
+        ele_classtag = ops.getEleClassTags(ele_tag)[0]
+
+        if (ele_classtag == EleClassTag.ElasticBeam2d or
+            ele_classtag == EleClassTag.ForceBeamColumn2d or
+            ele_classtag == EleClassTag.DispBeamColumn2d):
+
+            nen, ndf = 2, 3
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 2))
+            ed = np.zeros((nen, ndf))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ed[i, :] = ops.nodeDisp(ele_node_tag)
+
+            ex = ecrd[:, 0]
+            ey = ecrd[:, 1]
+            u = ed.flatten()
+
+            # print(f'\nin {inspect.stack()[0][3]}')
+            G, L, *_ = rot_transf_2d(ex, ey)
+
+            u_l = G @ u
+
+            N_t = beam_transverse_shape_functions(L, nep)
+
+            u_tc = N_t @ np.array([u_l[1], u_l[2], u_l[4], u_l[5]])
+            print(f'u_tc:\n{u_tc}')
+
+            max_u_tc = max(np.abs(u_tc))
+            print(f'max_u_tc:\n{max_u_tc}')
+
+            max_u_abs = max(max_u_abs, np.abs(max_u_tc))
+            print(f'max_u_abs:{max_u_abs}')
+
+    return max_u_abs
+
+
+def max_u_abs_from_beam_defo_interp_3d(nep):
+    """
+    Find maximum displacement from the interpolated tranverse deformation.
+
+    Useful if the translational nodal displacement are small and transverse
+    deformation is due to nodal rotations.
+    """
+
+    nen, ndf = 2, 6
+
+    max_u_abs = 0.0
+
+    ele_tags = ops.getEleTags()
+    print(f'ele_tags:\n{ele_tags}')
+
+    for i, ele_tag in enumerate(ele_tags):
+        ele_classtag = ops.getEleClassTags(ele_tag)[0]
+
+        if (ele_classtag == EleClassTag.ElasticBeam3d or
+            ele_classtag == EleClassTag.ForceBeamColumn3d or
+            ele_classtag == EleClassTag.DispBeamColumn3d):
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            g = np.vstack((ops.eleResponse(ele_tag, 'xlocal'),
+                           ops.eleResponse(ele_tag, 'ylocal'),
+                           ops.eleResponse(ele_tag, 'zlocal')))
+
+            ecrd = np.zeros((nen, 3))
+            ed = np.zeros((nen, ndf))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ed[i, :] = ops.nodeDisp(ele_node_tag)
+
+            ex = ecrd[:, 0]
+            ey = ecrd[:, 1]
+            ez = ecrd[:, 2]
+            u = ed.flatten()
+
+            G, L = rot_transf_3d(ex, ey, ez, g)
+            ul = G @ u
+
+            N_t = beam_transverse_shape_functions(L, nep)
+
+            u_tc = N_t @ np.array([ul[1], ul[5], ul[7], ul[11]])
+            max_u_tc = max(np.abs(u_tc))
+            max_u_abs = max(max_u_abs, np.abs(max_u_tc))
+
+            u_tc = N_t @ np.array([ul[2], -ul[4], ul[8], -ul[10]])
+            max_u_tc = max(np.abs(u_tc))
+            max_u_abs = max(max_u_abs, np.abs(max_u_tc))
+
+    return max_u_abs
+
+
+def beam_transverse_shape_functions(L, nep):
+
+    xl = np.linspace(0., L, num=nep)
+    one = np.ones(xl.shape)
+    N_t = np.column_stack((one - 3*xl**2/L**2 + 2*xl**3/L**3,
+                           xl - 2*xl**2/L + xl**3/L**2,
+                           3*xl**2/L**2 - 2*xl**3/L**3,
+                           -xl**2/L + xl**3/L**2))
+
+    return N_t
+
+
+def beam_axial_shape_functions(L, nep):
+
+    xl = np.linspace(0., L, num=nep)
+    one = np.ones(xl.shape)
+    N_a = np.column_stack((one - xl/L, xl/L))
+
+    return N_a
+
+
+def rot_transf_2d(ex, ey):
+
+    Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
+    L = np.sqrt(Lxy @ Lxy)
+    cosa, cosb = Lxy / L
+    G = np.array([[cosa,  cosb, 0., 0.,    0.,   0.],
+                  [-cosb, cosa, 0., 0.,    0.,   0.],
+                  [0.,    0.,   1., 0.,    0.,   0.],
+                  [0.,    0.,   0., cosa,  cosb, 0.],
+                  [0.,    0.,   0., -cosb, cosa, 0.],
+                  [0.,    0.,   0., 0.,    0.,   1.]])
+
+    return G, L, cosa, cosb
