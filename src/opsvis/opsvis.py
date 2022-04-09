@@ -5383,7 +5383,7 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
                    lw=2, length=alen, alpha=.8, normalize=True)
         plt.quiver(Xm, Ym, Zm, g[2, 0], g[2, 1], g[2, 2], color='r',
                    lw=2, length=alen, alpha=.8, normalize=True)
-    
+
     # Get box aspect ratio according to the structure's general layout:
     ymin, ymax = ax.get_ylim()
     xmin, xmax = ax.get_xlim()
