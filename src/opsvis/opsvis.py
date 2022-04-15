@@ -3615,6 +3615,7 @@ def plot_supports_and_loads_2d(nep=17, sfac=False):
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
     ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
+    ndofs = np.shape(ops.nodeDOFs(node_tags[0]))[0]
 
     # calculate sfac
     min_x, min_y = np.inf, np.inf
@@ -3830,7 +3831,7 @@ def plot_supports_and_loads_2d(nep=17, sfac=False):
 
         marker_type=''
 
-        if ndim < 3:
+        if ndofs < 3:
             if node_dofs[0] == -1 and node_dofs[1] == -1:
                 marker_type = '^m'
             elif node_dofs[0] == -1 or node_dofs[1] == -1:
