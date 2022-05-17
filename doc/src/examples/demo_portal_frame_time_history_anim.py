@@ -1,5 +1,4 @@
 import openseespy.opensees as ops
-# import opensees as ops  # local compilation
 import opsvis as opsv
 
 import numpy as np
@@ -94,9 +93,12 @@ for step in range(n_steps):
                               ops.nodeDisp(nd2)[1],
                               ops.nodeDisp(nd2)[2]]
 
+fmt_defo = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 3.0,
+            'marker': '', 'markersize': 6}
+
 # 1. animate the deformated shape
-anim = opsv.anim_defo(Eds, timeV, sfac_a, interpFlag=1, xlim=[-1, 7],
-                      ylim=[-1, 5], fig_wi_he=(30., 22.))
+anim = opsv.anim_defo(Eds, timeV, sfac_a, fmt_defo=fmt_defo,
+                      xlim=[-1, 7], ylim=[-1, 5], fig_wi_he=(30., 22.))
 
 plt.show()
 
@@ -106,8 +108,8 @@ eigVals = ops.eigen(5)
 modeNo = 2  # specify which mode to animate
 f_modeNo = np.sqrt(eigVals[modeNo-1])/(2*np.pi)  # i-th natural frequency
 
-anim = opsv.anim_mode(modeNo, interpFlag=1, xlim=[-1, 7], ylim=[-1, 5],
-                      fig_wi_he=(30., 22.))
+anim = opsv.anim_mode(modeNo, fmt_defo=fmt_defo,
+                      xlim=[-1, 7], ylim=[-1, 5], fig_wi_he=(30., 22.))
 plt.title(f'Mode {modeNo}, f_{modeNo}: {f_modeNo:.3f} Hz')
 
 plt.show()
