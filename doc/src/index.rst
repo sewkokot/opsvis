@@ -27,7 +27,7 @@ Welcome to Opsvis documentation!
 
 Warning - Incompatible changes!
 
-Starting from Opsvis ver. 0.99.1 (April 2022):
+Starting from Opsvis ver. 1.0.1 (May 2022):
 
 #. the ``plot_supports_and_loads_2d`` function is removed and instead
    ``plot_loads_2d`` is available. The model supports can now be shown in
@@ -37,7 +37,7 @@ Starting from Opsvis ver. 0.99.1 (April 2022):
 
 #. the ``plot_mesh_with_ips_2d()`` function is removed.
 
-#. See and use updated example ``.py`` files (:doc:`examples`).
+#. See and use the updated example ``.py`` files (:doc:`examples`).
 
 #. Now the opsvis plotting functions use the Python dictionary
    (instead of the string) for the maptplotlib line formatting.

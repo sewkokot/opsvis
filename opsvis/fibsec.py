@@ -47,7 +47,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
     """
 
     fig, ax = plt.subplots()
-    ax.set_xlabel(r'$\leftarrow$ z')
+    ax.set_xlabel('z')
     ax.invert_xaxis()  # To make z-axis positive to the left
     ax.set_ylabel('y')
     ax.grid(False)
