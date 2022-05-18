@@ -310,7 +310,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def _plot_supports(node_tags, ax):
 
-    ndf = ops.getNDF()[0]
+    ndf = np.shape(ops.nodeDOFs(node_tags[0]))[0]
 
     # fix 2d support: square
     verts = [(-1., 0.),
@@ -1019,7 +1019,7 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
     # az_el - azimut, elevation used for 3d plots only
     node_tags = ops.getNodeTags()
 
-    ndim = ops.getNDM()[0]
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     if ndim == 2:
         ax = _plot_model_2d(node_labels, element_labels, offset_nd_label,
@@ -1093,7 +1093,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-    ndf = ops.getNDF()[0]
+    ndf = np.shape(ops.nodeDOFs(node_tags[0]))[0]
 
     Wx = False
     waa = False
@@ -1374,7 +1374,7 @@ def get_nodal_loads_from_ops_domain():
         load_at_nodes[node_load_tag] = []
 
     for node_load_tag in node_load_tags_all_patterns:
-        ndf = ops.getNDF(node_load_tag)[0]
+        ndf = np.shape(ops.nodeDOFs(node_tags[0]))[0]
         iend = ibeg+ndf
         node_load_data = node_load_data_all_patterns[ibeg:iend]
         ibeg = iend
