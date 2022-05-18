@@ -1427,6 +1427,50 @@ def get_Ew_data_from_ops_domain():
     return Ew
 
 
+def get_Ew_data_from_ops_domain_3d():
+
+    Ew = {}
+    ibeg = 0
+    iend = 0
+    ele_load_tags_all_patterns = ops.getEleLoadTags()
+    ele_load_types_all_patterns = ops.getEleLoadClassTags()
+    ele_load_data_all_patterns = ops.getEleLoadData()
+
+    for ele_load_tag in ele_load_tags_all_patterns:
+        Ew[ele_load_tag] = []
+
+    # iterate over ele_load_tags/classtags
+    for ele_load_type, ele_load_tag in zip(ele_load_types_all_patterns,
+                                           ele_load_tags_all_patterns):
+
+        # -beamUniform
+        if ele_load_type == LoadTag.Beam3dUniformLoad:
+            iend = ibeg+LoadTag.Beam3dUniformLoad_ndata
+            ele_load_data = ele_load_data_all_patterns[ibeg:iend]
+            ibeg = iend
+            wy, wz, wx = ele_load_data[0], ele_load_data[1]
+            Ew[ele_load_tag].append(['-beamUniform', wy, wy, wx])
+        # -beamUniform partial
+        elif ele_load_type == LoadTag.Beam3dPartialUniformLoad:
+            iend = ibeg+LoadTag.Beam3dPartialUniformLoad_ndata
+            ele_load_data = ele_load_data_all_patterns[ibeg:iend]
+            ibeg = iend
+            wy, wz, wa, aL, bL = ele_load_data
+            Ew[ele_load_tag].append(['-beamUniform', wy, wz, wa, aL, bL])
+        # -beamPoint
+        elif ele_load_type == LoadTag.Beam3dPointLoad:
+            iend = ibeg+LoadTag.Beam3dPointLoad_ndata
+            ele_load_data = ele_load_data_all_patterns[ibeg:iend]
+            ibeg = iend
+            Py, Pz, Px, aL = ele_load_data
+            Ew[ele_load_tag].append(['-beamPoint', Py, Pz, aL, Px])
+        else:
+            print(f'\nWarning! ele_load_type:\n{ele_load_type} - Unknown element load Error')
+
+
+    return Ew
+
+
 def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
                             fig_wi_he=False,
                             fig_lbrt=False, ax=False):

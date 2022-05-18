@@ -290,7 +290,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             ax.plot([xy[0, 0], xy[2, 0], xy[2, 0], xy[0, 0],
                      xy[0, 0]],
                     [xy[1, 1], xy[1, 1], xy[3, 1], xy[3, 1],
-                     xy[1, 1]], fmt_model_joint2d, lw=1.2, ms=2)
+                     xy[1, 1]], **fmt_model_joint2d)
 
         else:
             print(f'\nWarning! Elements not supported yet. nen: {nen}; must be: 2, 3, 4, 8.')  # noqa: E501

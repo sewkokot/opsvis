@@ -79,7 +79,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
                     V = V_1 * one + Wy * xl
                     M = -M_1 * one + V_1 * xl + 0.5 * Wy * xl**2
                     s += np.column_stack((N, V, M))
-                elif nlf == 2:
+                elif nlf == 1:
                     s += np.column_stack((N))
 
             elif n_ele_load_data == 7:
@@ -139,7 +139,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
         elif ele_load_type == '-beamPoint':
             Pt, aL, Pa = ele_load_data_i[1:4]
-            a = aL*L
+            a = aL * L
 
             if a in xl:
                 # idx = xl.searchsorted(a)
@@ -183,7 +183,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
 
 def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
-                                  ele_load_data=['-beamUniform', 0., 0., 0.]):
+                                  ele_load_data=[['-beamUniform', 0., 0., 0.]]):
     """
     Calculate section forces (N, Vy, Vz, T, My, Mz) for an elastic 3d beam.
 
@@ -232,27 +232,104 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
 
     """
 
-    # eload_type = ele_load_data[0]
-    Wy, Wz, Wx = ele_load_data[1], ele_load_data[2], ele_load_data[3]
-
-    N1, Vy1, Vz1, T1, My1, Mz1 = pl[:6]
 
     Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
     L = np.sqrt(Lxyz @ Lxyz)
 
+    nlf = len(pl)
     xl = np.linspace(0., L, nep)
     one = np.ones(nep)
 
-    N = -1.*(N1*one + Wx*xl)
-    Vy = Vy1*one + Wy*xl
-    Vz = Vz1*one + Wz*xl
-    T = -T1*one
-    Mz = -Mz1*one + Vy1*xl + 0.5*Wy*xl**2
-    My = My1*one + Vz1*xl + 0.5*Wz*xl**2
 
-    s = np.column_stack((N, Vy, Vz, T, My, Mz))
+    for ele_load_data_i in ele_load_data:
+        ele_load_type = ele_load_data_i[0]
 
-    return s, xl
+        if nlf == 1:  # trusses
+            N_1 = pl[0]
+        elif nlf == 12:  # plane frames
+            # N_1, V_1, M_1 = pl[0], pl[1], pl[2]
+            # N_1, V_1, M_1 = pl[:3]
+            N1, Vy1, Vz1, T1, My1, Mz1 = pl[:6]
+        else:
+            print('\nWarning! Not supported. Number of nodal forces: {nlf}')
+
+        if ele_load_type == '-beamUniform':
+            # raise ValueError
+            # raise NameError
+
+            n_ele_load_data = len(ele_load_data_i)
+
+            if n_ele_load_data == 4:
+                # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
+                Wy, Wz, Wx = ele_load_data_i[1], ele_load_data_i[2], ele_load_data_i[3]
+                # Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
+
+                # eload_type = ele_load_data[0]
+
+                if nlf == 12:
+                    s = np.zeros((nep, 3))
+                elif nlf == 1:
+                    s = np.zeros((nep, 1))
+
+                N = -1. * (N1 * one + Wx * xl)
+
+                if nlf == 12:
+                    Vy = Vy1 * one + Wy * xl
+                    Vz = Vz1 * one + Wz * xl
+                    T = -T1 * one
+                    Mz = -Mz1 * one + Vy1 * xl + 0.5 * Wy * xl**2
+                    My = My1 * one + Vz1 * xl + 0.5 * Wz * xl**2
+
+                    s = np.column_stack((N, Vy, Vz, T, My, Mz))
+
+                elif nlf == 1:
+                    s += np.column_stack((N))
+
+        elif ele_load_type == '-beamPoint':
+            Py, Pz, aL, Px = ele_load_data_i[1:5]
+            a = aL * L
+
+            if a in xl:
+                # idx = xl.searchsorted(a)
+                # np.concatenate((xl[:idx], [a], xl[idx:]))
+                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
+                nep += 1
+
+            else:
+                # idx = xl.searchsorted(a)
+                # xl = np.concatenate((xl[:idx], [a], xl[idx:]))
+                # idx = xl.searchsorted(a+0.001)
+                # xl = np.concatenate((xl[:idx], [a+0.001], xl[idx:]))
+                xl = np.insert(xl, xl.searchsorted(a), a)
+                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
+                nep += 2
+
+            if nlf == 12:
+                s = np.zeros((nep, 6))
+            elif nlf == 2:
+                s = np.zeros((nep, 1))
+
+
+            indx = 0
+            for x in np.nditer(xl):
+                if x <= a:
+                    s[indx, 0] = -1. * N1  # N
+                    s[indx, 1] = Vy1  # Vy
+                    s[indx, 2] = Vz1  # Vz
+                    s[indx, 3] = -T1  # T
+                    s[indx, 4] = My1 + Vz1 * x  # My
+                    s[indx, 5] = -Mz1 + Vy1 * x  # Mz
+                elif x > a:
+                    s[indx, 0] = -1. * (N1 + Px)  # N
+                    s[indx, 1] = Vy1 + Py  # Vy
+                    s[indx, 2] = Vz1 + Pz  # Vz
+                    s[indx, 3] = -T1  # T
+                    s[indx, 4] = My1 + Vz1 * x + Pz * (x-a)  # My
+                    s[indx, 5] = -Mz1 + Vy1 * x + Py * (x-a)  # Mz
+
+                indx += 1
+
+    return s, xl, nep
 
 
 def section_force_diagram_2d(sf_type, sfac=1., nep=17,
@@ -312,7 +389,6 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             fleft, fbottom, fright, ftop = fig_lbrt
             fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
 
-    # model
     model.plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_secforce,
                      node_supports=False, ax=ax)
 
@@ -442,7 +518,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
     return minVal, maxVal
 
 
-def section_force_diagram_3d(sf_type, Ew, sfac=1., nep=17,
+def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                              fmt_secforce1=fmt_secforce1,
                              fmt_secforce2=fmt_secforce2,
                              ref_vert_lines=True,
@@ -510,10 +586,15 @@ def section_force_diagram_3d(sf_type, Ew, sfac=1., nep=17,
 
     ax.view_init(azim=azim, elev=elev)
 
+    model.plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_secforce,
+                     node_supports=False, ax=ax)
+
+    Ew = model.get_Ew_data_from_ops_domain_3d()
+
     for i, ele_tag in enumerate(ele_tags):
 
         # by default no element load
-        eload_data = ['-beamUniform', 0., 0., 0.]
+        eload_data = [['-beamUniform', 0., 0., 0.]]
         if ele_tag in Ew:
             eload_data = Ew[ele_tag]
 
@@ -539,8 +620,8 @@ def section_force_diagram_3d(sf_type, Ew, sfac=1., nep=17,
 
         pl = ops.eleResponse(ele_tag, 'localForces')
 
-        s_all, xl = section_force_distribution_3d(ex, ey, ez, pl, nep,
-                                                  eload_data)
+        s_all, xl, nep = section_force_distribution_3d(ex, ey, ez, pl, nep,
+                                                       eload_data)
 
         # 1:'y' 2:'z'
         if sf_type == 'N':
@@ -592,11 +673,6 @@ def section_force_diagram_3d(sf_type, Ew, sfac=1., nep=17,
         s_p[:, 2] += s * g[dir_plt, 2]
 
         # plt.axis('equal')
-
-        # model
-        # plt.plot(ex, ey, ez, 'k-')
-        model.plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_secforce,
-                         node_supports=False, ax=ax)
 
         # section force curve
         ax.plot(s_p[:, 0], s_p[:, 1], s_p[:, 2], **fmt_secforce1)

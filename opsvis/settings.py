@@ -97,16 +97,23 @@ class LoadTag:
     Beam2dPointLoad_ndata = 3
 
     Beam3dUniformLoad = 5
+    Beam3dUniformLoad_ndata = 3
+
     Beam3dPointLoad = 6
+    Beam3dPointLoad_ndata = 4
+
     BrickSelfWeight = 7
     Beam2dTempLoad = 8
     SurfaceLoader = 9
     SelfWeight = 10
     Beam2dThermalAction = 11
+
     Beam2dPartialUniformLoad = 12
     Beam2dPartialUniformLoad_ndata = 6
 
     Beam3dPartialUniformLoad = 121
+    Beam3dPartialUniformLoad_ndata = 5
+
     Beam3dThermalAction = 13
     ShellThermalAction = 14
     NodalThermalAction = 15
