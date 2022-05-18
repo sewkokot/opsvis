@@ -681,7 +681,7 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     max_ux, max_uy, max_uz = -np.inf, -np.inf, -np.inf
     ratio = 0.1
 
-    ndim = ops.getNDM()[0]
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     if ndim == 2:
         if not sfac:
@@ -811,7 +811,7 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
     max_ux, max_uy, max_uz = -np.inf, -np.inf, -np.inf
     ratio = 0.1
 
-    ndim = ops.getNDM()[0]
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     if ndim == 2:
         if not sfac:
