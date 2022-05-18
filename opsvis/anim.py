@@ -29,7 +29,7 @@ def _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
     # truss and beam/frame elements
     if nen == 2:
 
-        ndf = ops.getNDF()[0]
+        ndf = np.shape(ops.nodeDOFs(node_tags[0]))[0]
 
         # truss element
         if ndf == 2:
@@ -261,7 +261,7 @@ def anim_mode(modeNo, sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     max_ux, max_uy = -np.inf, -np.inf
     ratio = 0.1
 
-    ndim = ops.getNDM()[0]
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     if ndim == 2:
         if not sfac:
@@ -348,7 +348,7 @@ def _anim_defo_2d(Eds, timeV, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
     # truss and beam/frame elements
     if nen == 2:
 
-        ndf = ops.getNDF()[0]
+        ndf = np.shape(ops.nodeDOFs(node_tags[0]))[0]
 
         # truss element
         if ndf == 2:
@@ -564,7 +564,7 @@ def anim_defo(Eds, timeV, sfac, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
 
     node_tags = ops.getNodeTags()
 
-    ndim = ops.getNDM()[0]
+    ndim = np.shape(ops.nodeCoord(node_tags[0]))[0]
 
     if ndim == 2:
         anim = _anim_defo_2d(Eds, timeV, sfac, nep, unDefoFlag, fmt_defo,
