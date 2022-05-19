@@ -520,8 +520,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
-            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
-            ele_classtag == EleClassTag.truss):
+            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -576,6 +575,45 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                           lw=2, length=alen, alpha=.8, normalize=True)
                 ax.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
                           lw=2, length=alen, alpha=.8, normalize=True)
+
+        elif (ele_classtag == EleClassTag.truss):
+
+            nen = 2
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 3))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            # location of label
+            xt = sum(ecrd[:, 0]) / nen
+            yt = sum(ecrd[:, 1]) / nen
+            zt = sum(ecrd[:, 2]) / nen
+
+            ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_model)
+
+            # fixme: placement of node_tag labels
+            if element_labels:
+                if ecrd[1, 0] - ecrd[0, 0] == 0:
+                    va = 'center'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = _offset, 0.0, 0.0
+                elif ecrd[1, 1] - ecrd[0, 1] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, _offset, 0.0
+                elif ecrd[1, 2] - ecrd[0, 2] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, 0.0, _offset
+                else:
+                    va = 'bottom'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = 0.03, 0.03, 0.03
+
+                ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
+                        va=va, ha=ha, color='red')
 
         # quad in 3d
         # elif nen == 4:

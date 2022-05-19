@@ -392,6 +392,36 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                                               ed.flatten(), sfac)
                 ax.plot(xd, yd, zd, **fmt_nodes)
 
+        elif (ele_classtag == EleClassTag.truss):
+
+            nen, ndf = 2, 3
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 3))
+            ed = np.zeros((nen, ndf))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)
+
+            if unDefoFlag:
+                plt.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_undefo)
+
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+
+            # displaced element coordinates (scaled by sfac factor)
+            xyz = ecrd + sfac * ed
+            ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], **fmt_defo)
+
         # plot: shell in 3d
         elif (ele_classtag == EleClassTag.ShellMITC4 or
               ele_classtag == EleClassTag.ASDShellQ4):
