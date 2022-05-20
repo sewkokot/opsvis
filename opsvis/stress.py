@@ -948,7 +948,7 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50):
     """
 
     # az_el - azimut, elevation used for 3d plots only
-    ndim = np.shape(ops.nodeCoord(ops.getNodeTags()[0]))[0]
+    ndim = ops.getNDM()[0]
 
     if ndim == 2:
         _plot_stress_2d(stress_str, mesh_outline, cmap, levels)
