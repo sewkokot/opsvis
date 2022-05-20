@@ -399,8 +399,8 @@ def _plot_supports(node_tags, ax):
 
         node_dofs = ops.nodeDOFs(node_tag)
 
+        m_type = None
         m_color = 'm'
-        m_type = ''
         m_fstyle = 'full'
 
         if ndf < 3:
@@ -416,6 +416,7 @@ def _plot_supports(node_tags, ax):
                 m_type = path_roller_horiz
                 m_fstyle = 'full'
                 m_size = 16
+
         else:
             if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
                 m_type = path_fix
@@ -434,8 +435,9 @@ def _plot_supports(node_tags, ax):
                 m_fstyle = 'full'
                 m_size = 16
 
-        ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
-                color=m_color, fillstyle=m_fstyle)
+        if m_type:
+            ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
+                    color=m_color, fillstyle=m_fstyle)
 
     return ax
 

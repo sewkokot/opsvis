@@ -947,7 +947,6 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50):
     :ref:`opsvis_sig_out_per_node`
     """
 
-    # az_el - azimut, elevation used for 3d plots only
     ndim = ops.getNDM()[0]
 
     if ndim == 2:

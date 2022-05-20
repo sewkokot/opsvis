@@ -101,7 +101,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
                 if nlf == 6:
                     s = np.zeros((nep, 3))
-                elif nlf == 2:
+                elif nlf == 1:
                     s = np.zeros((nep, 1))
 
 
@@ -158,7 +158,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
             if nlf == 6:
                 s = np.zeros((nep, 3))
-            elif nlf == 2:
+            elif nlf == 1:
                 s = np.zeros((nep, 1))
 
 
@@ -306,7 +306,7 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
 
             if nlf == 12:
                 s = np.zeros((nep, 6))
-            elif nlf == 2:
+            elif nlf == 1:
                 s = np.zeros((nep, 1))
 
 
