@@ -1488,8 +1488,8 @@ def get_Ew_data_from_ops_domain_3d():
             iend = ibeg+LoadTag.Beam3dUniformLoad_ndata
             ele_load_data = ele_load_data_all_patterns[ibeg:iend]
             ibeg = iend
-            wy, wz, wx = ele_load_data[0], ele_load_data[1]
-            Ew[ele_load_tag].append(['-beamUniform', wy, wy, wx])
+            wy, wz, wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
+            Ew[ele_load_tag].append(['-beamUniform', wy, wz, wx])
         # -beamUniform partial
         elif ele_load_type == LoadTag.Beam3dPartialUniformLoad:
             iend = ibeg+LoadTag.Beam3dPartialUniformLoad_ndata
