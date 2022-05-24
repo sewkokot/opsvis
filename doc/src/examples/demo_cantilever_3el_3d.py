@@ -102,23 +102,23 @@ sfacMz = 1.e-2
 sfacT = 1.e-2
 
 # plt.figure()
-minY, maxY = opsv.section_force_diagram_3d('N', Ew, sfacN)
-plt.title(f'Axial force N, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('N', sfacN)
+plt.title('Axial force N')
 
-minY, maxY = opsv.section_force_diagram_3d('Vy', Ew, sfacVy)
-plt.title(f'Transverse force Vy, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Vy', sfacVy)
+plt.title('Transverse force Vy')
 
-minY, maxY = opsv.section_force_diagram_3d('Vz', Ew, sfacVz)
-plt.title(f'Transverse force Vz, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Vz', sfacVz)
+plt.title('Transverse force Vz')
 
-minY, maxY = opsv.section_force_diagram_3d('My', Ew, sfacMy)
-plt.title(f'Bending moments My, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('My', sfacMy)
+plt.title('Bending moments My')
 
-minY, maxY = opsv.section_force_diagram_3d('Mz', Ew, sfacMz)
-plt.title(f'Bending moments Mz, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Mz', sfacMz)
+plt.title('Bending moments Mz')
 
-minY, maxY = opsv.section_force_diagram_3d('T', Ew, sfacT)
-plt.title(f'Torsional moment T, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('T', sfacT)
+plt.title('Torsional moment T')
 
 # just for demonstration,
 # the section data below does not match the data in OpenSees model above
