@@ -72,11 +72,14 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                 if len(item) > 8:
                     a0_deg, a1_deg = item[8], item[9]
                 else:
-                    a0_deg, a1_deg = 0., 360. - 360./n_bars
+                    a0_deg, a1_deg = 0., 360. - 360. / n_bars
+
+                if ((a1_deg - a0_deg) >= 360. and n_bars > 0):
+                    a1_deg = a0_deg + 360. - 360. / n_bars
 
                 a0_rad, a1_rad = np.pi * a0_deg / 180., np.pi * a1_deg / 180.
                 r_bar = np.sqrt(As / np.pi)
-                thetas = np.linspace(a0_rad, a1_rad, n_bars, endpoint=False)
+                thetas = np.linspace(a0_rad, a1_rad, n_bars)
                 Y = yC + arc_radius * np.cos(thetas)
                 Z = zC + arc_radius * np.sin(thetas)
                 for zi, yi in zip(Z, Y):
