@@ -278,7 +278,7 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
                     Vz = Vz1 * one + Wz * xl
                     T = -T1 * one
                     Mz = -Mz1 * one + Vy1 * xl + 0.5 * Wy * xl**2
-                    My = My1 * one + Vz1 * xl + 0.5 * Wz * xl**2
+                    My = -My1 * one - Vz1 * xl - 0.5 * Wz * xl**2
 
                     s = np.column_stack((N, Vy, Vz, T, My, Mz))
 
@@ -317,14 +317,14 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
                     s[indx, 1] = Vy1  # Vy
                     s[indx, 2] = Vz1  # Vz
                     s[indx, 3] = -T1  # T
-                    s[indx, 4] = My1 + Vz1 * x  # My
+                    s[indx, 4] = -My1 - Vz1 * x  # My
                     s[indx, 5] = -Mz1 + Vy1 * x  # Mz
                 elif x > a:
                     s[indx, 0] = -1. * (N1 + Px)  # N
                     s[indx, 1] = Vy1 + Py  # Vy
                     s[indx, 2] = Vz1 + Pz  # Vz
                     s[indx, 3] = -T1  # T
-                    s[indx, 4] = My1 + Vz1 * x + Pz * (x-a)  # My
+                    s[indx, 4] = -My1 - Vz1 * x - Pz * (x-a)  # My
                     s[indx, 5] = -Mz1 + Vy1 * x + Py * (x-a)  # Mz
 
                 indx += 1

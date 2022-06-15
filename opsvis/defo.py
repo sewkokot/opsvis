@@ -35,7 +35,8 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         ele_classtag = ops.getEleClassTags(ele_tag)[0]
         nen = np.shape(ops.eleNodes(ele_tag))[0]
 
-        if (ele_classtag == EleClassTag.truss):
+        if (ele_classtag == EleClassTag.truss
+            or ele_classtag == EleClassTag.trussSection):
 
             nen, ndf = 2, 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -392,7 +393,8 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                                               ed.flatten(), sfac)
                 ax.plot(xd, yd, zd, **fmt_nodes)
 
-        elif (ele_classtag == EleClassTag.truss):
+        elif (ele_classtag == EleClassTag.truss
+              or ele_classtag == EleClassTag.trussSection):
 
             nen, ndf = 2, 3
 
@@ -1134,10 +1136,10 @@ def beam_transverse_shape_functions(L, nep):
 
     xl = np.linspace(0., L, num=nep)
     one = np.ones(xl.shape)
-    N_t = np.column_stack((one - 3*xl**2/L**2 + 2*xl**3/L**3,
-                           xl - 2*xl**2/L + xl**3/L**2,
-                           3*xl**2/L**2 - 2*xl**3/L**3,
-                           -xl**2/L + xl**3/L**2))
+    N_t = np.column_stack((one - 3 * xl**2 / L**2 + 2 * xl**3 / L**3,
+                           xl - 2 * xl**2 / L + xl**3 / L**2,
+                           3 * xl**2 / L**2 - 2 * xl**3 / L**3,
+                           -xl**2 / L + xl**3 / L**2))
 
     return N_t
 
@@ -1146,6 +1148,6 @@ def beam_axial_shape_functions(L, nep):
 
     xl = np.linspace(0., L, num=nep)
     one = np.ones(xl.shape)
-    N_a = np.column_stack((one - xl/L, xl/L))
+    N_a = np.column_stack((one - xl / L, xl / L))
 
     return N_a

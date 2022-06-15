@@ -50,6 +50,7 @@ fig_wi_he = (16., 10.)
 class EleClassTag:
     """ELE_TAG constants defined in SRC/classTags.h"""
     truss = 12
+    trussSection = 13
     CorotTruss = 14
     ZeroLength = 19
     ZeroLengthSection = 20

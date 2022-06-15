@@ -76,7 +76,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
 
                 a0_rad, a1_rad = np.pi * a0_deg / 180., np.pi * a1_deg / 180.
                 r_bar = np.sqrt(As / np.pi)
-                thetas = np.linspace(a0_rad, a1_rad, n_bars)
+                thetas = np.linspace(a0_rad, a1_rad, n_bars, endpoint=False)
                 Y = yC + arc_radius * np.cos(thetas)
                 Z = zC + arc_radius * np.sin(thetas)
                 for zi, yi in zip(Z, Y):

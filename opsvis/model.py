@@ -88,6 +88,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
                 or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
                 or ele_classtag == EleClassTag.truss
+                or ele_classtag == EleClassTag.trussSection
                 or ele_classtag == EleClassTag.MVLEM
                 or ele_classtag == EleClassTag.SFI_MVLEM):
 
@@ -578,7 +579,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
                           lw=2, length=alen, alpha=.8, normalize=True)
 
-        elif (ele_classtag == EleClassTag.truss):
+        elif (ele_classtag == EleClassTag.truss
+              or ele_classtag == EleClassTag.trussSection):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -1133,7 +1135,6 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
-    ndf = ops.getNDF()[0]
 
     Wx = False
     waa = False
