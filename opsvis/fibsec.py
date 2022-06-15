@@ -71,11 +71,10 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                 yC, zC, arc_radius = item[5], item[6], item[7]
                 if len(item) > 8:
                     a0_deg, a1_deg = item[8], item[9]
+                    if ((a1_deg - a0_deg) >= 360. and n_bars > 0):
+                        a1_deg = a0_deg + 360. - 360. / n_bars
                 else:
                     a0_deg, a1_deg = 0., 360. - 360. / n_bars
-
-                if ((a1_deg - a0_deg) >= 360. and n_bars > 0):
-                    a1_deg = a0_deg + 360. - 360. / n_bars
 
                 a0_rad, a1_rad = np.pi * a0_deg / 180., np.pi * a1_deg / 180.
                 r_bar = np.sqrt(As / np.pi)
