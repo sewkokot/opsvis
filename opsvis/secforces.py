@@ -544,10 +544,6 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
             'Vy' or 'Vz' - shear force, 'My' or 'Mz' - bending moments,
             'T' - torsional moment.
 
-        Ew (dict): Ew Python dictionary contains information on non-zero
-            element loads, therfore each item of the Python dictionary
-            is in the form: 'ele_tag: ['-beamUniform', Wy, Wz, Wx]'.
-
         sfac (float): scale factor by wich the values of section forces are
             multiplied.
 
@@ -566,6 +562,8 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
             0 (default) - as defined in the code for each load effect type
             1 - in the y-axis (default for N, Vy, T, Mz)
             2 - in the z-axis (default for Vz, My)
+
+        ax: Optional axis to plot to.
 
     Returns:
         minVal (float): the minimum overall value of the section force.
