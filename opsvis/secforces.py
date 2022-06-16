@@ -389,8 +389,9 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             fleft, fbottom, fright, ftop = fig_lbrt
             fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
 
-    model.plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_secforce,
-                     node_supports=False, ax=ax)
+    ax = model.plot_model(node_labels=0, element_labels=0,
+                          fmt_model=fmt_model_secforce,
+                          node_supports=False, ax=ax)
 
     maxVal, minVal = -np.inf, np.inf
     ele_tags = ops.getEleTags()
@@ -511,11 +512,11 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
     if node_supports:
         node_tags = ops.getNodeTags()
-        model._plot_supports(node_tags, ax)
+        ax = model._plot_supports(node_tags, ax)
 
     # ax.grid(False)
 
-    return minVal, maxVal
+    return minVal, maxVal, ax
 
 
 def section_force_diagram_3d(sf_type, sfac=1., nep=17,
@@ -586,8 +587,9 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
     ax.view_init(azim=azim, elev=elev)
 
-    model.plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_secforce,
-                     node_supports=False, ax=ax)
+    ax = model.plot_model(node_labels=0, element_labels=0,
+                          fmt_model=fmt_model_secforce,
+                          node_supports=False, ax=ax)
 
     Ew = model.get_Ew_data_from_ops_domain_3d()
 
@@ -707,4 +709,4 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                 ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
                         f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
 
-    return minVal, maxVal
+    return minVal, maxVal, ax
