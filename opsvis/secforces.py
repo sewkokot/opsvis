@@ -373,7 +373,15 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
         node_supports (bool): True - show the supports.
             Default: True.
 
-        ax: axis object.
+        ax: the axes object.
+
+    Returns:
+        minVal (float): the minimum overall value of the section force.
+
+        maxVal (float): the maximum overall value of the section force.
+
+        ax: the axes object.
+
     Usage:
         See example: demo_portal_frame.py
     """
@@ -558,6 +566,13 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
             0 (default) - as defined in the code for each load effect type
             1 - in the y-axis (default for N, Vy, T, Mz)
             2 - in the z-axis (default for Vz, My)
+
+    Returns:
+        minVal (float): the minimum overall value of the section force.
+
+        maxVal (float): the maximum overall value of the section force.
+
+        ax (axes): the axes object.
 
     Usage:
         See example: demo_cantilever_3el_3d.py
