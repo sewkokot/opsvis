@@ -338,7 +338,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                              fig_wi_he=False, fig_lbrt=False,
                              ref_vert_lines=True,
                              end_max_values=True,
-                             node_supports=True, ax=False):
+                             node_supports=True, ax=False,
+                             alt_model_plot=1):
     """Display section forces diagram for 2d beam column model.
 
     This function plots a section forces diagram for 2d beam column elements
@@ -382,6 +383,11 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
         ax: the axes object.
 
+        alt_model_plot (int): 1 - for using the plot_model command,  2 - for using
+            simplified model plotting. Other integer - for no model plotting.
+            In this case the model can be plotted outside this command
+            using the axes (ax) object. Default is 1.
+
     Usage:
         See example: demo_portal_frame.py
     """
@@ -397,9 +403,12 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             fleft, fbottom, fright, ftop = fig_lbrt
             fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
 
-    ax = model.plot_model(node_labels=0, element_labels=0,
-                          fmt_model=fmt_model_secforce,
-                          node_supports=False, ax=ax)
+    if alt_model_plot == 1:
+        ax = model.plot_model(node_labels=0, element_labels=0,
+                              fmt_model=fmt_model_secforce,
+                              node_supports=False, ax=ax)
+    else:
+        pass
 
     maxVal, minVal = -np.inf, np.inf
     ele_tags = ops.getEleTags()
@@ -532,7 +541,8 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                              fmt_secforce2=fmt_secforce2,
                              ref_vert_lines=True,
                              end_max_values=True,
-                             dir_plt=0, ax=False):
+                             dir_plt=0, ax=False,
+                             alt_model_plot=1):
     """Display section forces diagram of a 3d beam column model.
 
     This function plots section forces diagrams for 3d beam column elements
@@ -565,12 +575,17 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
         ax: Optional axis to plot to.
 
+        alt_model_plot (int): 1 - for using the plot_model command,  2 - for using
+            simplified model plotting. Other integer - for no model plotting.
+            In this case the model can be plotted outside this command
+            using the axes (ax) object. Default is 1.
+
     Returns:
         minVal (float): the minimum overall value of the section force.
 
         maxVal (float): the maximum overall value of the section force.
 
-        ax (axes): the axes object.
+        ax: the axes object.
 
     Usage:
         See example: demo_cantilever_3el_3d.py
@@ -600,9 +615,20 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
     ax.view_init(azim=azim, elev=elev)
 
-    ax = model.plot_model(node_labels=0, element_labels=0,
-                          fmt_model=fmt_model_secforce,
-                          node_supports=False, ax=ax)
+    if alt_model_plot == 1:
+        ax = model.plot_model(node_labels=0, element_labels=0,
+                              fmt_model=fmt_model_secforce,
+                              node_supports=False, ax=ax)
+    elif alt_model_plot == 2:
+        # element
+        plt.plot(ex, ey, ez, "k-",
+                 solid_capstyle="round",
+                 solid_joinstyle="round",
+                 dash_capstyle="butt",
+                 dash_joinstyle="round")
+    else:
+        pass
+
 
     Ew = model.get_Ew_data_from_ops_domain_3d()
 
