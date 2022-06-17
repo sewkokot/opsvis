@@ -599,15 +599,20 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
     maxVal, minVal = -np.inf, np.inf
     ele_tags = ops.getEleTags()
 
-    azim, elev = az_el
-    fig_wi, fig_he = fig_wi_he
-    fleft, fbottom, fright, ftop = fig_lbrt
+    # If supplied axis can be plotted to
+    if hasattr(ax, "name") and (ax.name == "3d"):
+        pass
+    else:
+        azim, elev = az_el
+        fig_wi, fig_he = fig_wi_he
+        fleft, fbottom, fright, ftop = fig_lbrt
 
-    fig = plt.figure(figsize=(fig_wi/2.54, fig_he/2.54))
-    fig.subplots_adjust(left=.08, bottom=.08, right=.985, top=.94)
+        fig = plt.figure(figsize=(fig_wi / 2.54, fig_he / 2.54))
+        fig.subplots_adjust(left=0.08, bottom=0.08, right=0.985, top=0.94)
 
-    ax = fig.add_subplot(111, projection=Axes3D.name)
-    # ax.axis('equal')
+        ax = fig.add_subplot(111, projection=Axes3D.name)
+
+        ax.view_init(azim=azim, elev=elev)
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
