@@ -50,10 +50,10 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             if modeNo:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:2]
             else:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeDisp(ele_node_tag)
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:2]
 
             # displaced element coordinates (scaled by sfac factor)
             xy = ecrd + sfac * ed
@@ -408,10 +408,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             if modeNo:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:3]
             else:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeDisp(ele_node_tag)
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:3]
 
             if unDefoFlag:
                 plt.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_undefo)
