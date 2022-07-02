@@ -33,6 +33,8 @@ fmt_secforce2 = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.0, 'marke
 fmt_secforce_tension = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 2.0, 'marker': '', 'markersize': 1}
 fmt_secforce_compression = {'color': 'red', 'linestyle': 'solid', 'linewidth': 2.0, 'marker': '', 'markersize': 1}
 
+fmt_gauss_points = {'color': 'red', 'linestyle': 'None', 'linewidth': 2.0, 'marker': 'x', 'markersize': 6}
+
 # figure left right bottom top offsets
 fig_lbrt = (.04, .04, .96, .96)
 fig_lbrt_model = (.08, .08, .985, .94)

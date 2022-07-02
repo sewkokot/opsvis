@@ -15,7 +15,8 @@ from matplotlib.path import Path
 
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                    fig_wi_he, fig_lbrt, nodes_only, fmt_model,
-                   fmt_model_nodes_only, node_supports, ax):
+                   fmt_model_nodes_only, node_supports, gauss_points, fmt_gauss_points,
+                   ax):
 
     if not ax:
         if fig_wi_he:
@@ -122,6 +123,13 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
                 ax.text(xt+offset_x, yt+offset_y, f'{ele_tag}', va=va, ha=ha,
                         color='red')
+
+            if gauss_points:
+                Lgps = ops.eleResponse(ele_tag, 'integrationPoints')
+                for Lgpi in Lgps:
+                    dxi = (ecrd[1, 0] - ecrd[0, 0]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
+                    dyi = (ecrd[1, 1] - ecrd[0, 1]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
+                    ax.plot(ecrd[0, 0] + dxi, ecrd[0, 1] + dyi, **fmt_gauss_points)
 
         # 2d triangular (tri31) elements plot_model
         elif (ele_classtag == EleClassTag.tri3n):
@@ -445,7 +453,7 @@ def _plot_supports(node_tags, ax):
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                    az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                   fmt_model, ax):
+                   fmt_model, gauss_points, fmt_gauss_points, ax):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -578,6 +586,14 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                           lw=2, length=alen, alpha=.8, normalize=True)
                 ax.quiver(xt, yt, zt, g[2, 0], g[2, 1], g[2, 2], color='r',
                           lw=2, length=alen, alpha=.8, normalize=True)
+
+            if gauss_points:
+                Lgps = ops.eleResponse(ele_tag, 'integrationPoints')
+                for Lgpi in Lgps:
+                    dxi = (ecrd[1, 0] - ecrd[0, 0]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
+                    dyi = (ecrd[1, 1] - ecrd[0, 1]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
+                    dzi = (ecrd[1, 2] - ecrd[0, 2]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
+                    ax.plot(ecrd[0, 0] + dxi, ecrd[0, 1] + dyi, ecrd[0, 2] + dzi, **fmt_gauss_points)
 
         elif (ele_classtag == EleClassTag.truss
               or ele_classtag == EleClassTag.trussSection):
@@ -1003,7 +1019,8 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                fig_lbrt=False, local_axes=True, nodes_only=False,
                fmt_model=fmt_model,
                fmt_model_nodes_only=fmt_model_nodes_only,
-               node_supports=True, ax=False):
+               node_supports=True, gauss_points=True,
+               fmt_gauss_points=fmt_gauss_points, ax=False):
     """Plot defined model of the structure.
 
     Args:
@@ -1039,6 +1056,11 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
 
         node_supports (bool): True - show the supports. Default: True.
 
+        gauss_points (bool): True - show the integration (Gauss) points. Default: True.
+
+        fmt_gauss_points (dict): A dictionary containing formatting the marker
+            of the gauss point.
+
         ax: axis object.
 
     Usage:
@@ -1067,14 +1089,14 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         ax = _plot_model_2d(node_labels, element_labels, offset_nd_label,
                             axis_off, fig_wi_he, fig_lbrt, nodes_only,
                             fmt_model, fmt_model_nodes_only,
-                            node_supports, ax)
+                            node_supports, gauss_points, fmt_gauss_points, ax)
         if axis_off:
             ax.axis('off')
 
     elif ndim == 3:
         ax = _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                             az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                            fmt_model, ax)
+                            fmt_model, gauss_points, fmt_gauss_points, ax)
         if axis_off:
             ax.axis('off')
 
