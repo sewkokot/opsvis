@@ -319,8 +319,6 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def _plot_supports(node_tags, ax):
 
-    ndf = ops.getNDF()[0]
-
     # fix 2d support: square
     verts = [(-1., 0.),
              (1., 0.),
@@ -407,12 +405,14 @@ def _plot_supports(node_tags, ax):
         nd_crd = ops.nodeCoord(node_tag)
 
         node_dofs = ops.nodeDOFs(node_tag)
+        # ndf = ops.getNDF()[0]  # global, we need local data
+        ndfi = len(node_dofs)
 
         m_type = None
         m_color = 'm'
         m_fstyle = 'full'
 
-        if ndf < 3:
+        if ndfi < 3:
             if (node_dofs[0] == -1 and node_dofs[1] == -1):
                 m_type = path_pin
                 m_fstyle = 'full'
