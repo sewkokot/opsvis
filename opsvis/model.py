@@ -16,7 +16,7 @@ from matplotlib.path import Path
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                    fig_wi_he, fig_lbrt, nodes_only, fmt_model,
                    fmt_model_nodes_only, node_supports, gauss_points, fmt_gauss_points,
-                   ax):
+                   fmt_model_truss, truss_node_offset, ax):
 
     if not ax:
         if fig_wi_he:
@@ -88,8 +88,6 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 or ele_classtag == EleClassTag.DispBeamColumn2d
                 or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
                 or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
-                or ele_classtag == EleClassTag.truss
-                or ele_classtag == EleClassTag.trussSection
                 or ele_classtag == EleClassTag.MVLEM
                 or ele_classtag == EleClassTag.SFI_MVLEM):
 
@@ -130,6 +128,52 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                     dxi = (ecrd[1, 0] - ecrd[0, 0]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
                     dyi = (ecrd[1, 1] - ecrd[0, 1]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
                     ax.plot(ecrd[0, 0] + dxi, ecrd[0, 1] + dyi, **fmt_gauss_points)
+
+        if (ele_classtag == EleClassTag.truss
+                or ele_classtag == EleClassTag.trussSection):
+
+            nen = 2
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 2))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+
+            # location of label
+            xt = sum(ecrd[:, 0]) / nen
+            yt = sum(ecrd[:, 1]) / nen
+
+            if truss_node_offset:
+                Lx = ecrd[1, 0] - ecrd[0, 0]
+                Ly = ecrd[1, 1] - ecrd[0, 1]
+                dLx = truss_node_offset * Lx
+                dLy = truss_node_offset * Ly
+
+                ecrd[0, 0] += dLx
+                ecrd[1, 0] -= dLx
+                ecrd[0, 1] += dLy
+                ecrd[1, 1] -= dLy
+
+            ax.plot(ecrd[:, 0], ecrd[:, 1], **fmt_model_truss)
+
+            if element_labels:
+                if ecrd[1, 0] - ecrd[0, 0] == 0:
+                    va = 'center'
+                    ha = 'left'
+                    offset_x, offset_y = _offset, 0.0
+                elif ecrd[1, 1] - ecrd[0, 1] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y = 0.0, _offset
+                else:
+                    va = 'bottom'
+                    ha = 'left'
+                    offset_x, offset_y = 0.03, 0.03
+
+                ax.text(xt+offset_x, yt+offset_y, f'{ele_tag}', va=va, ha=ha,
+                        color='red')
 
         # 2d triangular (tri31) elements plot_model
         elif (ele_classtag == EleClassTag.tri3n):
@@ -453,7 +497,8 @@ def _plot_supports(node_tags, ax):
 
 def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                    az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                   fmt_model, gauss_points, fmt_gauss_points, ax):
+                   fmt_model, gauss_points, fmt_gauss_points,
+                   fmt_model_truss, truss_node_offset, ax):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -611,7 +656,22 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
             yt = sum(ecrd[:, 1]) / nen
             zt = sum(ecrd[:, 2]) / nen
 
-            ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_model)
+            if truss_node_offset:
+                Lx = ecrd[1, 0] - ecrd[0, 0]
+                Ly = ecrd[1, 1] - ecrd[0, 1]
+                Lz = ecrd[1, 2] - ecrd[0, 2]
+                dLx = truss_node_offset * Lx
+                dLy = truss_node_offset * Ly
+                dLz = truss_node_offset * Lz
+
+                ecrd[0, 0] += dLx
+                ecrd[1, 0] -= dLx
+                ecrd[0, 1] += dLy
+                ecrd[1, 1] -= dLy
+                ecrd[0, 2] += dLz
+                ecrd[1, 2] -= dLz
+
+            ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_model_truss)
 
             # fixme: placement of node_tag labels
             if element_labels:
@@ -1020,7 +1080,9 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
                fmt_model=fmt_model,
                fmt_model_nodes_only=fmt_model_nodes_only,
                node_supports=True, gauss_points=True,
-               fmt_gauss_points=fmt_gauss_points, ax=False):
+               fmt_gauss_points=fmt_gauss_points,
+               fmt_model_truss=fmt_model_truss,
+               truss_node_offset=0.96, ax=False):
     """Plot defined model of the structure.
 
     Args:
@@ -1061,6 +1123,10 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         fmt_gauss_points (dict): A dictionary containing formatting the marker
             of the gauss point.
 
+        truss_node_offset (float): If non-zero, the nodes are offset to show pin markers.
+            The number should preferably be between 0.90-0.97.
+            Zero (0) or False means no offset. Default: 0.96.
+
         ax: axis object.
 
     Usage:
@@ -1089,14 +1155,16 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
         ax = _plot_model_2d(node_labels, element_labels, offset_nd_label,
                             axis_off, fig_wi_he, fig_lbrt, nodes_only,
                             fmt_model, fmt_model_nodes_only,
-                            node_supports, gauss_points, fmt_gauss_points, ax)
+                            node_supports, gauss_points, fmt_gauss_points,
+                            fmt_model_truss, truss_node_offset, ax)
         if axis_off:
             ax.axis('off')
 
     elif ndim == 3:
         ax = _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                             az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                            fmt_model, gauss_points, fmt_gauss_points, ax)
+                            fmt_model, gauss_points, fmt_gauss_points,
+                            fmt_model_truss, truss_node_offset, ax)
         if axis_off:
             ax.axis('off')
 
@@ -1120,7 +1188,7 @@ def plot_supports_and_loads_2d(nep=17):
 
 def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                   fig_lbrt=False, fmt_model_loads=fmt_model_loads,
-                  node_supports=True, ax=False):
+                  node_supports=True, truss_node_offset=0, ax=False):
     """Display the nodal and element loads applied to the 2d models.
 
     Args:
@@ -1144,7 +1212,8 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
             fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
 
     ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
-                    node_supports=node_supports, ax=ax)
+                    node_supports=node_supports,
+                    truss_node_offset=truss_node_offset, ax=ax)
     # ax.axis('equal')
 
     if not sfac:

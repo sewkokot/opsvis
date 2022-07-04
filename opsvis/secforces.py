@@ -406,7 +406,9 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
     if alt_model_plot == 1:
         ax = model.plot_model(node_labels=0, element_labels=0,
                               fmt_model=fmt_model_secforce,
-                              node_supports=False, ax=ax)
+                              node_supports=False,
+                              fmt_model_truss=fmt_model_secforce,
+                              truss_node_offset=0, ax=ax)
     else:
         pass
 
@@ -623,7 +625,9 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
     if alt_model_plot == 1:
         ax = model.plot_model(node_labels=0, element_labels=0,
                               fmt_model=fmt_model_secforce,
-                              node_supports=False, ax=ax)
+                              node_supports=False,
+                              fmt_model_truss=fmt_model_secforce,
+                              truss_node_offset=0, ax=ax)
     elif alt_model_plot == 2:
         # element
         plt.plot(ex, ey, ez, "k-",

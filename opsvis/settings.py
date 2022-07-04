@@ -8,6 +8,7 @@ fmt_nodes = {'color': 'red', 'linestyle': 'None', 'linewidth': 1.2, 'marker': 's
 
 # initial model
 fmt_model = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '.', 'markersize': 6}
+fmt_model_truss = {'color': 'green', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': 'o', 'markersize': 6, 'markerfacecolor': 'white'}
 fmt_model_nodes_only = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '.', 'markersize': 6}
 fmt_model_loads = {'color': 'black', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '', 'markersize': 1}
 
