@@ -191,11 +191,21 @@ def fib_sec_list_to_cmds(fib_sec_list):
 
         if dat[0] == 'layer':
             matTag = dat[2]
+            n_bars = dat[3]
+            As = dat[4]
             if dat[1] == 'straight':
-                n_bars = dat[3]
-                As = dat[4]
                 Iy, Iz, Jy, Jz = dat[5], dat[6], dat[7], dat[8]
                 ops.layer('straight', matTag, n_bars, As, Iy, Iz, Jy, Jz)
+
+            elif dat[1] == 'circ':
+                yC, zC, radius = dat[5], dat[6], dat[7]
+
+                if len(dat) > 8:
+                    begAng, endAng = dat[8], dat[9]
+                    ops.layer('circ', matTag, n_bars, As, yC, zC, radius,
+                              begAng, endAng)
+                else:
+                    ops.layer('circ', matTag, n_bars, As, yC, zC, radius)
 
         if dat[0] == 'patch':
             matTag = dat[2]
@@ -208,7 +218,14 @@ def fib_sec_list_to_cmds(fib_sec_list):
                 ops.patch('quad', matTag, nIJ, nJK, Iy, Iz, Jy, Jz, Ky, Kz,
                           Ly, Lz)
 
-            if dat[1] == 'rect':
+            elif dat[1] == 'rect':
                 Iy, Iz, Ky, Kz = dat[5], dat[6], dat[7], dat[8]
                 Jy, Jz, Ly, Lz = Ky, Iz, Iy, Kz
                 ops.patch('rect', matTag, nIJ, nJK, Iy, Iz, Ky, Kz)
+
+            elif dat[1] == 'circ':
+                yC, zC, intRad, extRad = dat[5], dat[6], dat[7], dat[8]
+
+                begAng, endAng = dat[9], dat[10]
+                ops.patch('circ', matTag, nIJ, nJK, yC, zC, intRad, extRad,
+                          begAng, endAng)
