@@ -541,9 +541,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                              fmt_secforce1=fmt_secforce1,
                              fmt_secforce2=fmt_secforce2,
-                             ref_vert_lines=True,
-                             end_max_values=True,
-                             dir_plt=0, ax=False,
+                             ref_vert_lines=True, end_max_values=True,
+                             dir_plt=0, node_supports=True, ax=False,
                              alt_model_plot=1):
     """Display section forces diagram of a 3d beam column model.
 
@@ -756,5 +755,9 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
             if maxVal_ind != 0 or maxVal_ind != nep - 1:
                 ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
                         f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
+
+    if node_supports:
+        node_tags = ops.getNodeTags()
+        ax = model._plot_supports(node_tags, ax)
 
     return minVal, maxVal, ax

@@ -308,8 +308,9 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                        fmt_defo_faces, fmt_undefo_faces,
                        interpFlag, endDispFlag, fmt_nodes, az_el,
-                       fig_wi_he, fig_lbrt, ax):
+                       fig_wi_he, fig_lbrt, node_supports, ax):
 
+    node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
 
     azim, elev = az_el
@@ -656,6 +657,9 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                         xyz[[j, 16+j, 4+j], 2], 'b.-',
                         lw=0.4, ms=2, mfc='g', mec='g')
 
+    if node_supports:
+        opsvmodel._plot_supports(node_tags, ax)
+
     ax.set_box_aspect((np.ptp(ax.get_xlim3d()),
                        np.ptp(ax.get_ylim3d()),
                        np.ptp(ax.get_zlim3d())))
@@ -739,10 +743,11 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
 
             sfac = ratio * dlmax/max_u_abs
 
-        ax = _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
-                                fmt_defo_faces, fmt_undefo_faces,
-                                interpFlag, endDispFlag, fmt_nodes,
-                                fig_wi_he, fig_lbrt, node_supports, ax)
+        ax = _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo,
+                                fmt_undefo, fmt_defo_faces,
+                                fmt_undefo_faces, interpFlag,
+                                endDispFlag, fmt_nodes, fig_wi_he,
+                                fig_lbrt, node_supports, ax)
 
     elif ndim == 3:
         if not sfac:
@@ -774,10 +779,12 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
 
             sfac = ratio * dlmax/max_u_abs
 
-        ax = _plot_defo_mode_3d(0, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
-                                fmt_defo_faces, fmt_undefo_faces,
-                                interpFlag, endDispFlag,
-                                fmt_nodes, az_el, fig_wi_he, fig_lbrt, ax)
+        ax = _plot_defo_mode_3d(0, sfac, nep, unDefoFlag, fmt_defo,
+                                fmt_undefo, fmt_defo_faces,
+                                fmt_undefo_faces, interpFlag,
+                                endDispFlag, fmt_nodes, az_el,
+                                fig_wi_he, fig_lbrt, node_supports,
+                                ax)
 
     else:
         print(f'\nWarning! ndim: {ndim} not supported yet.')
@@ -866,10 +873,11 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
             max_u_abs = max(max_ux, max_uy)
             sfac = ratio * dlmax/max_u_abs
 
-        ax = _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
-                                fmt_defo_faces, fmt_undefo_faces,
-                                interpFlag, endDispFlag, fmt_nodes,
-                                fig_wi_he, fig_lbrt, node_supports, ax)
+        ax = _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag,
+                                fmt_defo, fmt_undefo, fmt_defo_faces,
+                                fmt_undefo_faces, interpFlag,
+                                endDispFlag, fmt_nodes, fig_wi_he,
+                                fig_lbrt, node_supports, ax)
 
     elif ndim == 3:
         if not sfac:
@@ -898,10 +906,12 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
             max_u_abs = max(max_ux, max_uy, max_uz)
             sfac = ratio * dlmax/max_u_abs
 
-        ax = _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo,
-                                fmt_undefo, fmt_defo_faces, fmt_undefo_faces,
-                                interpFlag, endDispFlag, fmt_nodes,
-                                az_el, fig_wi_he, fig_lbrt, ax)
+        ax = _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag,
+                                fmt_defo, fmt_undefo, fmt_defo_faces,
+                                fmt_undefo_faces, interpFlag,
+                                endDispFlag, fmt_nodes, az_el,
+                                fig_wi_he, fig_lbrt, node_supports,
+                                ax)
 
     else:
         print(f'\nWarning! ndim: {ndim} not supported yet.')

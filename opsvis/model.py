@@ -363,6 +363,8 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
 def _plot_supports(node_tags, ax):
 
+    ndim = ops.getNDM()[0]
+
     # fix 2d support: square
     verts = [(-1., 0.),
              (1., 0.),
@@ -456,49 +458,66 @@ def _plot_supports(node_tags, ax):
         m_color = 'm'
         m_fstyle = 'full'
 
-        if ndfi < 3:
-            if (node_dofs[0] == -1 and node_dofs[1] == -1):
-                m_type = path_pin
-                m_fstyle = 'full'
-                m_size = 16
-            elif (node_dofs[0] == -1):
-                m_type = path_roller_vert
-                m_fstyle = 'full'
-                m_size = 16
-            elif (node_dofs[1] == -1):
-                m_type = path_roller_horiz
-                m_fstyle = 'full'
-                m_size = 16
+        if ndim == 2:
+            if ndfi < 3:
+                if (node_dofs[0] == -1 and node_dofs[1] == -1):
+                    m_type = path_pin
+                    m_fstyle = 'full'
+                    m_size = 16
+                elif (node_dofs[0] == -1):
+                    m_type = path_roller_vert
+                    m_fstyle = 'full'
+                    m_size = 16
+                elif (node_dofs[1] == -1):
+                    m_type = path_roller_horiz
+                    m_fstyle = 'full'
+                    m_size = 16
 
-        else:
-            if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
+            else:
+                if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
+                    m_type = path_fix
+                    m_fstyle = 'full'
+                    m_size = 16
+                elif (node_dofs[0] == -1 and node_dofs[1] == -1):
+                    m_type = path_pin
+                    m_fstyle = 'full'
+                    m_size = 16
+                elif (node_dofs[0] == -1):
+                    m_type = path_roller_vert
+                    m_fstyle = 'full'
+                    m_size = 16
+                elif (node_dofs[1] == -1):
+                    m_type = path_roller_horiz
+                    m_fstyle = 'full'
+                    m_size = 16
+
+            if m_type:
+                ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
+                        color=m_color, fillstyle=m_fstyle)
+
+        elif ndim == 3:
+            if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1
+                    and node_dofs[3] == -1 and node_dofs[4] == -1 and node_dofs[5] == -1):
                 m_type = path_fix
                 m_fstyle = 'full'
                 m_size = 16
-            elif (node_dofs[0] == -1 and node_dofs[1] == -1):
+            elif (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
                 m_type = path_pin
                 m_fstyle = 'full'
                 m_size = 16
-            elif (node_dofs[0] == -1):
-                m_type = path_roller_vert
-                m_fstyle = 'full'
-                m_size = 16
-            elif (node_dofs[1] == -1):
-                m_type = path_roller_horiz
-                m_fstyle = 'full'
-                m_size = 16
 
-        if m_type:
-            ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
-                    color=m_color, fillstyle=m_fstyle)
+            if m_type:
+                ax.plot(nd_crd[0], nd_crd[1], nd_crd[2], marker=m_type, markersize=m_size,
+                        color=m_color, fillstyle=m_fstyle)
 
     return ax
 
 
-def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                   az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                   fmt_model, gauss_points, fmt_gauss_points,
-                   fmt_model_truss, truss_node_offset, ax):
+def _plot_model_3d(node_labels, element_labels, offset_nd_label,
+                   axis_off, az_el, fig_wi_he, fig_lbrt, local_axes,
+                   nodes_only, fmt_model, node_supports, gauss_points,
+                   fmt_gauss_points, fmt_model_truss,
+                   truss_node_offset, ax):
 
     node_tags = ops.getNodeTags()
     ele_tags = ops.getEleTags()
@@ -1067,6 +1086,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.text(xt, yt, zt, f'{ele_tag}', va='top', ha='left',
                         color='red')
 
+    if node_supports:
+        _plot_supports(node_tags, ax)
+
     ax.set_box_aspect((np.ptp(ax.get_xlim3d()),
                        np.ptp(ax.get_ylim3d()),
                        np.ptp(ax.get_zlim3d())))
@@ -1152,18 +1174,21 @@ def plot_model(node_labels=1, element_labels=1, offset_nd_label=False,
     ndim = ops.getNDM()[0]
 
     if ndim == 2:
-        ax = _plot_model_2d(node_labels, element_labels, offset_nd_label,
-                            axis_off, fig_wi_he, fig_lbrt, nodes_only,
-                            fmt_model, fmt_model_nodes_only,
-                            node_supports, gauss_points, fmt_gauss_points,
+        ax = _plot_model_2d(node_labels, element_labels,
+                            offset_nd_label, axis_off, fig_wi_he,
+                            fig_lbrt, nodes_only, fmt_model,
+                            fmt_model_nodes_only, node_supports,
+                            gauss_points, fmt_gauss_points,
                             fmt_model_truss, truss_node_offset, ax)
         if axis_off:
             ax.axis('off')
 
     elif ndim == 3:
-        ax = _plot_model_3d(node_labels, element_labels, offset_nd_label, axis_off,
-                            az_el, fig_wi_he, fig_lbrt, local_axes, nodes_only,
-                            fmt_model, gauss_points, fmt_gauss_points,
+        ax = _plot_model_3d(node_labels, element_labels,
+                            offset_nd_label, axis_off, az_el,
+                            fig_wi_he, fig_lbrt, local_axes,
+                            nodes_only, fmt_model, node_supports,
+                            gauss_points, fmt_gauss_points,
                             fmt_model_truss, truss_node_offset, ax)
         if axis_off:
             ax.axis('off')
