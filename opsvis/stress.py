@@ -752,6 +752,8 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
 
     if (ele_classtag == EleClassTag.tri3n):
         tris_conn = eles_conn
+        nds_crd_all = nds_crd
+        nds_val_all = nds_val
 
     elif (ele_classtag == EleClassTag.quad4n):
         tris_conn, nds_c_crd, nds_c_val = \
