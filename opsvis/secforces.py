@@ -421,10 +421,12 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
         ele_class_tag = ops.getEleClassTags(ele_tag)[0]
 
-        if (ele_class_tag == EleClassTag.ElasticBeam2d or
-            ele_class_tag == EleClassTag.ForceBeamColumn2d or
-            ele_class_tag == EleClassTag.DispBeamColumn2d or
-            ele_class_tag == EleClassTag.truss):
+        if (ele_class_tag == EleClassTag.ElasticBeam2d
+            or ele_class_tag == EleClassTag.ForceBeamColumn2d
+            or ele_class_tag == EleClassTag.DispBeamColumn2d
+            or ele_class_tag == EleClassTag.truss
+            or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
+            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
 
             nd1, nd2 = ops.eleNodes(ele_tag)
 
@@ -457,6 +459,11 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 eload_data = [['-beamUniform', 0., 0.]]
                 if ele_tag in Ew:
                     eload_data = Ew[ele_tag]
+
+                # a workaround due to a bug in OpenSees
+                # without the following the localForces are zero
+                if ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d:
+                    gF = ops.eleResponse(ele_tag, 'globalForces')
 
                 pl = ops.eleResponse(ele_tag, 'localForces')
 

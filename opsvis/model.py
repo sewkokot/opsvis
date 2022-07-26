@@ -447,68 +447,38 @@ def _plot_supports(node_tags, ax):
 
     path_roller_vert = Path(verts, codes)
 
-    for node_tag in node_tags:
+    m_color = 'm'
+    m_fstyle = 'full'
+    m_size = 16
+
+    fixed_nodes = ops.getFixedNodes()
+
+    for node_tag in fixed_nodes:
         nd_crd = ops.nodeCoord(node_tag)
 
-        node_dofs = ops.nodeDOFs(node_tag)
-        # ndf = ops.getNDF()[0]  # global, we need local data
-        ndfi = len(node_dofs)
-
-        m_type = None
-        m_color = 'm'
-        m_fstyle = 'full'
+        fixed_dofs = ops.getFixedDOFs(node_tag)
 
         if ndim == 2:
-            if ndfi < 3:
-                if (node_dofs[0] == -1 and node_dofs[1] == -1):
-                    m_type = path_pin
-                    m_fstyle = 'full'
-                    m_size = 16
-                elif (node_dofs[0] == -1):
-                    m_type = path_roller_vert
-                    m_fstyle = 'full'
-                    m_size = 16
-                elif (node_dofs[1] == -1):
-                    m_type = path_roller_horiz
-                    m_fstyle = 'full'
-                    m_size = 16
+            if (fixed_dofs == [1, 2, 3]):
+                m_type = path_fix
+            elif (fixed_dofs == [1, 2]):
+                m_type = path_pin
+            elif (fixed_dofs == [1]):
+                m_type = path_roller_vert
+            elif (fixed_dofs == [2]):
+                m_type = path_roller_horiz
 
-            else:
-                if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
-                    m_type = path_fix
-                    m_fstyle = 'full'
-                    m_size = 16
-                elif (node_dofs[0] == -1 and node_dofs[1] == -1):
-                    m_type = path_pin
-                    m_fstyle = 'full'
-                    m_size = 16
-                elif (node_dofs[0] == -1):
-                    m_type = path_roller_vert
-                    m_fstyle = 'full'
-                    m_size = 16
-                elif (node_dofs[1] == -1):
-                    m_type = path_roller_horiz
-                    m_fstyle = 'full'
-                    m_size = 16
-
-            if m_type:
-                ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
-                        color=m_color, fillstyle=m_fstyle)
+            ax.plot(nd_crd[0], nd_crd[1], marker=m_type, markersize=m_size,
+                    color=m_color, fillstyle=m_fstyle)
 
         elif ndim == 3:
-            if (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1
-                    and node_dofs[3] == -1 and node_dofs[4] == -1 and node_dofs[5] == -1):
+            if (fixed_dofs == [1, 2, 3, 4, 5, 6]):
                 m_type = path_fix
-                m_fstyle = 'full'
-                m_size = 16
-            elif (node_dofs[0] == -1 and node_dofs[1] == -1 and node_dofs[2] == -1):
+            elif (fixed_dofs == [1, 2, 3]):
                 m_type = path_pin
-                m_fstyle = 'full'
-                m_size = 16
 
-            if m_type:
-                ax.plot(nd_crd[0], nd_crd[1], nd_crd[2], marker=m_type, markersize=m_size,
-                        color=m_color, fillstyle=m_fstyle)
+            ax.plot(nd_crd[0], nd_crd[1], nd_crd[2], marker=m_type, markersize=m_size,
+                    color=m_color, fillstyle=m_fstyle)
 
     return ax
 

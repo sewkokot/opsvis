@@ -64,9 +64,11 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             ax.plot(xy[:, 0], xy[:, 1], **fmt_defo)
 
         # beam/frame element plot_defo
-        elif (ele_classtag == EleClassTag.ElasticBeam2d or
-              ele_classtag == EleClassTag.ForceBeamColumn2d or
-              ele_classtag == EleClassTag.DispBeamColumn2d):
+        elif (ele_classtag == EleClassTag.ElasticBeam2d
+              or ele_classtag == EleClassTag.ForceBeamColumn2d
+              or ele_classtag == EleClassTag.DispBeamColumn2d
+              or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
+              or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d):
 
             nen, ndf = 2, 3
 
