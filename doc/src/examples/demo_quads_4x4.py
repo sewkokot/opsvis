@@ -1,5 +1,4 @@
-# import openseespy.opensees as ops
-import opensees as ops  # local compilation
+import openseespy.opensees as ops
 import opsvis as opsv
 
 import matplotlib.pyplot as plt
@@ -73,14 +72,15 @@ ops.analyze(1)
 opsv.plot_model()
 plt.axis('equal')
 
+# plt.figure()
+opsv.plot_loads_2d()
+
 # - plot deformation
-plt.figure()
-opsv.plot_defo()
+opsv.plot_defo(unDefoFlag=1)
 plt.axis('equal')
 
 # get values at OpenSees nodes
 sig_out = opsv.sig_out_per_node()
-print(f'sig_out:\n{sig_out}')
 
 # !!! select from sig_out: e.g. vmises
 # j, jstr = 0, 'sxx'
@@ -95,32 +95,6 @@ nds_val = sig_out[:, j]
 
 plt.figure()
 opsv.plot_stress_2d(nds_val)
-
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
-plt.title(f'{jstr}')
-
-# for educational purposes show values at integration points and
-# nodes which can finally be averaged at nodes
-eles_ips_crd, eles_nds_crd, nds_crd, quads_conn = opsv.quad_crds_node_to_ip()
-
-print(f'\neles_ips_crd:\n{eles_ips_crd}')
-print(f'\neles_nds_crd:\n{eles_nds_crd}')
-print(f'\nnds_crd:\n{nds_crd}')
-print(f'\nquads_conn:\n{quads_conn}')
-
-eles_ips_sig_out, eles_nds_sig_out = opsv.sig_out_per_ele_quad()
-
-print(f'\neles_ips_sig_out:\n{eles_ips_sig_out}')
-print(f'\neles_nds_sig_out:\n{eles_nds_sig_out}')
-
-sig_out_indx = j  # same as j, jstr
-
-opsv.plot_mesh_with_ips_2d(nds_crd, eles_ips_crd, eles_nds_crd, quads_conn,
-                           eles_ips_sig_out, eles_nds_sig_out, sig_out_indx)
-
-plt.xlabel('x [m]')
-plt.ylabel('y [m]')
 
 plt.show()
 

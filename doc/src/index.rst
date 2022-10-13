@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ``opsvis``'s documentation!
-=======================================
+Welcome to Opsvis documentation!
+================================
 
 .. toctree::
    :maxdepth: 2
@@ -12,7 +12,7 @@ Welcome to ``opsvis``'s documentation!
 
    plot_model
    plot_defo
-   plot_supports_and_loads_2d
+   plot_loads_2d
    plot_mode_shape
    section_force_diagram_2d
    section_force_diagram_3d
@@ -25,19 +25,38 @@ Welcome to ``opsvis``'s documentation!
    sig_out_per_node
    examples
 
+Warning - Incompatible changes!
 
-Since October 2021, ``opsvis`` is no longer distributed with the main
-OpenSeesPy, and should be installed separately with the ``pip``
-command. Note also that the name has been simplified from ``ops_vis``
-to ``opsvis``.
+Starting from Opsvis ver. 1.0.1 (May 2022):
 
-The ``opsvis`` is an OpenSeesPy postprocessing and visualization module
+#. the ``plot_supports_and_loads_2d`` function is removed and instead
+   ``plot_loads_2d`` is available. The model supports can now be shown in
+   the ``plot_model`` function. The additiona function argument
+   ``node_supports`` (default is True) can be switched off (e.g.
+   ``plot_model(node_supports=False)``).
+
+#. the ``plot_mesh_with_ips_2d()`` function is removed.
+
+#. See and use the updated example ``.py`` files (:doc:`examples`).
+
+#. Now the opsvis plotting functions use the Python dictionary
+   (instead of the string) for the maptplotlib line formatting.
+   Example: Use ``fmt_model = {'color': 'blue', 'linestyle': 'solid',
+   'linewidth': 1.2, 'marker': '.', 'markersize': 6}`` instead of the
+   previous ``fmt_defo = 'b-'`` string format. Also the ``lw``
+   (linewidth) arguments are removed from the plotting functions as
+   they can be defined in the ``fmt_*`` dictionary. This feature has
+   been implemented as suggested by `mbbatukan
+   <https://github.com/sewkokot/opsvis/issues/11>`_.
+
+
+Opsvis is an OpenSeesPy postprocessing and visualization module
 written by Seweryn Kokot (Opole University of Technology, Poland).
 
-The ``opsvis`` uses the OpenSeesPy therefore first read the
+For OpenSeesPy documentation click the following link:
 `OpenSeesPy documentation <https://openseespydoc.readthedocs.io>`_
 
-This module can be mainly useful for students when learning the
+Opsvis can be mainly useful for students when learning the
 fundamentals of structural analysis (interpolated deformation of frame
 structures (static images or animations), section force distribution
 of frame structures, stress distribution in triangle, quadrilateral 2d
@@ -47,11 +66,7 @@ we can lower the bar in teaching and learning OpenSees at earlier
 years of civil engineering studies. However the visualization features
 for OpenSees can also be helpful for research studies.
 
-Note that there are other OpenSeesPy visualization modules (for example
-``Get_Rendering``), however ``opsvis`` is an alternative with some
-distinct features (on the other hand the ``Get_Rendering`` has other
-features that ``opsvis`` does not have), which for example allow us
-to plot:
+Opsvis offers the following plots:
 
 - interpolated deformation of frame structures,
 - stresses of triangular and (four, eight and nine-node) quadrilateral
@@ -59,7 +74,7 @@ to plot:
   principal stresses),
 - fibers of cross-sections,
 - models with extruded cross sections
-- animation of mode shapes.
+- animation of deformation (from time history analysis) and mode shapes.
 
 Installation
 ============
@@ -71,7 +86,7 @@ Note the name of the PyPi package is without the underscore ``_``.
 Usage
 =====
 
-To use ``opsvis`` in OpenSeesPy
+To use Opsvis in OpenSeesPy
 scripts, your ``.py`` file should start as follows: ::
 
 	import openseespy.opensees as ops
@@ -91,7 +106,7 @@ visualization are as follows:
 
 #. :doc:`plot_model`
 #. :doc:`plot_defo`
-#. :doc:`plot_supports_and_loads_2d`
+#. :doc:`plot_loads_2d`
 #. :doc:`plot_mode_shape`
 #. :doc:`section_force_diagram_2d`
 #. :doc:`section_force_diagram_3d`

@@ -1,5 +1,4 @@
 import openseespy.opensees as ops
-# import opensees as ops  # local compilation
 import opsvis as opsv
 
 import matplotlib.pyplot as plt
@@ -25,6 +24,9 @@ ops.node(4, girL, colL)
 
 ops.fix(1, 1, 1, 1)
 ops.fix(3, 1, 1, 0)
+
+opsv.plot_model()
+plt.title('plot_model before defining elements')
 
 ops.geomTransf('Linear', 1)
 
@@ -59,41 +61,30 @@ ops.analyze(1)
 
 ops.printModel()
 
-# 1. plot model with tag lebels
-
 opsv.plot_model()
+plt.title('plot_model after defining elements')
 
-# 2. plot supports and loads
+opsv.plot_loads_2d()
 
-plt.figure()
-opsv.plot_supports_and_loads_2d()
+# sfac = 80.
 
-# 3. plot deformed model
-
-sfac = 80.
-
-plt.figure()
+opsv.plot_defo()
 # opsv.plot_defo(sfac)
-opsv.plot_defo(sfac, fmt_interp='b.-')
-opsv.plot_defo(sfac, 5, interpFlag=0, fmt_nodes='bo-')
-opsv.plot_defo(sfac, 3, endDispFlag=0, fmt_interp='r.--')
-opsv.plot_defo(sfac, 2, fmt_interp='g.-')
+# fmt_interp = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '.', 'markersize': 6}
+# opsv.plot_defo(sfac, fmt_interp=fmt_interp)
 
 # 4. plot N, V, M forces diagrams
 
 sfacN, sfacV, sfacM = 5.e-5, 5.e-5, 5.e-5
 
-plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('N', sfacN)
-plt.title(f'Axial forces, max = {maxVal:.2f}, min = {minVal:.2f}')
+opsv.section_force_diagram_2d('N', sfacN)
+plt.title('Axial force distribution')
 
-plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('T', sfacV)
-plt.title(f'Shear forces, max = {maxVal:.2f}, min = {minVal:.2f}')
+opsv.section_force_diagram_2d('T', sfacV)
+plt.title('Shear force distribution')
 
-plt.figure()
-minVal, maxVal = opsv.section_force_diagram_2d('M', sfacM)
-plt.title(f'Bending moments, max = {maxVal:.2f}, min = {minVal:.2f}')
+opsv.section_force_diagram_2d('M', sfacM)
+plt.title('Bending moment distribution')
 
 plt.show()
 
