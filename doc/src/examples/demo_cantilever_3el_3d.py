@@ -1,5 +1,4 @@
 import openseespy.opensees as ops
-# import opensees as ops  # local compilation
 import opsvis as opsv
 
 import matplotlib.pyplot as plt
@@ -74,14 +73,13 @@ fig_wi_he = 30., 20.
 
 # - 1
 nep = 9
-opsv.plot_defo(sfac, nep, fmt_interp='b-', az_el=(-68., 39.),
+opsv.plot_defo(sfac, nep, az_el=(-68., 39.),
                fig_wi_he=fig_wi_he, endDispFlag=0)
 
 plt.title('3d 3-element cantilever beam')
 
 # - 2
-opsv.plot_defo(sfac, 19, fmt_interp='b-', az_el=(6., 30.),
-               fig_wi_he=fig_wi_he)
+opsv.plot_defo(sfac, 19, az_el=(6., 30.), fig_wi_he=fig_wi_he)
 
 plt.title('3d 3-element cantilever beam')
 
@@ -92,7 +90,7 @@ eigValues = ops.eigen(nfreq)
 modeNo = 6
 
 sfac = 2.0e1
-opsv.plot_mode_shape(modeNo, sfac, 19, fmt_interp='b-', az_el=(106., 46.),
+opsv.plot_mode_shape(modeNo, sfac, 19, az_el=(106., 46.),
                      fig_wi_he=fig_wi_he)
 plt.title(f'Mode {modeNo}')
 
@@ -104,23 +102,23 @@ sfacMz = 1.e-2
 sfacT = 1.e-2
 
 # plt.figure()
-minY, maxY = opsv.section_force_diagram_3d('N', Ew, sfacN)
-plt.title(f'Axial force N, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('N', sfacN)
+plt.title('Axial force N')
 
-minY, maxY = opsv.section_force_diagram_3d('Vy', Ew, sfacVy)
-plt.title(f'Transverse force Vy, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Vy', sfacVy)
+plt.title('Transverse force Vy')
 
-minY, maxY = opsv.section_force_diagram_3d('Vz', Ew, sfacVz)
-plt.title(f'Transverse force Vz, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Vz', sfacVz)
+plt.title('Transverse force Vz')
 
-minY, maxY = opsv.section_force_diagram_3d('My', Ew, sfacMy)
-plt.title(f'Bending moments My, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('My', sfacMy)
+plt.title('Bending moments My')
 
-minY, maxY = opsv.section_force_diagram_3d('Mz', Ew, sfacMz)
-plt.title(f'Bending moments Mz, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('Mz', sfacMz)
+plt.title('Bending moments Mz')
 
-minY, maxY = opsv.section_force_diagram_3d('T', Ew, sfacT)
-plt.title(f'Torsional moment T, max = {maxY:.2f}, min = {minY:.2f}')
+opsv.section_force_diagram_3d('T', sfacT)
+plt.title('Torsional moment T')
 
 # just for demonstration,
 # the section data below does not match the data in OpenSees model above
