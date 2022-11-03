@@ -424,7 +424,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
         if (ele_class_tag == EleClassTag.ElasticBeam2d
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
-            or ele_class_tag == EleClassTag.truss
+            or ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
 
@@ -440,7 +440,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
-            if ele_class_tag == EleClassTag.truss:
+            if ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]:
                 axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
                 ss = -axial_force * np.ones(nep)
                 xl = np.linspace(0., L, nep)
@@ -515,7 +515,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 ax.plot([s_0[-1, 0], s_p[-1, 0]], [s_0[-1, 1], s_p[-1, 1]],
                         **fmt_secforce2)
 
-            if ele_class_tag == EleClassTag.truss:
+            if ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]:
                 ha = 'center'
                 ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
                         f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
