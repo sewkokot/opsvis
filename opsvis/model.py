@@ -476,6 +476,8 @@ def _plot_supports(node_tags, ax):
                 m_type = path_fix
             elif (fixed_dofs == [1, 2, 3]):
                 m_type = path_pin
+            else: # This is for rigid diaphragms 
+                m_type = "None"
 
             ax.plot(nd_crd[0], nd_crd[1], nd_crd[2], marker=m_type, markersize=m_size,
                     color=m_color, fillstyle=m_fstyle)
