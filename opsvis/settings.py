@@ -18,6 +18,7 @@ fmt_model_secforce = {'color': 'black', 'linestyle': 'solid', 'linewidth': 1.2, 
 # deformed model
 fmt_defo = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '', 'markersize': 1}
 fmt_defo_faces = {'linewidths': 1, 'edgecolors': 'k', 'alpha': 0.5}
+fmt_defo_zeroLenght = {'color': 'blue', 'linestyle': 'dashed', 'linewidth': 1.2, 'marker': '*', 'markersize': 6, 'markerfacecolor': 'white'}
 
 # undeformed model
 fmt_undefo = {'color': 'green', 'linestyle': (0, (1, 5)), 'linewidth': 1.2, 'marker': '', 'markersize': 1}
@@ -78,7 +79,8 @@ class EleClassTag:
     brick8n = 56
     SSPbrick = 121
     FourNodeTetrahedron = 179
-    TenNodeTetrahedron = 1790
+    TenNodeTetrahedron = 256
+    TenNodeTetrahedronSK = 1790
     ASDShellQ4 = 203
     ASDShellT3 = 204
     ShellMITC4 = 53

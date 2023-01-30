@@ -44,8 +44,6 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
 
     nlf = len(pl)
     xl = np.linspace(0., L, nep)
-    one = np.ones(nep)
-
 
     for ele_load_data_i in ele_load_data:
         ele_load_type = ele_load_data_i[0]
@@ -68,20 +66,6 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
                 # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                 Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
 
-                if nlf == 6:
-                    s = np.zeros((nep, 3))
-                elif nlf == 1:
-                    s = np.zeros((nep, 1))
-
-                N = -1.*(N_1 * one + Wx * xl)
-
-                if nlf == 6:
-                    V = V_1 * one + Wy * xl
-                    M = -M_1 * one + V_1 * xl + 0.5 * Wy * xl**2
-                    s += np.column_stack((N, V, M))
-                elif nlf == 1:
-                    s += np.column_stack((N))
-
             elif n_ele_load_data == 7:
                 wta, waa, aL, bL, wtb, wab = ele_load_data_i[1:7]
                 a, b = aL*L, bL*L
@@ -98,44 +82,6 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
                 else:
                     xl = np.insert(xl, xl.searchsorted(b), b)
                     nep += 1
-
-                if nlf == 6:
-                    s = np.zeros((nep, 3))
-                elif nlf == 1:
-                    s = np.zeros((nep, 1))
-
-
-                indx = 0
-                for x in np.nditer(xl):
-                    xma = x - a
-                    wtx = wta + (wtb - wta) * xma / bma
-                    # xc = a + bma * (wtb + 2*wta) / (3 * (wta + wtb))
-                    if wtx == 0:
-                        xc = 0.
-                    else:
-                        xc = a + xma * (wtx + 2*wta) / (3 * (wta + wtx))
-
-                    Ax = 0.5 * (wtx+wta) * xma
-                    V1x = V_1 * x
-                    Axxc = Ax * xc
-
-                    if x < a:
-                        pass
-                    elif x >= a and x <= b:
-                        s[indx, 0] = -1.*(N_1 + (wab - waa) * x)
-                        s[indx, 1] = V_1 + Ax
-                        s[indx, 2] = -M_1 + V1x + Axxc
-
-                    elif x > b:
-                        pass
-
-                    indx += 1
-
-                if aL == 0 and bL == 0:
-                    N = -1.*(N_1 * one + wta * xl)
-                    V = V_1 * one + wta * xl
-                else:
-                    N = 0
 
         elif ele_load_type == '-beamPoint':
             Pt, aL, Pa = ele_load_data_i[1:4]
@@ -156,25 +102,99 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
                 xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
                 nep += 2
 
-            if nlf == 6:
-                s = np.zeros((nep, 3))
-            elif nlf == 1:
-                s = np.zeros((nep, 1))
 
+    # xl is modified on the fly
+    one = np.ones(nep)
+
+    N = -1. * N_1 * one
+
+    if nlf == 6:
+        # s = np.zeros((nep, 3))
+        V = V_1 * one
+        M = -M_1 * one + V_1 * xl
+        s = np.column_stack((N, V, M))
+
+    elif nlf == 1:
+        # s = np.zeros((nep, 1))
+        s = np.column_stack((N))
+
+    for ele_load_data_i in ele_load_data:
+        ele_load_type = ele_load_data_i[0]
+
+        if ele_load_type == '-beamUniform':
+            # raise ValueError
+            # raise NameError
+
+            n_ele_load_data = len(ele_load_data_i)
+
+            if n_ele_load_data == 3:
+                # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
+                Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
+
+                N = -1.*(Wx * xl)
+
+                if nlf == 6:
+                    V = Wy * xl
+                    M = 0.5 * Wy * xl**2
+                    s += np.column_stack((N, V, M))
+                elif nlf == 1:
+                    s += np.column_stack((N))
+
+            elif n_ele_load_data == 7:
+                wta, waa, aL, bL, wtb, wab = ele_load_data_i[1:7]
+                a, b = aL*L, bL*L
+
+                bma = b - a
+
+                indx = 0
+                for x in np.nditer(xl):
+                    xma = x - a
+                    wtx = wta + (wtb - wta) * xma / bma
+                    # xc = a + bma * (wtb + 2*wta) / (3 * (wta + wtb))
+                    if wtx == 0:
+                        xc = 0.
+                    else:
+                        xc = a + xma * (wtx + 2*wta) / (3 * (wta + wtx))
+
+                    Ax = 0.5 * (wtx+wta) * xma
+                    # V1x = V_1 * x
+                    Axxc = Ax * xc
+
+                    if x < a:
+                        pass
+                    elif x >= a and x <= b:
+                        s[indx, 0] += -1.*((wab - waa) * x)
+                        s[indx, 1] += Ax
+                        s[indx, 2] += Axxc
+
+                    elif x > b:
+                        pass
+
+                    indx += 1
+
+                if aL == 0 and bL == 0:
+                    N = -1.*(N_1 * one + wta * xl)
+                    V = V_1 * one + wta * xl
+                else:
+                    N = 0
+
+        elif ele_load_type == '-beamPoint':
+            Pt, aL, Pa = ele_load_data_i[1:4]
+            a = aL * L
 
             indx = 0
             for x in np.nditer(xl):
                 if x <= a:
-                    s[indx, 0] = -1. * N_1
-                    s[indx, 1] = V_1
-                    s[indx, 2] = -M_1 + V_1 * x
+                    pass
+                    # s[indx, 0] += -1. * N_1
+                    # s[indx, 1] += V_1
+                    # s[indx, 2] += -M_1 + V_1 * x
                 elif x > a:
-                    s[indx, 0] = -1. * (N_1 + Pa)
-                    s[indx, 1] = V_1 + Pt
-                    s[indx, 2] = -M_1 + V_1 * x + Pt * (x-a)
+                    s[indx, 0] += -1. * (Pa)
+                    s[indx, 1] += Pt
+                    s[indx, 2] += Pt * (x-a)
 
                 indx += 1
-
 
     # if eload_type == '-beamUniform':
     # else:
@@ -424,7 +444,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
         if (ele_class_tag == EleClassTag.ElasticBeam2d
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
-            or ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]
+            or ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
 
@@ -440,7 +460,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
-            if ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]:
+            if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
                 axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
                 ss = -axial_force * np.ones(nep)
                 xl = np.linspace(0., L, nep)
@@ -459,11 +479,6 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 eload_data = [['-beamUniform', 0., 0.]]
                 if ele_tag in Ew:
                     eload_data = Ew[ele_tag]
-
-                # a workaround due to a bug in OpenSees
-                # without the following the localForces are zero
-                if ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d:
-                    gF = ops.eleResponse(ele_tag, 'globalForces')
 
                 pl = ops.eleResponse(ele_tag, 'localForces')
 
@@ -515,7 +530,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 ax.plot([s_0[-1, 0], s_p[-1, 0]], [s_0[-1, 1], s_p[-1, 1]],
                         **fmt_secforce2)
 
-            if ele_class_tag in [EleClassTag.truss,EleClassTag.trussSection]:
+            if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
                 ha = 'center'
                 ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
                         f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
@@ -643,7 +658,6 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                  dash_joinstyle="round")
     else:
         pass
-
 
     Ew = model.get_Ew_data_from_ops_domain_3d()
 

@@ -63,6 +63,39 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             ax.plot(xy[:, 0], xy[:, 1], **fmt_defo)
 
+        elif (ele_classtag == EleClassTag.ZeroLength
+              or ele_classtag == EleClassTag.ZeroLengthSection):
+
+            nen, ndf = 2, 3
+            ele_node_tags = ops.eleNodes(ele_tag)
+            # nd1, nd2 = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 2))
+            ed = np.zeros((nen, ndf))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:3]
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:3]
+
+
+            # fix for a sdof system, or specify sfac explicitly
+            if np.isclose(sfac, 0.0):
+                sfac = 1.0
+
+            # displaced element coordinates (scaled by sfac factor)
+            xy = ecrd + sfac * ed[:, :2]
+
+            if unDefoFlag:
+                ax.plot(ecrd[:, 0], ecrd[:, 1], **fmt_undefo)
+
+            ax.plot(xy[:, 0], xy[:, 1], **fmt_defo_zeroLenght)
+
         # beam/frame element plot_defo
         elif (ele_classtag == EleClassTag.ElasticBeam2d
               or ele_classtag == EleClassTag.ForceBeamColumn2d
@@ -344,9 +377,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         nen = np.shape(ops.eleNodes(ele_tag))[0]
 
         # if (ele_classtag == EleClassTag.truss):
-        if (ele_classtag == EleClassTag.ElasticBeam3d or
-            ele_classtag == EleClassTag.ForceBeamColumn3d or
-            ele_classtag == EleClassTag.DispBeamColumn3d):
+        if (ele_classtag == EleClassTag.ElasticBeam3d
+            or ele_classtag == EleClassTag.ForceBeamColumn3d
+            or ele_classtag == EleClassTag.DispBeamColumn3d
+            or ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d):
 
             nen, ndf = 2, 6
 
@@ -426,6 +460,42 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             # displaced element coordinates (scaled by sfac factor)
             xyz = ecrd + sfac * ed
             ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], **fmt_defo)
+
+        elif (ele_classtag == EleClassTag.ZeroLength
+              or ele_classtag == EleClassTag.ZeroLengthSection):
+
+            nen, ndf = 2, 6
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 3))
+            ed = np.zeros((nen, ndf))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:6]
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:6]
+
+            if unDefoFlag:
+                plt.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_undefo)
+
+            ax.set_xlabel('X')
+            ax.set_ylabel('Y')
+            ax.set_zlabel('Z')
+
+            # fix for a sdof system, or specify sfac explicitly
+            if np.isclose(sfac, 0.0):
+                sfac = 1.0
+
+            # displaced element coordinates (scaled by sfac factor)
+            xyz = ecrd + sfac * ed[:, :3]
+
+            ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], **fmt_defo_zeroLenght)
 
         # plot: shell in 3d
         elif (ele_classtag == EleClassTag.ShellMITC4 or
@@ -512,7 +582,8 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                          lw=0.4, ms=2, mfc='g', mec='g')
 
         # tetra10n, 3d defo
-        elif (ele_classtag == EleClassTag.TenNodeTetrahedron):
+        elif (ele_classtag in {EleClassTag.TenNodeTetrahedron,
+                               EleClassTag.TenNodeTetrahedronSK}):
 
             nen, ndf = 10, 3
             nodes_geo_order = [0, 4, 1, 5, 2, 6, 0]

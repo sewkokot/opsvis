@@ -476,8 +476,8 @@ def _plot_supports(node_tags, ax):
                 m_type = path_fix
             elif (fixed_dofs == [1, 2, 3]):
                 m_type = path_pin
-            else: # This is for rigid diaphragms 
-                m_type = "None"
+            else:
+                m_type = None
 
             ax.plot(nd_crd[0], nd_crd[1], nd_crd[2], marker=m_type, markersize=m_size,
                     color=m_color, fillstyle=m_fstyle)
@@ -742,7 +742,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
             #                 ops.nodeCoord(node_tag)[2]+_offset,
             #                 f'{node_tag}', va='bottom', ha='left', color='blue')
 
-        elif ele_classtag == EleClassTag.TenNodeTetrahedron:
+        elif (ele_classtag in {EleClassTag.TenNodeTetrahedron,
+                               EleClassTag.TenNodeTetrahedronSK}):
 
             nen = 10
             nodes_geo_order = [0, 4, 1, 5, 2, 6, 0]
@@ -1306,7 +1307,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                              head_width=0.1*sfac, head_length=0.2*sfac,
                              fc='b', ec='b',
                              length_includes_head=False, shape='full')
-                    ax.text(sum(ex)/2, sum(ey)/2, f'{Pt}', color='b')
+                    ax.text(sum(ex)/2, sum(ey)/2, f'{abs(Pt)}', color='b')
                     # ax.annotate("", xy=(s_p[0], s_p[1]),
                     #             xytext=(s_0[0], s_0[1]),
                     #             arrowprops=dict(arrowstyle="->", color='r', lw=3,
@@ -1320,7 +1321,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                     if n_ele_load_data == 3:
                         # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                         Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
-                        text_string = f'q = {Wy}, {Wx}'
+                        text_string = f'q = {abs(Wy)}, {abs(Wx)}'
 
                         # s = sfac * Wy * one
                         s = sfac * one * np.sign(Wy)
@@ -1329,7 +1330,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                     # triangular or trapezoidal element load
                     elif n_ele_load_data == 7:
                         wta, waa, aL, bL, wtb, wab = ele_load_data_i[1:7]
-                        text_string = f'q = {wta}, {waa}, {aL}, {bL}, {wtb}, {wab}'
+                        text_string = f'q = {abs(wta)}, {abs(waa)}, {aL}, {bL}, {abs(wtb)}, {abs(wab)}'
                         a, b = aL * L, bL * L
                         bma = b - a
                         s = np.zeros(nep)
@@ -1434,7 +1435,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
     for node_tag in node_tags:
         nd_crd = ops.nodeCoord(node_tag)
 
-        # 2. nodal loads
+        # 2. nodal loads 2d
         nodal_loads = ops.nodeUnbalance(node_tag)
         nodal_loads_idx = np.nonzero(nodal_loads)
 
@@ -1469,7 +1470,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                              head_width=0.1*sfac, head_length=0.2*sfac,
                              fc='b', ec='b',
                              length_includes_head=True, shape='full')
-                    ax.text(nd_crd[0]+dx, nd_crd[1]+dy, f' {nodal_loads[kier]:.5g}', color='b')
+                    ax.text(nd_crd[0]+dx, nd_crd[1]+dy, f' {abs(nodal_loads[kier]):.5g}', color='b')
 
                 # concentrated bending moment
                 elif kier == 2:
@@ -1484,7 +1485,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                         marker_type=r'$\curvearrowright$'
 
                     ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=35, color='b')
-                    ax.text(nd_crd[0], nd_crd[1], f'{nodal_loads[kier]:.5g}', color='b', va='bottom', ha='left')
+                    ax.text(nd_crd[0], nd_crd[1], f'{abs(nodal_loads[kier]):.5g}', color='b', va='bottom', ha='left')
 
     ax.axis('equal')
     ax.grid(False)
