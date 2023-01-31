@@ -64,7 +64,9 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             ax.plot(xy[:, 0], xy[:, 1], **fmt_defo)
 
         elif (ele_classtag == EleClassTag.ZeroLength
-              or ele_classtag == EleClassTag.ZeroLengthSection):
+              or ele_classtag == EleClassTag.ZeroLengthSection
+              or ele_classtag == EleClassTag.CoupledZeroLength
+              or ele_classtag == EleClassTag.TwoNodeLink):
 
             nen, ndf = 2, 3
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -462,7 +464,9 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], **fmt_defo)
 
         elif (ele_classtag == EleClassTag.ZeroLength
-              or ele_classtag == EleClassTag.ZeroLengthSection):
+              or ele_classtag == EleClassTag.ZeroLengthSection
+              or ele_classtag == EleClassTag.CoupledZeroLength
+              or ele_classtag == EleClassTag.TwoNodeLink):
 
             nen, ndf = 2, 6
 
