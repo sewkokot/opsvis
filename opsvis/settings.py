@@ -58,6 +58,7 @@ class EleClassTag:
     CorotTruss = 14
     ZeroLength = 19
     ZeroLengthSection = 20
+    CoupledZeroLength = 26
     ElasticBeam2d = 3
     ElasticBeam3d = 5
     DispBeamColumn2d = 62
