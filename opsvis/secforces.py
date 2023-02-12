@@ -461,27 +461,31 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             cosa, cosb = Lxy / L
 
             if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
-                axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
-                ss = -axial_force * np.ones(nep)
-                xl = np.linspace(0., L, nep)
+                if sf_type == 'N' or sf_type == 'axial':
+                    axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
+                    ss = -axial_force * np.ones(nep)
+                    xl = np.linspace(0., L, nep)
 
-                if axial_force > 0:
-                    va = 'top'
-                    fmt_color = 'b'
-                    fmt_secforce1 = fmt_secforce_tension
-                else:
-                    va = 'bottom'
-                    fmt_color = 'r'
-                    fmt_secforce1 = fmt_secforce_compression
+                    if axial_force > 0:
+                        va = 'top'
+                        fmt_color = 'b'
+                        fmt_secforce1 = fmt_secforce_tension
+                    else:
+                        va = 'bottom'
+                        fmt_color = 'r'
+                        fmt_secforce1 = fmt_secforce_compression
 
-            else:
+                else:  # for sf_type = 'V' or 'M'
+                    xl = np.linspace(0., L, 2)
+                    ss = np.zeros(2)
+
+            else:  # for other elements than truss
                 # by default no element load
                 eload_data = [['-beamUniform', 0., 0.]]
                 if ele_tag in Ew:
                     eload_data = Ew[ele_tag]
 
                 pl = ops.eleResponse(ele_tag, 'localForces')
-
                 s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, eload_data)
 
                 if sf_type == 'N' or sf_type == 'axial':
@@ -492,48 +496,58 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                     ss = s_all[:, 2]
 
 
-            # minVal = min(minVal, np.min(ss))
-            # maxVal = max(maxVal, np.max(ss))
-            minVal, minVal_ind = np.amin(ss), np.argmin(ss)
-            maxVal, maxVal_ind = np.amax(ss), np.argmax(ss)
+            if len(ss) == 2:  # for truss with zero shear force and moment
+                pass
 
-            s = ss * sfac
-
-            s_0 = np.zeros((nep, 2))
-            s_0[0, :] = [ex[0], ey[0]]
-
-            s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
-            s_0[1:, 1] = s_0[0, 1] + xl[1:] * cosb
-
-            s_p = np.copy(s_0)
-
-            # positive M are opposite to N and V
-            if sf_type == 'M' or sf_type == 'moment':
-                s *= -1.
-
-            s_p[:, 0] -= s * cosb
-            s_p[:, 1] += s * cosa
-
-            ax.axis('equal')
-
-            # section force curve
-            ax.plot(s_p[:, 0], s_p[:, 1], **fmt_secforce1)
-
-            # reference perpendicular lines
-            if ref_vert_lines:
-                for i in np.arange(nep):
-                    ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
-                            **fmt_secforce2)
             else:
-                ax.plot([s_0[0, 0], s_p[0, 0]], [s_0[0, 1], s_p[0, 1]],
-                        **fmt_secforce2)
-                ax.plot([s_0[-1, 0], s_p[-1, 0]], [s_0[-1, 1], s_p[-1, 1]],
-                        **fmt_secforce2)
+                # minVal = min(minVal, np.min(ss))
+                # maxVal = max(maxVal, np.max(ss))
+                minVal, minVal_ind = np.amin(ss), np.argmin(ss)
+                maxVal, maxVal_ind = np.amax(ss), np.argmax(ss)
+
+                s = ss * sfac
+
+                s_0 = np.zeros((nep, 2))
+                s_0[0, :] = [ex[0], ey[0]]
+
+                s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
+                s_0[1:, 1] = s_0[0, 1] + xl[1:] * cosb
+
+                s_p = np.copy(s_0)
+
+                # positive M are opposite to N and V
+                if sf_type == 'M' or sf_type == 'moment':
+                    s *= -1.
+
+                s_p[:, 0] -= s * cosb
+                s_p[:, 1] += s * cosa
+
+                ax.axis('equal')
+
+                # section force curve
+                ax.plot(s_p[:, 0], s_p[:, 1], **fmt_secforce1)
+
+                # reference perpendicular lines
+                if ref_vert_lines:
+                    for i in np.arange(nep):
+                        ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
+                                **fmt_secforce2)
+                else:
+                    ax.plot([s_0[0, 0], s_p[0, 0]], [s_0[0, 1], s_p[0, 1]],
+                            **fmt_secforce2)
+                    ax.plot([s_0[-1, 0], s_p[-1, 0]], [s_0[-1, 1], s_p[-1, 1]],
+                            **fmt_secforce2)
 
             if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
                 ha = 'center'
-                ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
-                        f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
+                va = 'bottom'
+                if sf_type == 'N' or sf_type == 'axial':
+                    ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
+                            f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
+                else:
+                    ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
+                            '0.0', va=va, ha=ha)
+
             else:
                 if end_max_values:
                     ha = 'left'
