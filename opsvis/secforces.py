@@ -432,6 +432,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
     else:
         pass
 
+    fmt_secforce1_orig = fmt_secforce1
     maxVal, minVal = -np.inf, np.inf
     ele_tags = ops.getEleTags()
 
@@ -526,6 +527,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
                 # section force curve
                 ax.plot(s_p[:, 0], s_p[:, 1], **fmt_secforce1)
+                fmt_secforce1 = fmt_secforce1_orig
 
                 # reference perpendicular lines
                 if ref_vert_lines:
@@ -544,9 +546,9 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 if sf_type == 'N' or sf_type == 'axial':
                     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
                             f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
-                else:
-                    ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
-                            '0.0', va=va, ha=ha)
+                # else:
+                #     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
+                #             '0.0', va=va, ha=ha)
 
             else:
                 if end_max_values:
