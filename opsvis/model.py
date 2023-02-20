@@ -93,24 +93,47 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
-
-            ecrd = np.zeros((nen, 2))
-
+            ecrd_nodes = np.zeros((nen, 2))
             for i, ele_node_tag in enumerate(ele_node_tags):
-                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+                ecrd_nodes[i, :] = ops.nodeCoord(ele_node_tag)
+
+            ecrd_eles = np.copy(ecrd_nodes)
+
+            ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+            nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+            if np.any(nz_offsets):
+                # modify ecrd_eles
+                ecrd_eles[:, 0] += ele_offsets[[0, 3]]
+                ecrd_eles[:, 1] += ele_offsets[[1, 4]]
+                ax.plot([ecrd_nodes[0, 0], ecrd_eles[0, 0]],
+                        [ecrd_nodes[0, 1], ecrd_eles[0, 1]],
+                        **fmt_model_rigid_offset)
+                ax.plot([ecrd_nodes[1, 0], ecrd_eles[1, 0]],
+                        [ecrd_nodes[1, 1], ecrd_eles[1, 1]],
+                        **fmt_model_rigid_offset)
+
+            else:
+                pass
+
+            ax.plot(ecrd_eles[:, 0], ecrd_eles[:, 1], **fmt_model)
+
+            if gauss_points:
+                Lgps = ops.eleResponse(ele_tag, 'integrationPoints')
+                for Lgpi in Lgps:
+                    dxi = (ecrd_eles[1, 0] - ecrd_eles[0, 0]) * Lgpi / bar_length(ecrd_eles)
+                    dyi = (ecrd_eles[1, 1] - ecrd_eles[0, 1]) * Lgpi / bar_length(ecrd_eles)
+                    ax.plot(ecrd_eles[0, 0] + dxi, ecrd_eles[0, 1] + dyi, **fmt_gauss_points)
 
             # location of label
-            xt = sum(ecrd[:, 0]) / nen
-            yt = sum(ecrd[:, 1]) / nen
-
-            ax.plot(ecrd[:, 0], ecrd[:, 1], **fmt_model)
+            xt = sum(ecrd_eles[:, 0]) / nen
+            yt = sum(ecrd_eles[:, 1]) / nen
 
             if element_labels:
-                if ecrd[1, 0] - ecrd[0, 0] == 0:
+                if ecrd_eles[1, 0] - ecrd_eles[0, 0] == 0:
                     va = 'center'
                     ha = 'left'
                     offset_x, offset_y = _offset, 0.0
-                elif ecrd[1, 1] - ecrd[0, 1] == 0:
+                elif ecrd_eles[1, 1] - ecrd_eles[0, 1] == 0:
                     va = 'bottom'
                     ha = 'center'
                     offset_x, offset_y = 0.0, _offset
@@ -121,13 +144,6 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
                 ax.text(xt+offset_x, yt+offset_y, f'{ele_tag}', va=va, ha=ha,
                         color='red')
-
-            if gauss_points:
-                Lgps = ops.eleResponse(ele_tag, 'integrationPoints')
-                for Lgpi in Lgps:
-                    dxi = (ecrd[1, 0] - ecrd[0, 0]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
-                    dyi = (ecrd[1, 1] - ecrd[0, 1]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1])
-                    ax.plot(ecrd[0, 0] + dxi, ecrd[0, 1] + dyi, **fmt_gauss_points)
 
         if (ele_classtag == EleClassTag.truss
                 or ele_classtag == EleClassTag.trussSection):
@@ -555,9 +571,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
 
     if node_labels:
         for node_tag in node_tags:
-            ax.text(ops.nodeCoord(node_tag)[0]+_offset,
-                    ops.nodeCoord(node_tag)[1]+_offset,
-                    ops.nodeCoord(node_tag)[2]+_offset,
+            ax.text(ops.nodeCoord(node_tag)[0] + _offset,
+                    ops.nodeCoord(node_tag)[1] + _offset,
+                    ops.nodeCoord(node_tag)[2] + _offset,
                     f'{node_tag}', va='bottom', ha='left', color='blue')
 
     for i, ele_tag in enumerate(ele_tags):
@@ -571,30 +587,52 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
-
-            ecrd = np.zeros((nen, 3))
-
+            ecrd_nodes = np.zeros((nen, 3))
             for i, ele_node_tag in enumerate(ele_node_tags):
-                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+                ecrd_nodes[i, :] = ops.nodeCoord(ele_node_tag)
+
+            ecrd_eles = np.copy(ecrd_nodes)
+
+            ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+            nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+            if np.any(nz_offsets):
+                # modify ecrd_eles
+                ecrd_eles[:, 0] += ele_offsets[[0, 3]]
+                ecrd_eles[:, 1] += ele_offsets[[1, 4]]
+                ecrd_eles[:, 2] += ele_offsets[[2, 5]]
+                ax.plot([ecrd_nodes[0, 0], ecrd_eles[0, 0]],
+                        [ecrd_nodes[0, 1], ecrd_eles[0, 1]],
+                        [ecrd_nodes[0, 2], ecrd_eles[0, 2]],
+                        **fmt_model_rigid_offset)
+                ax.plot([ecrd_nodes[1, 0], ecrd_eles[1, 0]],
+                        [ecrd_nodes[1, 1], ecrd_eles[1, 1]],
+                        [ecrd_nodes[1, 2], ecrd_eles[1, 2]],
+                        **fmt_model_rigid_offset)
+
+            else:
+                pass
+
+            ax.plot(ecrd_eles[:, 0],
+                    ecrd_eles[:, 1],
+                    ecrd_eles[:, 2], **fmt_model)
+            # ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_model)
 
             # location of label
-            xt = sum(ecrd[:, 0]) / nen
-            yt = sum(ecrd[:, 1]) / nen
-            zt = sum(ecrd[:, 2]) / nen
-
-            ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_model)
+            xt = sum(ecrd_eles[:, 0]) / nen
+            yt = sum(ecrd_eles[:, 1]) / nen
+            zt = sum(ecrd_eles[:, 2]) / nen
 
             # fixme: placement of node_tag labels
             if element_labels:
-                if ecrd[1, 0] - ecrd[0, 0] == 0:
+                if ecrd_eles[1, 0] - ecrd_eles[0, 0] == 0:
                     va = 'center'
                     ha = 'left'
                     offset_x, offset_y, offset_z = _offset, 0.0, 0.0
-                elif ecrd[1, 1] - ecrd[0, 1] == 0:
+                elif ecrd_eles[1, 1] - ecrd_eles[0, 1] == 0:
                     va = 'bottom'
                     ha = 'center'
                     offset_x, offset_y, offset_z = 0.0, _offset, 0.0
-                elif ecrd[1, 2] - ecrd[0, 2] == 0:
+                elif ecrd_eles[1, 2] - ecrd_eles[0, 2] == 0:
                     va = 'bottom'
                     ha = 'center'
                     offset_x, offset_y, offset_z = 0.0, 0.0, _offset
@@ -603,7 +641,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
                     ha = 'left'
                     offset_x, offset_y, offset_z = 0.03, 0.03, 0.03
 
-                ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
+                ax.text(xt + offset_x,
+                        yt + offset_y,
+                        zt + offset_z, f'{ele_tag}',
                         va=va, ha=ha, color='red')
 
             if local_axes:
@@ -612,8 +652,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
                 yloc = ops.eleResponse(ele_tag, 'ylocal')
                 zloc = ops.eleResponse(ele_tag, 'zlocal')
                 g = np.vstack((xloc, yloc, zloc))
-                L = bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
-                alen = 0.1*L
+                L = bar_length(ecrd_eles)
+                alen = 0.1 * L
 
                 # plot local axis directional vectors: workaround quiver = arrow
                 ax.quiver(xt, yt, zt, g[0, 0], g[0, 1], g[0, 2], color='g',
@@ -626,19 +666,17 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
             if gauss_points:
                 Lgps = ops.eleResponse(ele_tag, 'integrationPoints')
                 for Lgpi in Lgps:
-                    dxi = (ecrd[1, 0] - ecrd[0, 0]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
-                    dyi = (ecrd[1, 1] - ecrd[0, 1]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
-                    dzi = (ecrd[1, 2] - ecrd[0, 2]) * Lgpi / bar_length(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2])
-                    ax.plot(ecrd[0, 0] + dxi, ecrd[0, 1] + dyi, ecrd[0, 2] + dzi, **fmt_gauss_points)
+                    dxi = (ecrd_eles[1, 0] - ecrd_eles[0, 0]) * Lgpi / bar_length(ecrd_eles)
+                    dyi = (ecrd_eles[1, 1] - ecrd_eles[0, 1]) * Lgpi / bar_length(ecrd_eles)
+                    dzi = (ecrd_eles[1, 2] - ecrd_eles[0, 2]) * Lgpi / bar_length(ecrd_eles)
+                    ax.plot(ecrd_eles[0, 0] + dxi, ecrd_eles[0, 1] + dyi, ecrd_eles[0, 2] + dzi, **fmt_gauss_points)
 
         elif (ele_classtag == EleClassTag.truss
               or ele_classtag == EleClassTag.trussSection):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
-
             ecrd = np.zeros((nen, 3))
-
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
@@ -972,9 +1010,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
             nodes_geo_order = np.array([0, 8, 1, 9, 2, 10, 3, 11, 0], dtype=int)  # bottom face nodes loop
 
             ele_node_tags = ops.eleNodes(ele_tag)
-
             ecrd = np.zeros((nen, 3))
-
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
@@ -1236,29 +1272,40 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
         ele_class_tag = ops.getEleClassTags(ele_tag)[0]
 
-        if (ele_class_tag == EleClassTag.ElasticBeam2d or
-            ele_class_tag == EleClassTag.ForceBeamColumn2d or
-            ele_class_tag == EleClassTag.DispBeamColumn2d):
+        if (ele_class_tag == EleClassTag.ElasticBeam2d
+            or ele_class_tag == EleClassTag.ForceBeamColumn2d
+            or ele_class_tag == EleClassTag.DispBeamColumn2d
+            or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
+            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
 
             # by default no element load
             ele_load_data = []
             if ele_tag in Ew:
                 ele_load_data = Ew[ele_tag]
 
-            nd1, nd2 = ops.eleNodes(ele_tag)
+            nen = 2
+            ele_node_tags = ops.eleNodes(ele_tag)
+            ecrd_nodes = np.zeros((nen, 2))
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd_nodes[i, :] = ops.nodeCoord(ele_node_tag)
 
-            # element x, y coordinates
-            ex = np.array([ops.nodeCoord(nd1)[0],
-                           ops.nodeCoord(nd2)[0]])
-            ey = np.array([ops.nodeCoord(nd1)[1],
-                           ops.nodeCoord(nd2)[1]])
+            ecrd_eles = np.copy(ecrd_nodes)
+
+            ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+            nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+            if np.any(nz_offsets):
+                # modify ecrd_eles
+                ecrd_eles[:, 0] += ele_offsets[[0, 3]]
+                ecrd_eles[:, 1] += ele_offsets[[1, 4]]
+            else:
+                pass
 
             # step 1: first plot model itself
-            # ax.plot(ex, ey, 'k-', solid_capstyle='round', solid_joinstyle='round',
+            # ax.plot(ecrd[:, 0], ecrd[:, 1], 'k-', solid_capstyle='round', solid_joinstyle='round',
             #         dash_capstyle='butt', dash_joinstyle='round')
 
             # step 2
-            Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
+            Lxy = ecrd_eles[1, :] - ecrd_eles[0, :]
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
@@ -1286,10 +1333,10 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                     s = sfac * np.sign(Pt)
 
                     s_0 = np.zeros(2)
-                    # s_0 = [ex[0], ey[0]]
+                    # s_0 = [ecrd[0, 0], ecrd[0, 1]]
 
-                    s_0[0] = ex[0] + a * cosa
-                    s_0[1] = ey[0] + a * cosb
+                    s_0[0] = ecrd_eles[0, 0] + a * cosa
+                    s_0[1] = ecrd_eles[0, 1] + a * cosb
 
                     s_p = np.copy(s_0)
 
@@ -1299,15 +1346,15 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
                     # plot arrows
                     ax.arrow(s_0[0], s_0[1],
-                             s_p[0]-s_0[0], s_p[1]-s_0[1],
+                             s_p[0] - s_0[0], s_p[1] - s_0[1],
                              # width = 0.01,
                              head_starts_at_zero=True,  # default False
                              # overhang=0.2,
                              # lw = 1,
-                             head_width=0.1*sfac, head_length=0.2*sfac,
+                             head_width=0.1 * sfac, head_length=0.2 * sfac,
                              fc='b', ec='b',
                              length_includes_head=False, shape='full')
-                    ax.text(sum(ex)/2, sum(ey)/2, f'{abs(Pt)}', color='b')
+                    ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, f'{abs(Pt)}', color='b')
                     # ax.annotate("", xy=(s_p[0], s_p[1]),
                     #             xytext=(s_0[0], s_0[1]),
                     #             arrowprops=dict(arrowstyle="->", color='r', lw=3,
@@ -1325,7 +1372,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
                         # s = sfac * Wy * one
                         s = sfac * one * np.sign(Wy)
-                        # plt.text(sum(ex)/2, sum(ey)/2, f'q = {Wy}, {Wx}', va='bottom', ha='center', color='r')
+                        # plt.text(sum(ecrd[:, 0])/2, sum(ecrd[:, 1])/2, f'q = {Wy}, {Wx}', va='bottom', ha='center', color='r')
 
                     # triangular or trapezoidal element load
                     elif n_ele_load_data == 7:
@@ -1352,7 +1399,8 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                     s = s * sfac
 
                     s_0 = np.zeros((nep, 2))
-                    s_0[0, :] = [ex[0], ey[0]]
+                    # s_0[0, :] = [ex[0], ey[0]]
+                    s_0[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
 
                     s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
                     s_0[1:, 1] = s_0[0, 1] + xl[1:] * cosb
@@ -1381,7 +1429,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
                     # connecting beg-end line - redundant ?
                     # plt.plot([s_p[0, 0], s_p[-1, 0]],[s_p[0, 1], s_p[-1, 1]], 'r')
-                    ax.text(sum(ex)/2, sum(ey)/2, text_string, va='bottom', ha='center', color='r')
+                    ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, text_string, va='bottom', ha='center', color='r')
 
                     if Wx != 0:
                         # for i, xl in enumerate(xl2[:-1]):
@@ -1401,7 +1449,8 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
 
                     if waa != 0 or wab != 0:
                         sa = np.zeros((5, 2))
-                        sa[0, :] = [ex[0], ey[0]]
+                        # sa[0, :] = [ex[0], ey[0]]
+                        sa[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
                         sa[1:, 0] = sa[0, 0] + xl3[1:] * cosa
                         sa[1:, 1] = sa[0, 1] + xl3[1:] * cosb
 
@@ -1671,18 +1720,14 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
 
     for i, ele_tag in enumerate(ele_tags):
 
-        nd1, nd2 = ops.eleNodes(ele_tag)
-
-        # element x, y coordinates
-        ex = np.array([ops.nodeCoord(nd1)[0],
-                       ops.nodeCoord(nd2)[0]])
-        ey = np.array([ops.nodeCoord(nd1)[1],
-                       ops.nodeCoord(nd2)[1]])
-        ez = np.array([ops.nodeCoord(nd1)[2],
-                       ops.nodeCoord(nd2)[2]])
+        ele_node_tags = ops.eleNodes(ele_tag)
+        nen = 2
+        ecrd = np.zeros((nen, 3))
+        for i, ele_node_tag in enumerate(ele_node_tags):
+            ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
         # mesh outline
-        ax.plot(ex, ey, ez, 'k--', solid_capstyle='round',
+        ax.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], 'k--', solid_capstyle='round',
                 solid_joinstyle='round', dash_capstyle='butt',
                 dash_joinstyle='round')
 
@@ -1692,7 +1737,7 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
         zloc = ops.eleResponse(ele_tag, 'zlocal')
         g = np.vstack((xloc, yloc, zloc))
 
-        G, L = rot_transf_3d(ex, ey, ez, g)
+        G, L = rot_transf_3d(ecrd, g)
 
         # by default empty
         shape_type, shape_args = ['circ', [0.]]
@@ -1701,11 +1746,11 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
 
         if shape_type == 'rect' or shape_type == 'I':
             if shape_type == 'rect':
-                verts = _plot_extruded_shapes_3d_rect(ex, ey, ez, g,
+                verts = _plot_extruded_shapes_3d_rect(ecrd, g,
                                                       shape_args)
 
             elif shape_type == 'I':
-                verts = _plot_extruded_shapes_3d_double_T(ex, ey, ez, g,
+                verts = _plot_extruded_shapes_3d_double_T(ecrd, g,
                                                           shape_args)
 
             # plot 3d sides
@@ -1713,13 +1758,13 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
                                                  edgecolors='k', alpha=.25))
 
         elif shape_type == 'circ':
-            X, Y, Z = _plot_extruded_shapes_3d_circ(ex, ey, ez, g,
+            X, Y, Z = _plot_extruded_shapes_3d_circ(ecrd, g,
                                                     shape_args)
             ax.plot_surface(X, Y, Z, linewidths=0.4, edgecolors='k',
                             alpha=.25)
 
         # common for all members
-        Xm, Ym, Zm = sum(ex)/2, sum(ey)/2, sum(ez)/2
+        Xm, Ym, Zm = sum(ecrd[:, 0]) / 2, sum(ecrd[:, 1]) / 2, sum(ecrd[:, 2]) / 2
 
         alen = 0.1*L
 
@@ -1736,52 +1781,52 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
                        np.ptp(ax.get_zlim3d())))
 
 
-def _plot_extruded_shapes_3d_double_T(ex, ey, ez, g, shape_args):
+def _plot_extruded_shapes_3d_double_T(ecrd, g, shape_args):
     bf, d, tw, tf = shape_args
 
-    za, zb = tw/2, bf/2
-    ya, yb = d/2 - tf, d/2
+    za, zb = tw / 2, bf / 2
+    ya, yb = d / 2 - tf, d / 2
 
-    g10a, g11a, g12a = g[1, 0]*ya, g[1, 1]*ya, g[1, 2]*ya
-    g10b, g11b, g12b = g[1, 0]*yb, g[1, 1]*yb, g[1, 2]*yb
+    g10a, g11a, g12a = g[1, 0] * ya, g[1, 1] * ya, g[1, 2] * ya
+    g10b, g11b, g12b = g[1, 0] * yb, g[1, 1] * yb, g[1, 2] * yb
 
-    g20a, g21a, g22a = g[2, 0]*za, g[2, 1]*za, g[2, 2]*za
-    g20b, g21b, g22b = g[2, 0]*zb, g[2, 1]*zb, g[2, 2]*zb
+    g20a, g21a, g22a = g[2, 0] * za, g[2, 1] * za, g[2, 2] * za
+    g20b, g21b, g22b = g[2, 0] * zb, g[2, 1] * zb, g[2, 2] * zb
 
     pts = np.zeros((24, 3))
     # beg node (I) cross-section vertices crds, counter-clockwise order
-    pts[0] = [ex[0] - g10b - g20b, ey[0] - g11b - g21b, ez[0] - g12b - g22b]
-    pts[1] = [ex[0] - g10a - g20b, ey[0] - g11a - g21b, ez[0] - g12a - g22b]
-    pts[2] = [ex[0] - g10a - g20a, ey[0] - g11a - g21a, ez[0] - g12a - g22a]
+    pts[0] = [ecrd[0, 0] - g10b - g20b, ecrd[0, 1] - g11b - g21b, ecrd[0, 2] - g12b - g22b]
+    pts[1] = [ecrd[0, 0] - g10a - g20b, ecrd[0, 1] - g11a - g21b, ecrd[0, 2] - g12a - g22b]
+    pts[2] = [ecrd[0, 0] - g10a - g20a, ecrd[0, 1] - g11a - g21a, ecrd[0, 2] - g12a - g22a]
 
-    pts[3] = [ex[0] + g10a - g20a, ey[0] + g11a - g21a, ez[0] + g12a - g22a]
-    pts[4] = [ex[0] + g10a - g20b, ey[0] + g11a - g21b, ez[0] + g12a - g22b]
-    pts[5] = [ex[0] + g10b - g20b, ey[0] + g11b - g21b, ez[0] + g12b - g22b]
+    pts[3] = [ecrd[0, 0] + g10a - g20a, ecrd[0, 1] + g11a - g21a, ecrd[0, 2] + g12a - g22a]
+    pts[4] = [ecrd[0, 0] + g10a - g20b, ecrd[0, 1] + g11a - g21b, ecrd[0, 2] + g12a - g22b]
+    pts[5] = [ecrd[0, 0] + g10b - g20b, ecrd[0, 1] + g11b - g21b, ecrd[0, 2] + g12b - g22b]
 
-    pts[6] = [ex[0] + g10b + g20b, ey[0] + g11b + g21b, ez[0] + g12b + g22b]
-    pts[7] = [ex[0] + g10a + g20b, ey[0] + g11a + g21b, ez[0] + g12a + g22b]
-    pts[8] = [ex[0] + g10a + g20a, ey[0] + g11a + g21a, ez[0] + g12a + g22a]
+    pts[6] = [ecrd[0, 0] + g10b + g20b, ecrd[0, 1] + g11b + g21b, ecrd[0, 2] + g12b + g22b]
+    pts[7] = [ecrd[0, 0] + g10a + g20b, ecrd[0, 1] + g11a + g21b, ecrd[0, 2] + g12a + g22b]
+    pts[8] = [ecrd[0, 0] + g10a + g20a, ecrd[0, 1] + g11a + g21a, ecrd[0, 2] + g12a + g22a]
 
-    pts[9] = [ex[0] - g10a + g20a, ey[0] - g11a + g21a, ez[0] - g12a + g22a]
-    pts[10] = [ex[0] - g10a + g20b, ey[0] - g11a + g21b, ez[0] - g12a + g22b]
-    pts[11] = [ex[0] - g10b + g20b, ey[0] - g11b + g21b, ez[0] - g12b + g22b]
+    pts[9] = [ecrd[0, 0] - g10a + g20a, ecrd[0, 1] - g11a + g21a, ecrd[0, 2] - g12a + g22a]
+    pts[10] = [ecrd[0, 0] - g10a + g20b, ecrd[0, 1] - g11a + g21b, ecrd[0, 2] - g12a + g22b]
+    pts[11] = [ecrd[0, 0] - g10b + g20b, ecrd[0, 1] - g11b + g21b, ecrd[0, 2] - g12b + g22b]
 
     # end node (J) cross-section vertices
-    pts[12] = [ex[1] - g10b - g20b, ey[1] - g11b - g21b, ez[1] - g12b - g22b]
-    pts[13] = [ex[1] - g10a - g20b, ey[1] - g11a - g21b, ez[1] - g12a - g22b]
-    pts[14] = [ex[1] - g10a - g20a, ey[1] - g11a - g21a, ez[1] - g12a - g22a]
+    pts[12] = [ecrd[1, 0] - g10b - g20b, ecrd[1, 1] - g11b - g21b, ecrd[1, 2] - g12b - g22b]
+    pts[13] = [ecrd[1, 0] - g10a - g20b, ecrd[1, 1] - g11a - g21b, ecrd[1, 2] - g12a - g22b]
+    pts[14] = [ecrd[1, 0] - g10a - g20a, ecrd[1, 1] - g11a - g21a, ecrd[1, 2] - g12a - g22a]
 
-    pts[15] = [ex[1] + g10a - g20a, ey[1] + g11a - g21a, ez[1] + g12a - g22a]
-    pts[16] = [ex[1] + g10a - g20b, ey[1] + g11a - g21b, ez[1] + g12a - g22b]
-    pts[17] = [ex[1] + g10b - g20b, ey[1] + g11b - g21b, ez[1] + g12b - g22b]
+    pts[15] = [ecrd[1, 0] + g10a - g20a, ecrd[1, 1] + g11a - g21a, ecrd[1, 2] + g12a - g22a]
+    pts[16] = [ecrd[1, 0] + g10a - g20b, ecrd[1, 1] + g11a - g21b, ecrd[1, 2] + g12a - g22b]
+    pts[17] = [ecrd[1, 0] + g10b - g20b, ecrd[1, 1] + g11b - g21b, ecrd[1, 2] + g12b - g22b]
 
-    pts[18] = [ex[1] + g10b + g20b, ey[1] + g11b + g21b, ez[1] + g12b + g22b]
-    pts[19] = [ex[1] + g10a + g20b, ey[1] + g11a + g21b, ez[1] + g12a + g22b]
-    pts[20] = [ex[1] + g10a + g20a, ey[1] + g11a + g21a, ez[1] + g12a + g22a]
+    pts[18] = [ecrd[1, 0] + g10b + g20b, ecrd[1, 1] + g11b + g21b, ecrd[1, 2] + g12b + g22b]
+    pts[19] = [ecrd[1, 0] + g10a + g20b, ecrd[1, 1] + g11a + g21b, ecrd[1, 2] + g12a + g22b]
+    pts[20] = [ecrd[1, 0] + g10a + g20a, ecrd[1, 1] + g11a + g21a, ecrd[1, 2] + g12a + g22a]
 
-    pts[21] = [ex[1] - g10a + g20a, ey[1] - g11a + g21a, ez[1] - g12a + g22a]
-    pts[22] = [ex[1] - g10a + g20b, ey[1] - g11a + g21b, ez[1] - g12a + g22b]
-    pts[23] = [ex[1] - g10b + g20b, ey[1] - g11b + g21b, ez[1] - g12b + g22b]
+    pts[21] = [ecrd[1, 0] - g10a + g20a, ecrd[1, 1] - g11a + g21a, ecrd[1, 2] - g12a + g22a]
+    pts[22] = [ecrd[1, 0] - g10a + g20b, ecrd[1, 1] - g11a + g21b, ecrd[1, 2] - g12a + g22b]
+    pts[23] = [ecrd[1, 0] - g10b + g20b, ecrd[1, 1] - g11b + g21b, ecrd[1, 2] - g12b + g22b]
 
     # list of sides
     verts = [[pts[0], pts[1], pts[2], pts[3], pts[4], pts[5], pts[6],
@@ -1804,25 +1849,25 @@ def _plot_extruded_shapes_3d_double_T(ex, ey, ez, g, shape_args):
     return verts
 
 
-def _plot_extruded_shapes_3d_rect(ex, ey, ez, g, shape_args):
+def _plot_extruded_shapes_3d_rect(ecrd, g, shape_args):
     b, d = shape_args
-    b2, d2 = b/2, d/2
+    b2, d2 = b / 2, d / 2
 
-    g10, g11, g12 = g[1, 0]*d2, g[1, 1]*d2, g[1, 2]*d2
-    g20, g21, g22 = g[2, 0]*b2, g[2, 1]*b2, g[2, 2]*b2
+    g10, g11, g12 = g[1, 0] * d2, g[1, 1] * d2, g[1, 2] * d2
+    g20, g21, g22 = g[2, 0] * b2, g[2, 1] * b2, g[2, 2] * b2
 
     pts = np.zeros((8, 3))
     # beg node cross-section vertices
     # collected i-beg, j-end node coordinates, counter-clockwise order
-    pts[0] = [ex[0] - g10 - g20, ey[0] - g11 - g21, ez[0] - g12 - g22]
-    pts[1] = [ex[0] + g10 - g20, ey[0] + g11 - g21, ez[0] + g12 - g22]
-    pts[2] = [ex[0] + g10 + g20, ey[0] + g11 + g21, ez[0] + g12 + g22]
-    pts[3] = [ex[0] - g10 + g20, ey[0] - g11 + g21, ez[0] - g12 + g22]
+    pts[0] = [ecrd[0, 0] - g10 - g20, ecrd[0, 1] - g11 - g21, ecrd[0, 2] - g12 - g22]
+    pts[1] = [ecrd[0, 0] + g10 - g20, ecrd[0, 1] + g11 - g21, ecrd[0, 2] + g12 - g22]
+    pts[2] = [ecrd[0, 0] + g10 + g20, ecrd[0, 1] + g11 + g21, ecrd[0, 2] + g12 + g22]
+    pts[3] = [ecrd[0, 0] - g10 + g20, ecrd[0, 1] - g11 + g21, ecrd[0, 2] - g12 + g22]
     # end node cross-section vertices
-    pts[4] = [ex[1] - g10 - g20, ey[1] - g11 - g21, ez[1] - g12 - g22]
-    pts[5] = [ex[1] + g10 - g20, ey[1] + g11 - g21, ez[1] + g12 - g22]
-    pts[6] = [ex[1] + g10 + g20, ey[1] + g11 + g21, ez[1] + g12 + g22]
-    pts[7] = [ex[1] - g10 + g20, ey[1] - g11 + g21, ez[1] - g12 + g22]
+    pts[4] = [ecrd[1, 0] - g10 - g20, ecrd[1, 1] - g11 - g21, ecrd[1, 2] - g12 - g22]
+    pts[5] = [ecrd[1, 0] + g10 - g20, ecrd[1, 1] + g11 - g21, ecrd[1, 2] + g12 - g22]
+    pts[6] = [ecrd[1, 0] + g10 + g20, ecrd[1, 1] + g11 + g21, ecrd[1, 2] + g12 + g22]
+    pts[7] = [ecrd[1, 0] - g10 + g20, ecrd[1, 1] - g11 + g21, ecrd[1, 2] - g12 + g22]
 
     # list of 4-node sides
     verts = [[pts[0], pts[1], pts[2], pts[3]],  # beg
@@ -1835,37 +1880,37 @@ def _plot_extruded_shapes_3d_rect(ex, ey, ez, g, shape_args):
     return verts
 
 
-def _plot_extruded_shapes_3d_circ(ex, ey, ez, g, shape_args):
+def _plot_extruded_shapes_3d_circ(ecrd, g, shape_args):
     d = shape_args[0]
-    r = d/2
+    r = d / 2
 
-    Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
+    Lxyz = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxyz @ Lxyz)
 
     xl = np.linspace(0, L, 3)  # subdivde member length
     alpha = np.linspace(0, 2 * np.pi, 10)  # subdivide circle
 
     xl, alpha = np.meshgrid(xl, alpha)
-    X = (ex[0] + g[0, 0] * xl + r * np.sin(alpha) * g[1, 0]
+    X = (ecrd[0, 0] + g[0, 0] * xl + r * np.sin(alpha) * g[1, 0]
          + r * np.cos(alpha) * g[2, 0])
-    Y = (ey[0] + g[0, 1] * xl + r * np.sin(alpha) * g[1, 1]
+    Y = (ecrd[0, 1] + g[0, 1] * xl + r * np.sin(alpha) * g[1, 1]
          + r * np.cos(alpha) * g[2, 1])
-    Z = (ez[0] + g[0, 2] * xl + r * np.sin(alpha) * g[1, 2]
+    Z = (ecrd[0, 2] + g[0, 2] * xl + r * np.sin(alpha) * g[1, 2]
          + r * np.cos(alpha) * g[2, 2])
 
     return X, Y, Z
 
 
-def bar_length(ex, ey, ez=np.array([0., 0.])):
-    Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
+def bar_length(ecrd):
+    Lxyz = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxyz @ Lxyz)
 
     return L
 
 
-def rot_transf_2d(ex, ey):
+def rot_transf_2d(ecrd):
 
-    Lxy = np.array([ex[1] - ex[0], ey[1] - ey[0]])
+    Lxy = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxy @ Lxy)
     cosa, cosb = Lxy / L
     G = np.array([[cosa, cosb, 0., 0., 0., 0.],
@@ -1878,9 +1923,9 @@ def rot_transf_2d(ex, ey):
     return G, L, cosa, cosb
 
 
-def rot_transf_3d(ex, ey, ez, g):
+def rot_transf_3d(ecrd, g):
 
-    Lxyz = np.array([ex[1] - ex[0], ey[1] - ey[0], ez[1] - ez[0]])
+    Lxyz = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxyz @ Lxyz)
 
     z = np.zeros((3, 3))

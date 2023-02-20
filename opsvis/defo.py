@@ -68,9 +68,10 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
               or ele_classtag == EleClassTag.CoupledZeroLength
               or ele_classtag == EleClassTag.TwoNodeLink):
 
-            nen, ndf = 2, 3
+            # nen, ndf = 2, 3
+            ndf = ops.getNDF()[0]
             ele_node_tags = ops.eleNodes(ele_tag)
-            # nd1, nd2 = ops.eleNodes(ele_tag)
+            nen = len(ele_node_tags)
 
             ecrd = np.zeros((nen, 2))
             ed = np.zeros((nen, ndf))
@@ -80,10 +81,10 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             if modeNo:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:3]
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
             else:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:3]
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)
 
 
             # fix for a sdof system, or specify sfac explicitly
@@ -109,11 +110,16 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             ele_node_tags = ops.eleNodes(ele_tag)
 
-            ecrd = np.zeros((nen, 2))
+            ecrd_nodes = np.zeros((nen, 2))
+            # ecrd = np.zeros((nen, 2))
             ed = np.zeros((nen, ndf))
 
             for i, ele_node_tag in enumerate(ele_node_tags):
-                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+                # ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+                ecrd_nodes[i, :] = ops.nodeCoord(ele_node_tag)
+
+            ecrd_eles0 = np.copy(ecrd_nodes)
+            ecrd_eles = np.copy(ecrd_nodes)
 
             if modeNo:
                 for i, ele_node_tag in enumerate(ele_node_tags):
@@ -122,23 +128,58 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 for i, ele_node_tag in enumerate(ele_node_tags):
                     ed[i, :] = ops.nodeDisp(ele_node_tag)
 
+            ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+            nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+            if np.any(nz_offsets):
+                Lro_l, fi0_l = ro_length_init_rot(ele_offsets[0], ele_offsets[1])
+                Lro_r, fi0_r = ro_length_init_rot(ele_offsets[3], ele_offsets[4])
+                # ed[0, 2] - rotations
+                x_ro_rot_l, y_ro_rot_l = ro_rotated(Lro_l, fi0_l, ed[0, 2]*sfac)
+                x_ro_rot_r, y_ro_rot_r = ro_rotated(Lro_r, fi0_r, ed[1, 2]*sfac)
+                # modify ecrd_eles
+                ecrd_eles0[:, 0] += ele_offsets[[0, 3]]
+                ecrd_eles0[:, 1] += ele_offsets[[1, 4]]
+                ecrd_eles[:, 0] += [x_ro_rot_l, x_ro_rot_r]
+                ecrd_eles[:, 1] += [y_ro_rot_l, y_ro_rot_r]
+            else:
+                pass
+
             if unDefoFlag:
-                ax.plot(ecrd[:, 0], ecrd[:, 1], **fmt_undefo)
+                ax.plot(ecrd_eles0[:, 0], ecrd_eles0[:, 1], **fmt_undefo)
 
             # interpolated displacement field
             if interpFlag:
-                xcdi, ycdi = beam_defo_interp_2d(ecrd[:, 0], ecrd[:, 1],
-                                                 ed.flatten(), sfac, nep)
+                xcdi, ycdi = beam_defo_interp_2d(ecrd_eles, ed.flatten(), sfac, nep)
             else:
-                xcdi, ycdi = beam_disp_ends(ecrd[:, 0], ecrd[:, 1],
-                                            ed.flatten(), sfac)
+                xcdi, ycdi = beam_disp_ends(ecrd_eles, ed.flatten(), sfac)
 
             ax.plot(xcdi, ycdi, **fmt_defo)
 
+            # plot rigid offsets
+            # xdi, ydi = beam_disp_ro(ecrd_eles[:, 0],
+            #                         ecrd_eles[:, 1],
+            #                         ed.flatten(), sfac)
+            ax.plot([ecrd_nodes[0, 0] + sfac * ed[0, 0],
+                     ecrd_eles[0, 0] + sfac * ed[0, 0]] ,
+                    [ecrd_nodes[0, 1] + sfac * ed[0, 1],
+                     ecrd_eles[0, 1] + sfac * ed[0, 1]] ,
+                    **fmt_model_rigid_offset)
+            ax.plot([ecrd_nodes[1, 0] + sfac * ed[1, 0],
+                     ecrd_eles[1, 0] + sfac * ed[1, 0]] ,
+                    [ecrd_nodes[1, 1] + sfac * ed[1, 1],
+                     ecrd_eles[1, 1] + sfac * ed[1, 1]],
+                    **fmt_model_rigid_offset)
+
+            # ax.plot([ecrd_nodes[1, 0], ecrd_eles[1, 0]],
+            #         [ecrd_nodes[1, 1], ecrd_eles[1, 1]],
+            #         **fmt_model_rigid_offset)
+
+            # ax.plot([ecrd[0, 0] + sfac*ed[0], ecrd[1, 0] + sfac*ed[3]],
+            #         [ecrd[0, 1] + sfac*ed[1], ecrd[1, 1] + sfac*ed[4]], **fmt_model_rigid_offset)
+
             # translations of ends
             if endDispFlag:
-                xdi, ydi = beam_disp_ends(ecrd[:, 0], ecrd[:, 1],
-                                          ed.flatten(), sfac)
+                xdi, ydi = beam_disp_ends(ecrd_eles, ed.flatten(), sfac)
                 ax.plot(xdi, ydi, **fmt_nodes)
 
         # 2d triangular (tri31) elements plot_defo
@@ -342,6 +383,39 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
     return ax
 
 
+def ro_length_init_rot(xo, yo):
+    """Return lenght and initial rotation of the rigid offset in 2d
+    """
+
+    L = np.sqrt(xo**2. + yo**2.)
+    # fi0 = np.arctan(yo/xo)
+    fi0 = np.arctan2(yo, xo)
+
+    return L, fi0
+
+
+# def ro_length_init_rot_3d(xo, yo, zo, along='x'):
+#     """Return lenght and initial rotation of the rigid offset in 3d
+#     """
+#     L = np.sqrt(xo**2. + yo**2. + zo**2.)
+#     if along == 'x':
+#         fi0 = np.arctan2(zo, xo)
+#     elif along == 'y':
+#         fi0 = np.arctan2(zo, xo)
+#     elif along == 'z':
+#         fi0 = 0.
+
+
+#     return L, fi0
+
+
+def ro_rotated(L, fi0, fi):
+    dfi = fi0 + fi
+    x = L * np.cos(dfi)
+    y = L * np.sin(dfi)
+    return x, y
+
+
 def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                        fmt_defo_faces, fmt_undefo_faces,
                        interpFlag, endDispFlag, fmt_nodes, az_el,
@@ -412,13 +486,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             if interpFlag:
                 # xcd, ycd, zcd = beam_defo_interp_3d(ex, ey, ez, g,
                 #                                     ed, sfac, nep)
-                xcd, ycd, zcd = beam_defo_interp_3d(ecrd[:, 0], ecrd[:, 1],
-                                                    ecrd[:, 2], g,
+                xcd, ycd, zcd = beam_defo_interp_3d(ecrd, g,
                                                     ed.flatten(), sfac, nep)
             else:
-                xcd, ycd, zcd = beam_disp_ends3d(ecrd[:, 0], ecrd[:, 1],
-                                                 ecrd[:, 2],
-                                                 ed.flatten(), sfac)
+                xcd, ycd, zcd = beam_disp_ends3d(ecrd, ed.flatten(), sfac)
 
             ax.plot(xcd, ycd, zcd, **fmt_defo)
             ax.set_xlabel('X')
@@ -427,9 +498,7 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             # translations of ends
             if endDispFlag:
-                xd, yd, zd = beam_disp_ends3d(ecrd[:, 0], ecrd[:, 1],
-                                              ecrd[:, 2],
-                                              ed.flatten(), sfac)
+                xd, yd, zd = beam_disp_ends3d(ecrd, ed.flatten(), sfac)
                 ax.plot(xd, yd, zd, **fmt_nodes)
 
         elif (ele_classtag == EleClassTag.truss
@@ -468,9 +537,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
               or ele_classtag == EleClassTag.CoupledZeroLength
               or ele_classtag == EleClassTag.TwoNodeLink):
 
-            nen, ndf = 2, 6
-
+            # nen, ndf = 2, 6
+            ndf = ops.getNDF()[0]
             ele_node_tags = ops.eleNodes(ele_tag)
+            nen = len(ele_node_tags)
 
             ecrd = np.zeros((nen, 3))
             ed = np.zeros((nen, ndf))
@@ -480,10 +550,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             if modeNo:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:6]
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
             else:
                 for i, ele_node_tag in enumerate(ele_node_tags):
-                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:6]
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)
 
             if unDefoFlag:
                 plt.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_undefo)
@@ -994,25 +1064,38 @@ def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
         print(f'\nWarning! ndim: {ndim} not supported yet.')
 
 
-def beam_disp_ends(ex, ey, d, sfac):
+def beam_disp_ends(ecrd, d, sfac):
     """
     Calculate the element deformation at element ends only.
     """
 
     #  indx: 0   1   2   3   4   5
     # Ed = ux1 uy1 ur1 ux2 uy2 ur2
-    exd = np.array([ex[0] + sfac*d[0], ex[1] + sfac*d[3]])
-    eyd = np.array([ey[0] + sfac*d[1], ey[1] + sfac*d[4]])
+    exd = np.array([ecrd[0, 0] + sfac * d[0], ecrd[1, 0] + sfac * d[3]])
+    eyd = np.array([ecrd[0, 1] + sfac * d[1], ecrd[1, 1] + sfac * d[4]])
 
     return exd, eyd
 
 
-def beam_defo_interp_2d(ex, ey, u, sfac, nep=17):
+def beam_disp_ro(ecrd, d, sfac):
+    """
+    Calculate the element deformation at element ends only.
+    """
+
+    #  indx: 0   1   2   3   4   5
+    # Ed = ux1 uy1 ur1 ux2 uy2 ur2
+    exd = np.array([ecrd[0, 0] + sfac * d[0], ecrd[1, 0] + sfac * d[3]])
+    eyd = np.array([ecrd[0, 1] + sfac * d[1], ecrd[1, 1] + sfac * d[4]])
+
+    return exd, eyd
+
+
+def beam_defo_interp_2d(ecrd, u, sfac, nep=17):
     """
     Interpolate element displacements at nep points.
 
     Parametrs:
-    ex, ey : element x, y coordinates,
+    ecrd : element x, y coordinates (2 x ndm),
     u : element nodal displacements
     sfac : scale factor for deformation plot
     nep : number of evaluation points (including end nodes)
@@ -1023,7 +1106,7 @@ def beam_defo_interp_2d(ex, ey, u, sfac, nep=17):
     """
 
 
-    G, L, cosa, cosb = opsvmodel.rot_transf_2d(ex, ey)
+    G, L, cosa, cosb = opsvmodel.rot_transf_2d(ecrd)
 
     u_l = G @ u
 
@@ -1051,8 +1134,8 @@ def beam_defo_interp_2d(ex, ey, u, sfac, nep=17):
     # discretize element coordinates
     # first  row = X + [0 dx 2dx ... 4-dx 4]
     # second row = Y + [0 dy 2dy ... 3-dy 3]
-    xy_c = np.vstack((np.linspace(ex[0], ex[1], num=nep),
-                      np.linspace(ey[0], ey[1], num=nep)))
+    xy_c = np.vstack((np.linspace(ecrd[0, 0], ecrd[1, 0], num=nep),
+                      np.linspace(ecrd[0, 1], ecrd[1, 1], num=nep)))
 
     # Continuous x, y displacement coordinates
     crd_xc = xy_c[0, :] + sfac * u_xyc[0, :]
@@ -1063,33 +1146,31 @@ def beam_defo_interp_2d(ex, ey, u, sfac, nep=17):
     return crd_xc, crd_yc
 
 
-def beam_disp_ends3d(ex, ey, ez, d, sfac):
+def beam_disp_ends3d(ecrd, d, sfac):
     """
     Calculate the element deformation at element ends only.
     """
 
     #  indx: 0   1   2   3   4   5   6   7   8   9  10  11
     # Ed = ux1 uy1 uz1 rx1 ry1 rz1 ux2 uy2 uz2 rx2 ry2 rz2
-    exd = np.array([ex[0] + sfac*d[0], ex[1] + sfac*d[6]])
-    eyd = np.array([ey[0] + sfac*d[1], ey[1] + sfac*d[7]])
-    ezd = np.array([ez[0] + sfac*d[2], ez[1] + sfac*d[8]])
+    exd = np.array([ecrd[0, 0] + sfac * d[0], ecrd[1, 0] + sfac * d[6]])
+    eyd = np.array([ecrd[0, 1] + sfac * d[1], ecrd[1, 1] + sfac * d[7]])
+    ezd = np.array([ecrd[0, 2] + sfac * d[2], ecrd[1, 2] + sfac * d[8]])
 
     return exd, eyd, ezd
 
 
-def beam_defo_interp_3d(ex, ey, ez, g, u, sfac, nep=17):
+def beam_defo_interp_3d(ecrd, g, u, sfac, nep=17):
     """
     3d beam version of beam_defo_interp_2d.
     """
-    G, L = opsvmodel.rot_transf_3d(ex, ey, ez, g)
+    G, L = opsvmodel.rot_transf_3d(ecrd, g)
     ul = G @ u
 
-    _, crd_yc = beam_defo_interp_2d(np.array([0., L]),
-                                    np.array([0., 0.]),
+    _, crd_yc = beam_defo_interp_2d(np.array([[0., 0.], [L, 0.]]),
                                     np.array([ul[0], ul[1], ul[5], ul[6],
                                               ul[7], ul[11]]), sfac, nep)
-    crd_xc, crd_zc = beam_defo_interp_2d(np.array([0., L]),
-                                         np.array([0., 0.]),
+    crd_xc, crd_zc = beam_defo_interp_2d(np.array([[0., 0.], [L, 0.]]),
                                          np.array([ul[0], ul[2], -ul[4], ul[6],
                                                    ul[8], -ul[10]]), sfac, nep)
 
@@ -1100,9 +1181,9 @@ def beam_defo_interp_3d(ex, ey, ez, g, u, sfac, nep=17):
 
     u_xyzc = np.transpose(g) @ crd_xyzc
 
-    xyz_c = np.vstack((np.linspace(ex[0], ex[1], num=nep),
-                       np.linspace(ey[0], ey[1], num=nep),
-                       np.linspace(ez[0], ez[1], num=nep)))
+    xyz_c = np.vstack((np.linspace(ecrd[0, 0], ecrd[1, 0], num=nep),
+                       np.linspace(ecrd[0, 1], ecrd[1, 1], num=nep),
+                       np.linspace(ecrd[0, 2], ecrd[1, 2], num=nep)))
 
     crd_xc = xyz_c[0, :] + u_xyzc[0, :]
     crd_yc = xyz_c[1, :] + u_xyzc[1, :]
@@ -1140,11 +1221,9 @@ def max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep):
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ed[i, :] = ops.nodeDisp(ele_node_tag)
 
-            ex = ecrd[:, 0]
-            ey = ecrd[:, 1]
             u = ed.flatten()
 
-            G, L, *_ = opsvmodel.rot_transf_2d(ex, ey)
+            G, L, *_ = opsvmodel.rot_transf_2d(ecrd)
 
             u_l = G @ u
 
@@ -1193,12 +1272,9 @@ def max_u_abs_from_beam_defo_interp_3d(max_u_abs, nep):
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ed[i, :] = ops.nodeDisp(ele_node_tag)
 
-            ex = ecrd[:, 0]
-            ey = ecrd[:, 1]
-            ez = ecrd[:, 2]
             u = ed.flatten()
 
-            G, L = opsvmodel.rot_transf_3d(ex, ey, ez, g)
+            G, L = opsvmodel.rot_transf_3d(ecrd, g)
             ul = G @ u
 
             N_t = beam_transverse_shape_functions(L, nep)

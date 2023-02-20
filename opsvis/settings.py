@@ -11,6 +11,7 @@ fmt_model = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': 
 fmt_model_truss = {'color': 'green', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': 'o', 'markersize': 6, 'markerfacecolor': 'white'}
 fmt_model_nodes_only = {'color': 'blue', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '.', 'markersize': 6}
 fmt_model_loads = {'color': 'black', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '', 'markersize': 1}
+fmt_model_rigid_offset = {'color': 'black', 'linestyle': 'solid', 'linewidth': 3.2, 'marker': '.', 'markersize': 1}
 
 fmt_model_joint2d = {'color': 'black', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '', 'markersize': 1}
 fmt_model_secforce = {'color': 'black', 'linestyle': 'solid', 'linewidth': 1.2, 'marker': '', 'markersize': 1}
@@ -66,6 +67,7 @@ class EleClassTag:
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
     TimoshenkoBeamColumn2d = 63
+    TimoshenkoBeamColumn3d = 631
     ElasticTimoshenkoBeam2d = 145
     ElasticTimoshenkoBeam3d = 146
     tri3n = 33

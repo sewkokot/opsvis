@@ -12,13 +12,13 @@ from settings import *
 import model
 
 
-def section_force_distribution_2d(ex, ey, pl, nep=2,
+def section_force_distribution_2d(ecrd, pl, nep=2,
                                   ele_load_data=[['-beamUniform', 0., 0.]]):
     """
     Calculate section forces (N, V, M) for an elastic 2D Euler-Bernoulli beam.
 
     Input:
-    ex, ey - x, y element coordinates in global system
+    ecrd - x, y element coordinates in global system
     nep - number of evaluation points, by default (2) at element ends
     ele_load_list - list of transverse and longitudinal element load
       syntax: [ele_load_type, Wy, Wx]
@@ -39,7 +39,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
     """
 
 
-    Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
+    Lxy = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxy @ Lxy)
 
     nlf = len(pl)
@@ -202,7 +202,7 @@ def section_force_distribution_2d(ex, ey, pl, nep=2,
     return s, xl, nep
 
 
-def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
+def section_force_distribution_3d(ecrd, pl, nep=2,
                                   ele_load_data=[['-beamUniform', 0., 0., 0.]]):
     """
     Calculate section forces (N, Vy, Vz, T, My, Mz) for an elastic 3d beam.
@@ -212,12 +212,8 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
     Parameters
     ----------
 
-    ex : list
-        x element coordinates
-    ey : list
-        y element coordinates
-    ez : list
-        z element coordinates
+    ecrd : ndarray
+        x, y, z element coordinates
     pl : ndarray
     nep : int
         number of evaluation points, by default (2) at element ends
@@ -253,7 +249,7 @@ def section_force_distribution_3d(ex, ey, ez, pl, nep=2,
     """
 
 
-    Lxyz = np.array([ex[1]-ex[0], ey[1]-ey[0], ez[1]-ez[0]])
+    Lxyz = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxyz @ Lxyz)
 
     nlf = len(pl)
@@ -449,15 +445,12 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
 
-            nd1, nd2 = ops.eleNodes(ele_tag)
+            ele_node_tags = ops.eleNodes(ele_tag)
+            ecrd = np.zeros((2, 2))
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
-            # element x, y coordinates
-            ex = np.array([ops.nodeCoord(nd1)[0],
-                           ops.nodeCoord(nd2)[0]])
-            ey = np.array([ops.nodeCoord(nd1)[1],
-                           ops.nodeCoord(nd2)[1]])
-
-            Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
+            Lxy = ecrd[1, :] - ecrd[0, :]
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
@@ -487,7 +480,25 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                     eload_data = Ew[ele_tag]
 
                 pl = ops.eleResponse(ele_tag, 'localForces')
-                s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, eload_data)
+
+                # rigid offsets for 2d
+                ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+                nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+                if np.any(nz_offsets):
+                    # modify ecrd_eles
+                    # ex += ele_offsets[[0, 3]]
+                    # ey += ele_offsets[[1, 4]]
+                    ecrd[:, 0] += ele_offsets[[0, 3]]
+                    ecrd[:, 1] += ele_offsets[[1, 4]]
+                    # modify the following due to rigid offsets
+                    # Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])
+                    Lxy = ecrd[1, :] - ecrd[0, :]
+                    L = np.sqrt(Lxy @ Lxy)
+                    cosa, cosb = Lxy / L
+                else:
+                    pass
+
+                s_all, xl, nep = section_force_distribution_2d(ecrd, pl, nep, eload_data)
 
                 if sf_type == 'N' or sf_type == 'axial':
                     ss = s_all[:, 0]
@@ -509,7 +520,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 s = ss * sfac
 
                 s_0 = np.zeros((nep, 2))
-                s_0[0, :] = [ex[0], ey[0]]
+                s_0[0, :] = [ecrd[0, 0], ecrd[0, 1]]
 
                 s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
                 s_0[1:, 1] = s_0[0, 1] + xl[1:] * cosb
@@ -579,7 +590,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                              fmt_secforce1=fmt_secforce1,
                              fmt_secforce2=fmt_secforce2,
-                             ref_vert_lines=True, end_max_values=True,
+                             ref_vert_lines=True,
+                             end_max_values=True,
                              dir_plt=0, node_supports=True, ax=False,
                              alt_model_plot=1):
     """Display section forces diagram of a 3d beam column model.
@@ -635,9 +647,6 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
     (trapezoidal) uniform element load, and 'beamPoint' element load.
     """
 
-    maxVal, minVal = -np.inf, np.inf
-    ele_tags = ops.getEleTags()
-
     # If supplied axis can be plotted to
     if hasattr(ax, "name") and (ax.name == "3d"):
         pass
@@ -665,133 +674,186 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                               node_supports=False,
                               fmt_model_truss=fmt_model_secforce,
                               truss_node_offset=0, ax=ax)
-    elif alt_model_plot == 2:
-        # element
-        plt.plot(ex, ey, ez, "k-",
-                 solid_capstyle="round",
-                 solid_joinstyle="round",
-                 dash_capstyle="butt",
-                 dash_joinstyle="round")
     else:
         pass
+
+    fmt_secforce1_orig = fmt_secforce1
+    maxVal, minVal = -np.inf, np.inf
+    ele_tags = ops.getEleTags()
 
     Ew = model.get_Ew_data_from_ops_domain_3d()
 
     for i, ele_tag in enumerate(ele_tags):
 
-        # by default no element load
-        eload_data = [['-beamUniform', 0., 0., 0.]]
-        if ele_tag in Ew:
-            eload_data = Ew[ele_tag]
+        ele_class_tag = ops.getEleClassTags(ele_tag)[0]
 
-        nd1, nd2 = ops.eleNodes(ele_tag)
+        if (ele_class_tag == EleClassTag.ElasticBeam3d
+            or ele_class_tag == EleClassTag.ForceBeamColumn3d
+            or ele_class_tag == EleClassTag.DispBeamColumn3d
+            or ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]
+            or ele_class_tag == EleClassTag.TimoshenkoBeamColumn3d
+            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam3d):
 
-        # element x, y coordinates
-        ex = np.array([ops.nodeCoord(nd1)[0],
-                       ops.nodeCoord(nd2)[0]])
-        ey = np.array([ops.nodeCoord(nd1)[1],
-                       ops.nodeCoord(nd2)[1]])
-        ez = np.array([ops.nodeCoord(nd1)[2],
-                       ops.nodeCoord(nd2)[2]])
+            ele_node_tags = ops.eleNodes(ele_tag)
+            ecrd = np.zeros((2, 3))
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
-        # eo = Eo[i, :]
-        xloc = ops.eleResponse(ele_tag, 'xlocal')
-        yloc = ops.eleResponse(ele_tag, 'ylocal')
-        zloc = ops.eleResponse(ele_tag, 'zlocal')
-        g = np.vstack((xloc, yloc, zloc))
+            # eo = Eo[i, :]
+            xloc = ops.eleResponse(ele_tag, 'xlocal')
+            yloc = ops.eleResponse(ele_tag, 'ylocal')
+            zloc = ops.eleResponse(ele_tag, 'zlocal')
+            g = np.vstack((xloc, yloc, zloc))
 
-        G, _ = model.rot_transf_3d(ex, ey, ez, g)
+            # rigid offsets for 3d
+            ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))
+            nz_offsets = np.nonzero(ele_offsets)[0]  # tuple of arrays
+            if np.any(nz_offsets):
+                # modify ecrd_eles
+                # ex += ele_offsets[[0, 3]]
+                # ey += ele_offsets[[1, 4]]
+                ecrd[:, 0] += ele_offsets[[0, 3]]
+                ecrd[:, 1] += ele_offsets[[1, 4]]
+                ecrd[:, 2] += ele_offsets[[2, 5]]
+                # modify the following due to rigid offsets
+            else:
+                pass
 
-        g = G[:3, :3]
+            G, _ = model.rot_transf_3d(ecrd, g)
 
-        pl = ops.eleResponse(ele_tag, 'localForces')
+            g = G[:3, :3]
 
-        s_all, xl, nep = section_force_distribution_3d(ex, ey, ez, pl, nep,
-                                                       eload_data)
+            if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
+                if sf_type == 'N' or sf_type == 'axial':
+                    axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
+                    ss = -axial_force * np.ones(nep)
+                    xl = np.linspace(0., L, nep)
 
-        # 1:'y' 2:'z'
-        if sf_type == 'N':
-            ss = s_all[:, 0]
-            dir_plt_tmp = 1
-        elif sf_type == 'Vy':
-            ss = s_all[:, 1]
-            dir_plt_tmp = 1
-        elif sf_type == 'Vz':
-            ss = s_all[:, 2]
-            dir_plt_tmp = 2
-        elif sf_type == 'T':
-            ss = s_all[:, 3]
-            dir_plt_tmp = 1
-        elif sf_type == 'My':
-            ss = s_all[:, 4]
-            dir_plt_tmp = 2
-        elif sf_type == 'Mz':
-            ss = s_all[:, 5]
-            dir_plt_tmp = 1
+                    if axial_force > 0:
+                        va = 'top'
+                        fmt_color = 'b'
+                        fmt_secforce1 = fmt_secforce_tension
+                    else:
+                        va = 'bottom'
+                        fmt_color = 'r'
+                        fmt_secforce1 = fmt_secforce_compression
 
-        if dir_plt == 0:
-            dir_plt = dir_plt_tmp
+                else:  # for sf_type = 'V' or 'M'
+                    xl = np.linspace(0., L, 2)
+                    ss = np.zeros(2)
 
-        # minVal = min(minVal, np.min(ss))
-        # maxVal = max(maxVal, np.max(ss))
-        minVal, minVal_ind = np.amin(ss), np.argmin(ss)
-        maxVal, maxVal_ind = np.amax(ss), np.argmax(ss)
+            else:
+                # by default no element load
+                eload_data = [['-beamUniform', 0., 0., 0.]]
+                if ele_tag in Ew:
+                    eload_data = Ew[ele_tag]
 
-        s = ss * sfac
+                pl = ops.eleResponse(ele_tag, 'localForces')
 
-        # FIXME - can be simplified
-        s_0 = np.zeros((nep, 3))
-        s_0[0, :] = [ex[0], ey[0], ez[0]]
+                s_all, xl, nep = section_force_distribution_3d(ecrd, pl, nep,
+                                                               eload_data)
 
-        s_0[1:, 0] = s_0[0, 0] + xl[1:] * g[0, 0]
-        s_0[1:, 1] = s_0[0, 1] + xl[1:] * g[0, 1]
-        s_0[1:, 2] = s_0[0, 2] + xl[1:] * g[0, 2]
+                # 1:'y' 2:'z'
+                if sf_type == 'N':
+                    ss = s_all[:, 0]
+                    dir_plt_tmp = 1
+                elif sf_type == 'Vy':
+                    ss = s_all[:, 1]
+                    dir_plt_tmp = 1
+                elif sf_type == 'Vz':
+                    ss = s_all[:, 2]
+                    dir_plt_tmp = 2
+                elif sf_type == 'T':
+                    ss = s_all[:, 3]
+                    dir_plt_tmp = 1
+                elif sf_type == 'My':
+                    ss = s_all[:, 4]
+                    dir_plt_tmp = 2
+                elif sf_type == 'Mz':
+                    ss = s_all[:, 5]
+                    dir_plt_tmp = 1
 
-        s_p = np.copy(s_0)
+                if dir_plt == 0:
+                    dir_plt = dir_plt_tmp
 
-        # positive M are opposite to N and V
-        # if sf_type == 'Mz' or sf_type == 'My':
-        if sf_type == 'Mz':
-            s *= -1.
 
-        s_p[:, 0] += s * g[dir_plt, 0]
-        s_p[:, 1] += s * g[dir_plt, 1]
-        s_p[:, 2] += s * g[dir_plt, 2]
+            if len(ss) == 2:  # for truss with zero shear force and moment
+                pass
 
-        # plt.axis('equal')
+            else:
+                # minVal = min(minVal, np.min(ss))
+                # maxVal = max(maxVal, np.max(ss))
+                minVal, minVal_ind = np.amin(ss), np.argmin(ss)
+                maxVal, maxVal_ind = np.amax(ss), np.argmax(ss)
 
-        # section force curve
-        ax.plot(s_p[:, 0], s_p[:, 1], s_p[:, 2], **fmt_secforce1)
+                s = ss * sfac
 
-        # reference perpendicular lines
-        if ref_vert_lines:
-            for i in np.arange(nep):
-                ax.plot([s_0[i, 0], s_p[i, 0]],
-                        [s_0[i, 1], s_p[i, 1]],
-                        [s_0[i, 2], s_p[i, 2]], **fmt_secforce2)
-        else:
-            ax.plot([s_0[0, 0], s_p[0, 0]],
-                    [s_0[0, 1], s_p[0, 1]],
-                    [s_0[0, 2], s_p[0, 2]], **fmt_secforce2)
-            ax.plot([s_0[-1, 0], s_p[-1, 0]],
-                    [s_0[-1, 1], s_p[-1, 1]],
-                    [s_0[-1, 2], s_p[-1, 2]], **fmt_secforce2)
+                # FIXME - can be simplified
+                s_0 = np.zeros((nep, 3))
+                s_0[0, :] = [ecrd[0, 0], ecrd[0, 1], ecrd[0, 2]]
 
-        if end_max_values:
-            ha = 'left'
-            va = 'bottom'
-            ax.text(s_p[0, 0], s_p[0, 1], s_p[0, 2],
-                    f'{ss[0]:.5g}', va=va, ha=ha)
-            ax.text(s_p[-1, 0], s_p[-1, 1], s_p[-1, 2],
-                    f'{ss[-1]:.5g}', va=va, ha=ha)
+                s_0[1:, 0] = s_0[0, 0] + xl[1:] * g[0, 0]
+                s_0[1:, 1] = s_0[0, 1] + xl[1:] * g[0, 1]
+                s_0[1:, 2] = s_0[0, 2] + xl[1:] * g[0, 2]
 
-            if minVal_ind != 0 or minVal_ind != nep - 1:
-                ax.text(s_p[minVal_ind, 0], s_p[minVal_ind, 1], s_p[minVal_ind, 2],
-                        f'{ss[minVal_ind]:.5g}', va=va, ha=ha)
+                s_p = np.copy(s_0)
 
-            if maxVal_ind != 0 or maxVal_ind != nep - 1:
-                ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
-                        f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
+                # positive M are opposite to N and V
+                # if sf_type == 'Mz' or sf_type == 'My':
+                if sf_type == 'Mz':
+                    s *= -1.
+
+                s_p[:, 0] += s * g[dir_plt, 0]
+                s_p[:, 1] += s * g[dir_plt, 1]
+                s_p[:, 2] += s * g[dir_plt, 2]
+
+                # plt.axis('equal')
+
+                # section force curve
+                ax.plot(s_p[:, 0], s_p[:, 1], s_p[:, 2], **fmt_secforce1)
+                fmt_secforce1 = fmt_secforce1_orig
+
+                # reference perpendicular lines
+                if ref_vert_lines:
+                    for i in np.arange(nep):
+                        ax.plot([s_0[i, 0], s_p[i, 0]],
+                                [s_0[i, 1], s_p[i, 1]],
+                                [s_0[i, 2], s_p[i, 2]], **fmt_secforce2)
+                else:
+                    ax.plot([s_0[0, 0], s_p[0, 0]],
+                            [s_0[0, 1], s_p[0, 1]],
+                            [s_0[0, 2], s_p[0, 2]], **fmt_secforce2)
+                    ax.plot([s_0[-1, 0], s_p[-1, 0]],
+                            [s_0[-1, 1], s_p[-1, 1]],
+                            [s_0[-1, 2], s_p[-1, 2]], **fmt_secforce2)
+
+            # dodane FIXME
+            if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
+                ha = 'center'
+                va = 'bottom'
+                if sf_type == 'N' or sf_type == 'axial':
+                    ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1], s_p[int(nep / 2), 2],
+                            f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
+                # else:
+                #     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
+                #             '0.0', va=va, ha=ha)
+
+            else:
+                if end_max_values:
+                    ha = 'left'
+                    va = 'bottom'
+                    ax.text(s_p[0, 0], s_p[0, 1], s_p[0, 2],
+                            f'{ss[0]:.5g}', va=va, ha=ha)
+                    ax.text(s_p[-1, 0], s_p[-1, 1], s_p[-1, 2],
+                            f'{ss[-1]:.5g}', va=va, ha=ha)
+
+                    if minVal_ind != 0 or minVal_ind != nep - 1:
+                        ax.text(s_p[minVal_ind, 0], s_p[minVal_ind, 1], s_p[minVal_ind, 2],
+                                f'{ss[minVal_ind]:.5g}', va=va, ha=ha)
+
+                    if maxVal_ind != 0 or maxVal_ind != nep - 1:
+                        ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
+                                f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
 
     if node_supports:
         node_tags = ops.getNodeTags()
