@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
-from settings import *
+from .settings import *
 
 
 def stress_2d_ele_tags_only(ele_tags):

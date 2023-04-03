@@ -8,8 +8,8 @@ from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
 import matplotlib.tri as tri
 
-from settings import *
-import model
+from .settings import *
+from . import model
 
 
 def section_force_distribution_2d(ecrd, pl, nep=2,

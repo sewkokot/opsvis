@@ -6,11 +6,11 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib.collections import PolyCollection
 from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
+from matplotlib.path import Path
 import matplotlib.tri as tri
 
-from settings import *
-from defo import *
-from matplotlib.path import Path
+from .settings import *
+from .defo import *
 
 
 def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
