@@ -72,8 +72,9 @@ def _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             ax.set_ylim(ylim[0], ylim[1])
 
             nel = len(ele_tags)
-            Ex = np.zeros((nel, 2))
-            Ey = np.zeros((nel, 2))
+            Ecrd = np.zeros((nel, 2, 2))
+            # Ex = np.zeros((nel, 2))
+            # Ey = np.zeros((nel, 2))
             Ed = np.zeros((nel, 6))
             # time vector for one cycle (period)
             n_cycles = 10
@@ -82,20 +83,20 @@ def _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             lines = []
 
             for i, ele_tag in enumerate(ele_tags):
-                nd1, nd2 = ops.eleNodes(ele_tag)
+                ele_node_tags = ops.eleNodes(ele_tag)
 
+                for j, ele_node_tag in enumerate(ele_node_tags):
+                    Ecrd[i, j, :] = ops.nodeCoord(ele_node_tag)
+
+                # nd1, nd2 = ops.eleNodes(ele_tag)
                 # element x, y coordinates
-                Ex[i, :] = np.array([ops.nodeCoord(nd1)[0],
-                                     ops.nodeCoord(nd2)[0]])
-                Ey[i, :] = np.array([ops.nodeCoord(nd1)[1],
-                                     ops.nodeCoord(nd2)[1]])
+                # Ex[i, :] = np.array([ops.nodeCoord(nd1)[0],
+                #                      ops.nodeCoord(nd2)[0]])
+                # Ey[i, :] = np.array([ops.nodeCoord(nd1)[1],
+                #                      ops.nodeCoord(nd2)[1]])
 
-                Ed[i, :] = np.array([ops.nodeEigenvector(nd1, modeNo)[0],
-                                     ops.nodeEigenvector(nd1, modeNo)[1],
-                                     ops.nodeEigenvector(nd1, modeNo)[2],
-                                     ops.nodeEigenvector(nd2, modeNo)[0],
-                                     ops.nodeEigenvector(nd2, modeNo)[1],
-                                     ops.nodeEigenvector(nd2, modeNo)[2]])
+                Ed[i, :] = np.array([*ops.nodeEigenvector(ele_node_tags[0], modeNo)[:3],
+                                     *ops.nodeEigenvector(ele_node_tags[1], modeNo)[:3]])
 
                 lines.append(ax.plot([], [], **fmt_defo)[0])
 
@@ -108,14 +109,13 @@ def _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 for j, ele_tag in enumerate(ele_tags):
 
                     if interpFlag:
-                        xcdi, ycdi = beam_defo_interp_2d(Ex[j, :],
-                                                         Ey[j, :],
+                        xcdi, ycdi = beam_defo_interp_2d(Ecrd[j, :, :],
                                                          Ed[j, :],
                                                          sfac*np.sin(t[i]),
                                                          nep)
                         lines[j].set_data(xcdi, ycdi)
                     else:
-                        xdi, ydi = beam_disp_ends(Ex[j, :], Ey[j, :], Ed[j, :],
+                        xdi, ydi = beam_disp_ends(Ecrd[j, :, :], Ed[j, :],
                                                   sfac*np.cos(t[i]))
                         lines[j].set_data(xdi, ydi)
 
@@ -385,8 +385,9 @@ def _anim_defo_2d(Eds, timeV, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             # ax.grid()
 
             nel = len(ele_tags)
-            Ex = np.zeros((nel, 2))
-            Ey = np.zeros((nel, 2))
+            Ecrd = np.zeros((nel, 2, 2))
+            # Ex = np.zeros((nel, 2))
+            # Ey = np.zeros((nel, 2))
             # no of frames equal to time intervals
             n_frames, _, _ = np.shape(Eds)
             lines = []
@@ -394,13 +395,17 @@ def _anim_defo_2d(Eds, timeV, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             # time_text = ax.set_title('')  # does not work
             time_text = ax.text(.05, .95, '', transform=ax.transAxes)
             for i, ele_tag in enumerate(ele_tags):
-                nd1, nd2 = ops.eleNodes(ele_tag)
+                ele_node_tags = ops.eleNodes(ele_tag)
 
-                # element x, y coordinates
-                Ex[i, :] = np.array([ops.nodeCoord(nd1)[0],
-                                     ops.nodeCoord(nd2)[0]])
-                Ey[i, :] = np.array([ops.nodeCoord(nd1)[1],
-                                     ops.nodeCoord(nd2)[1]])
+                for j, ele_node_tag in enumerate(ele_node_tags):
+                    Ecrd[i, j, :] = ops.nodeCoord(ele_node_tag)
+                # nd1, nd2 = ops.eleNodes(ele_tag)
+
+                # # element x, y coordinates
+                # Ex[i, :] = np.array([ops.nodeCoord(nd1)[0],
+                #                      ops.nodeCoord(nd2)[0]])
+                # Ey[i, :] = np.array([ops.nodeCoord(nd1)[1],
+                #                      ops.nodeCoord(nd2)[1]])
 
                 lines.append(ax.plot([], [], **fmt_defo)[0])
 
@@ -416,14 +421,13 @@ def _anim_defo_2d(Eds, timeV, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 for j, ele_tag in enumerate(ele_tags):
 
                     if interpFlag:
-                        xcdi, ycdi = beam_defo_interp_2d(Ex[j, :],
-                                                         Ey[j, :],
+                        xcdi, ycdi = beam_defo_interp_2d(Ecrd[j, :, :],
                                                          Eds[i, j, :],
                                                          sfac,
                                                          nep)
                         lines[j].set_data(xcdi, ycdi)
                     else:
-                        xdi, ydi = beam_disp_ends(Ex[j, :], Ey[j, :],
+                        xdi, ydi = beam_disp_ends(Ecrd[j, :, :],
                                                   Eds[i, j, :], sfac)
                         lines[j].set_data(xdi, ydi)
 

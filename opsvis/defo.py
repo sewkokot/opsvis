@@ -394,19 +394,19 @@ def ro_length_init_rot(xo, yo):
     return L, fi0
 
 
-# def ro_length_init_rot_3d(xo, yo, zo, along='x'):
-#     """Return lenght and initial rotation of the rigid offset in 3d
-#     """
-#     L = np.sqrt(xo**2. + yo**2. + zo**2.)
-#     if along == 'x':
-#         fi0 = np.arctan2(zo, xo)
-#     elif along == 'y':
-#         fi0 = np.arctan2(zo, xo)
-#     elif along == 'z':
-#         fi0 = 0.
+def ro_length_init_rot_3d(xo, yo, zo, along='x'):
+    """Return lenght and initial rotation of the rigid offset in 3d
+    """
+    L = np.sqrt(xo**2. + yo**2. + zo**2.)
+    if along == 'x':
+        fi0 = np.arctan2(zo, xo)
+    elif along == 'y':
+        fi0 = np.arctan2(zo, xo)
+    elif along == 'z':
+        fi0 = 0.
 
 
-#     return L, fi0
+    return L, fi0
 
 
 def ro_rotated(L, fi0, fi):
