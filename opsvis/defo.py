@@ -8,8 +8,8 @@ from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
 import matplotlib.tri as tri
 
-from settings import *
-import model as opsvmodel
+from .settings import *
+from . import model as opsvmodel
 
 
 def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,

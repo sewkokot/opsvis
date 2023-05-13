@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon, Wedge
 
-from settings import *
+from .settings import *
 
 
 # plot_fiber_section is inspired by plotSection matlab function
