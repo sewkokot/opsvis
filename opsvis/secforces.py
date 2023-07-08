@@ -247,56 +247,76 @@ def section_force_distribution_3d(ecrd, pl, nep=2,
     Todo: add '-beamPoint' element load type
 
     """
-
-
     Lxyz = ecrd[1, :] - ecrd[0, :]
     L = np.sqrt(Lxyz @ Lxyz)
 
     nlf = len(pl)
     xl = np.linspace(0., L, nep)
-    one = np.ones(nep)
-
 
     for ele_load_data_i in ele_load_data:
         ele_load_type = ele_load_data_i[0]
 
-        if nlf == 1:  # trusses
-            N_1 = pl[0]
-        elif nlf == 12:  # plane frames
-            # N_1, V_1, M_1 = pl[0], pl[1], pl[2]
-            # N_1, V_1, M_1 = pl[:3]
+        if nlf == 1:
+            N1 = pl[0]
+        elif nlf == 12:
             N1, Vy1, Vz1, T1, My1, Mz1 = pl[:6]
         else:
             print('\nWarning! Not supported. Number of nodal forces: {nlf}')
 
         if ele_load_type == '-beamUniform':
-            # raise ValueError
-            # raise NameError
-
             n_ele_load_data = len(ele_load_data_i)
 
             if n_ele_load_data == 4:
-                # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
-                Wy, Wz, Wx = ele_load_data_i[1], ele_load_data_i[2], ele_load_data_i[3]
-                # Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
+                pass
 
-                # eload_type = ele_load_data[0]
+        elif ele_load_type == '-beamPoint':
+            Py, Pz, aL, Px = ele_load_data_i[1:5]
+            a = aL * L
+
+            if a in xl:
+                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
+                nep += 1
+
+            else:
+                xl = np.insert(xl, xl.searchsorted(a), a)
+                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
+                nep += 2
+
+    one = np.ones(nep)
+
+    N = -1. * (N1 * one)
+
+    if nlf == 12:
+        Vy = Vy1 * one
+        Vz = Vz1 * one
+        T = -T1 * one
+        Mz = -Mz1 * one + Vy1 * xl
+        My = -My1 * one - Vz1 * xl
+
+        s = np.column_stack((N, Vy, Vz, T, My, Mz))
+
+    elif nlf == 1:
+        s = np.column_stack((N))
+
+    for ele_load_data_i in ele_load_data:
+        ele_load_type = ele_load_data_i[0]
+
+        if ele_load_type == '-beamUniform':
+            n_ele_load_data = len(ele_load_data_i)
+
+            if n_ele_load_data == 4:
+                Wy, Wz, Wx = ele_load_data_i[1:4]
+
+                N = -1. * (Wx * xl)
 
                 if nlf == 12:
-                    s = np.zeros((nep, 3))
-                elif nlf == 1:
-                    s = np.zeros((nep, 1))
+                    Vy = Wy * xl
+                    Vz = Wz * xl
+                    T = np.zeros_like(one)
+                    Mz = 0.5 * Wy * xl**2
+                    My = -0.5 * Wz * xl**2
 
-                N = -1. * (N1 * one + Wx * xl)
-
-                if nlf == 12:
-                    Vy = Vy1 * one + Wy * xl
-                    Vz = Vz1 * one + Wz * xl
-                    T = -T1 * one
-                    Mz = -Mz1 * one + Vy1 * xl + 0.5 * Wy * xl**2
-                    My = -My1 * one - Vz1 * xl - 0.5 * Wz * xl**2
-
-                    s = np.column_stack((N, Vy, Vz, T, My, Mz))
+                    s += np.column_stack((N, Vy, Vz, T, My, Mz))
 
                 elif nlf == 1:
                     s += np.column_stack((N))
@@ -305,43 +325,16 @@ def section_force_distribution_3d(ecrd, pl, nep=2,
             Py, Pz, aL, Px = ele_load_data_i[1:5]
             a = aL * L
 
-            if a in xl:
-                # idx = xl.searchsorted(a)
-                # np.concatenate((xl[:idx], [a], xl[idx:]))
-                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
-                nep += 1
-
-            else:
-                # idx = xl.searchsorted(a)
-                # xl = np.concatenate((xl[:idx], [a], xl[idx:]))
-                # idx = xl.searchsorted(a+0.001)
-                # xl = np.concatenate((xl[:idx], [a+0.001], xl[idx:]))
-                xl = np.insert(xl, xl.searchsorted(a), a)
-                xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
-                nep += 2
-
-            if nlf == 12:
-                s = np.zeros((nep, 6))
-            elif nlf == 1:
-                s = np.zeros((nep, 1))
-
-
             indx = 0
             for x in np.nditer(xl):
                 if x <= a:
-                    s[indx, 0] = -1. * N1  # N
-                    s[indx, 1] = Vy1  # Vy
-                    s[indx, 2] = Vz1  # Vz
-                    s[indx, 3] = -T1  # T
-                    s[indx, 4] = -My1 - Vz1 * x  # My
-                    s[indx, 5] = -Mz1 + Vy1 * x  # Mz
+                    pass
                 elif x > a:
-                    s[indx, 0] = -1. * (N1 + Px)  # N
-                    s[indx, 1] = Vy1 + Py  # Vy
-                    s[indx, 2] = Vz1 + Pz  # Vz
-                    s[indx, 3] = -T1  # T
-                    s[indx, 4] = -My1 - Vz1 * x - Pz * (x-a)  # My
-                    s[indx, 5] = -Mz1 + Vy1 * x + Py * (x-a)  # Mz
+                    s[indx, 0] += -1. * Px
+                    s[indx, 1] += Py
+                    s[indx, 2] += Pz
+                    s[indx, 4] += - Pz * (x - a)
+                    s[indx, 5] += Py * (x - a)
 
                 indx += 1
 
