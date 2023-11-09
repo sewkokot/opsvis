@@ -579,7 +579,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
     for i, ele_tag in enumerate(ele_tags):
         ele_classtag = ops.getEleClassTags(ele_tag)[0]
         nen = np.shape(ops.eleNodes(ele_tag))[0]
-        print(ele_tag)
+
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
