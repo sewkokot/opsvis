@@ -88,6 +88,10 @@ class EleClassTag:
     ASDShellT3 = 204
     ShellMITC4 = 53
     ShellMITC9 = 54
+    ShellDKGQ = 156
+    ShellNLDKGQ = 157
+    ShellDKGT = 167
+    ShellNLDKGT = 168        
     Joint2D = 82
     Joint3D = 83
     MVLEM = 162
