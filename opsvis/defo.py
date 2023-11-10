@@ -571,9 +571,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
 
             ax.plot(xyz[:, 0], xyz[:, 1], xyz[:, 2], **fmt_defo_zeroLenght)
 
-        # plot: shell in 3d
-        elif (ele_classtag == EleClassTag.ShellMITC4 or
-              ele_classtag == EleClassTag.ASDShellQ4):
+        # plot: four node shell in 3d
+        elif ele_classtag in [EleClassTag.ShellMITC4,
+                               EleClassTag.ASDShellQ4,
+                               EleClassTag.ShellDKGQ,EleClassTag.ShellNLDKGQ]:
 
             # ndf is limited to translations x, y, z (no rotations)
             nen, ndf = 4, 3
@@ -606,6 +607,44 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             # z = ez+sfac*ed[[2, 5, 8, 11]]
 
             verts = [[xyz[0], xyz[1], xyz[2], xyz[3]]]
+            ax.add_collection3d(Poly3DCollection(verts, **fmt_defo_faces))
+
+            ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2], s=0)
+
+        # plot: three node shell in 3d
+        elif ele_classtag in [EleClassTag.ShellDKGT,EleClassTag.ShellNLDKGT]:
+
+            # ndf is limited to translations x, y, z (no rotations)
+            nen, ndf = 3, 3
+            nodes_geo_order = [0, 1, 2, 0]
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 3))
+            ed = np.zeros((nen, ndf))  # without rotations
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:3]
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:3]
+
+            if unDefoFlag:
+                ax.plot(ecrd[nodes_geo_order, 0],
+                        ecrd[nodes_geo_order, 1],
+                        ecrd[nodes_geo_order, 2],
+                        **fmt_undefo)
+
+            xyz = ecrd + sfac * ed
+            # x = ex+sfac*ed[[0, 3, 6, 9]]
+            # y = ey+sfac*ed[[1, 4, 7, 10]]
+            # z = ez+sfac*ed[[2, 5, 8, 11]]
+
+            verts = [[xyz[0], xyz[1], xyz[2]]]
             ax.add_collection3d(Poly3DCollection(verts, **fmt_defo_faces))
 
             ax.scatter(xyz[:, 0], xyz[:, 1], xyz[:, 2], s=0)

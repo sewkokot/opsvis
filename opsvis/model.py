@@ -838,6 +838,8 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
 
         elif (ele_classtag == EleClassTag.ShellMITC4 or
               ele_classtag == EleClassTag.ASDShellQ4 or
+              ele_classtag == EleClassTag.ShellNLDKGQ or
+              ele_classtag == EleClassTag.ShellDKGQ or                            
               ele_classtag == EleClassTag.quad4n):
 
             nen = 4
@@ -888,6 +890,57 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
             #                 ops.nodeCoord(node_tag)[2]+_offset,
             #                 f'{node_tag}', va='bottom', ha='left', color='blue')
 
+        elif (ele_classtag == EleClassTag.ShellNLDKGT or
+              ele_classtag == EleClassTag.ShellDKGT):
+            
+            nen = 3
+            nodes_geo_order = [0, 1, 2, 0]
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 3))
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            # location of label
+            xt = sum(ecrd[:, 0]) / nen
+            yt = sum(ecrd[:, 1]) / nen
+            zt = sum(ecrd[:, 2]) / nen
+
+            ax.plot(ecrd[nodes_geo_order, 0],
+                    ecrd[nodes_geo_order, 1],
+                    ecrd[nodes_geo_order, 2],
+                    **fmt_model)
+
+            if element_labels:
+                if ecrd[1, 0] - ecrd[0, 0] == 0:
+                    va = 'center'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = _offset, 0.0, 0.0
+                elif ecrd[1, 1] - ecrd[0, 1] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, _offset, 0.0
+                elif ecrd[1, 2] - ecrd[0, 2] == 0:
+                    va = 'bottom'
+                    ha = 'center'
+                    offset_x, offset_y, offset_z = 0.0, 0.0, _offset
+                else:
+                    va = 'bottom'
+                    ha = 'left'
+                    offset_x, offset_y, offset_z = 0.03, 0.03, 0.03
+
+                ax.text(xt+offset_x, yt+offset_y, zt+offset_z, f'{ele_tag}',
+                        va=va, ha=ha, color='red')
+
+            # if node_labels:
+            #     for node_tag in node_tags:
+            #         ax.text(ops.nodeCoord(node_tag)[0]+_offset,
+            #                 ops.nodeCoord(node_tag)[1]+_offset,
+            #                 ops.nodeCoord(node_tag)[2]+_offset,
+            #                 f'{node_tag}', va='bottom', ha='left', color='blue')
+            
         # mvlem 3d plot model
         elif (ele_classtag == EleClassTag.MVLEM_3D
               or ele_classtag == EleClassTag.SFI_MVLEM_3D):
