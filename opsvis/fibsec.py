@@ -126,7 +126,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                                        [Z[j, k+1], Y[j, k+1]],
                                        [Z[j+1, k+1], Y[j+1, k+1]],
                                        [Z[j+1, k], Y[j+1, k]]])
-                        poly = Polygon(zy, True, ec='k', fc=matcolor[matTag-1])
+                        poly = Polygon(zy, closed=True, ec='k', fc=matcolor[matTag-1])
                         ax.add_patch(poly)
 
             else:
