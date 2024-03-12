@@ -154,7 +154,7 @@ def section_force_distribution_2d(ecrd, pl, nep=2,
                     if wtx == 0:
                         xc = 0.
                     else:
-                        xc = a + xma * (wtx + 2*wta) / (3 * (wta + wtx))
+                        xc = xma * (wtx + 2*wta) / (3 * (wta + wtx))
 
                     Ax = 0.5 * (wtx+wta) * xma
                     # V1x = V_1 * x
@@ -168,7 +168,14 @@ def section_force_distribution_2d(ecrd, pl, nep=2,
                         s[indx, 2] += Axxc
 
                     elif x > b:
-                        pass
+                        xmb = x - b
+                        xc = bma * (wtb + 2 * wta) / (3 * (wta + wtb)) + xmb
+                        Ab = 0.5 * (wtb + wta) * bma
+                        Abxc = Ab * xc
+
+                        s[indx, 0] += -1. * ((wab - waa) * x)
+                        s[indx, 1] += Ab
+                        s[indx, 2] += Abxc
 
                     indx += 1
 
