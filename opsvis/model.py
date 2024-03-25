@@ -1421,7 +1421,7 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                     if n_ele_load_data == 3:
                         # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                         Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
-                        text_string = f'q = {abs(Wy)}, {abs(Wx)}'
+                        text_string = f'q = {abs(Wy):.3g}, {abs(Wx):.3g}'
 
                         # s = sfac * Wy * one
                         s = sfac * one * np.sign(Wy)
@@ -1496,9 +1496,16 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
                         #               fc='m', ec='m',
                         #               length_includes_head=True, shape='full')
 
-                        ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
-                                  s_0[1:, 0]-s_0[:-1, 0], s_0[1:, 1]-s_0[:-1, 1],
-                                  scale_units='xy', angles='xy', scale=0.8, color='m')
+                        if Wx < 0:
+                            ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
+                                      -1 * (s_0[1:, 0] - s_0[:-1, 0]),
+                                      -1 * (s_0[1:, 1] - s_0[:-1, 1]),
+                                      scale_units='xy', angles='xy', scale=0.8, color='m')
+                        else:
+                            ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
+                                      s_0[1:, 0] - s_0[:-1, 0],
+                                      s_0[1:, 1] - s_0[:-1, 1],
+                                      scale_units='xy', angles='xy', scale=0.8, color='m')
 
                     if waa != 0 or wab != 0:
                         sa = np.zeros((5, 2))
