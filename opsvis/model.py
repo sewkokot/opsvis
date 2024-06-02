@@ -1273,9 +1273,8 @@ def plot_supports_and_loads_2d(nep=17):
     print('\nWarning! plot_loads_2d() for showing loads')  # noqa: E501
 
 
-def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
-                  fig_lbrt=False, fmt_model_loads=fmt_model_loads,
-                  node_supports=True, truss_node_offset=0, ax=False):
+def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
+                  node_supports, truss_node_offset, ax):
     """Display the nodal and element loads applied to the 2d models.
 
     Args:
@@ -1602,9 +1601,8 @@ def plot_loads_2d(nep=17, sfac=False, fig_wi_he=False,
     return ax
 
 
-def plot_loads_3d(nep=11, sfac=False, fig_wi_he=False,
-                  fig_lbrt=False, fmt_model_loads=fmt_model_loads,
-                  node_supports=True, truss_node_offset=0, ax=False):
+def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
+                  node_supports, local_axes, ax):
     """Display the nodal and element loads applied to the 2d models.
 
     Args:
