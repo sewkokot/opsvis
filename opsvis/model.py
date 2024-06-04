@@ -1317,14 +1317,7 @@ def plot_supports_and_loads_2d(nep=17):
 def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                   node_supports, truss_node_offset, ax):
     """Display the nodal and element loads applied to the 2d models.
-
-    Args:
-        nep (int): number of arrows when displacing element distributed loads
-            (default: 17)
-
-        node_supports (bool): True - show the node support conditions.
-            Default: False.
-
+    This is a local function: use plot_load()
     """
 
     if not ax:
@@ -1643,16 +1636,9 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
 
 def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
-                  node_supports, local_axes, ax):
-    """Display the nodal and element loads applied to the 2d models.
-
-    Args:
-        nep (int): number of arrows when displacing element distributed loads
-            (default: 11)
-
-        node_supports (bool): True - show the node support conditions.
-            Default: False.
-
+                  node_supports, truss_node_offset, local_axes, ax):
+    """Display the nodal and element loads applied to the 3d models.
+    This is a local function: use plot_load()
     """
 
     if not ax:
@@ -1660,6 +1646,7 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             fig_wi, fig_he = fig_wi_he
 
             fig = plt.figure(figsize=(fig_wi / 2.54, fig_he / 2.54))
+            # fig.subplots_adjust(left=.08, bottom=.08, right=.985, top=.94)
 
         else:
             fig = plt.figure()
@@ -1672,10 +1659,9 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
     ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
                     node_supports=node_supports, local_axes=local_axes, ax=ax)
-    # ax.axis('equal')
 
     if not sfac:
-        ratio = 0.1
+        ratio = 0.15  # initial scale 10% of the max dimension
         min_x, max_x = ax.get_xlim()
         min_y, max_y = ax.get_ylim()
         min_z, max_z = ax.get_zlim()
@@ -1692,7 +1678,6 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
     waa = False
     wab = False
 
-    # get Ew data
     Ew = get_Ew_data_from_ops_domain_3d()
 
     for ele_tag in ele_tags:  # plot load 3d
@@ -1726,10 +1711,6 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             else:
                 pass
 
-            # step 1: first plot model itself
-            # ax.plot(ex, ey, 'k-', solid_capstyle='round', solid_joinstyle='round',
-            #         dash_capstyle='butt', dash_joinstyle='round')
-
             # step 2
             xloc = ops.eleResponse(ele_tag, 'xlocal')
             yloc = ops.eleResponse(ele_tag, 'ylocal')
@@ -1753,7 +1734,7 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                 # fixme uncomment when regular uniformLoad works! (1)
                 if ele_load_type == '-beamPoint':  # plot load 3d
                     Py, Pz, aL, Px = ele_load_data_i[1:5]
-                    Pyzx = [Px, Py, Pz]
+                    Pxyz = [Px, Py, Pz]
                     xa = aL * L
                     text_string = f'Pyzx:{Py},{Pz},{Px}'
 
@@ -1762,32 +1743,34 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s_0[1] = ecrd_eles[0, 1] + xa * g[0, 1]
                     s_0[2] = ecrd_eles[0, 2] + xa * g[0, 2]
 
-                    for k, Pi in enumerate(Pyzx):
+                    for k, Pi in enumerate(Pxyz):
 
                         if Pi != 0:
                             dir_plt = k
                             s = sfac * np.sign(Pi)
 
-                            s_p = np.copy(s_0)
+                            dx = s * g[dir_plt, 0]
+                            dy = s * g[dir_plt, 1]
+                            dz = s * g[dir_plt, 2]
 
-                            s_p[0] += s * g[dir_plt, 0]
-                            s_p[1] += s * g[dir_plt, 1]
-                            s_p[2] += s * g[dir_plt, 2]
-
-                            nn = 2
+                            # plot arrows: 3d beamPoint
+                            nn = 1.0  # additional scaling for arrows
                             ax.arrow3D(s_0[0], s_0[1], s_0[2],
-                                       nn * (s_p[0] - s_0[0]),
-                                       nn * (s_p[1] - s_0[1]),
-                                       nn * (s_p[2] - s_0[2]), mutation_scale=8)
+                                       nn * dx,
+                                       nn * dy,
+                                       nn * dz, mutation_scale=8,
+                                       ec='b', fc='c')
 
-                        ax.text(s_0[0], s_0[1], s_0[2],
-                                text_string, va='bottom', ha='center', color='r')
+                            ax.text(s_0[0] + dx, s_0[1] + dy, s_0[2] + dz,
+                                    f'{abs(Pi)}', va='bottom', ha='center', color='r')
 
                 elif ele_load_type == '-beamUniform':  # plot load 3d
 
                     n_ele_load_data = len(ele_load_data_i)
 
+                    # constant uniform element load
                     if n_ele_load_data == 4:
+                        # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                         Wy, Wz, Wx = ele_load_data_i[1:4]
                         text_string = f'q = {Wy}, {Wz}, {Wx}'
                         Wxyz = [Wx, Wy, Wz]
@@ -1795,7 +1778,6 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                         s_0 = np.zeros((nep, 3))
                         s_0[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1], ecrd_eles[0, 2]]
 
-                        # fixme
                         s_0[1:, 0] = s_0[0, 0] + xl[1:] * g[0, 0]
                         s_0[1:, 1] = s_0[0, 1] + xl[1:] * g[0, 1]
                         s_0[1:, 2] = s_0[0, 2] + xl[1:] * g[0, 2]
@@ -1805,31 +1787,28 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                             if Wi != 0:
 
                                 dir_plt = k
-                                s = sfac * one * np.sign(Wi)
-                                s = s * sfac
+                                s = sfac * one * np.sign(Wi)  # fixme: 2d is different
 
                                 s_p = np.copy(s_0)
 
-                                # s_p[:, 0] -= s * g[dir_plt, 0]
                                 s_p[:, 0] += s * g[dir_plt, 0]
                                 s_p[:, 1] += s * g[dir_plt, 1]
                                 s_p[:, 2] += s * g[dir_plt, 2]
 
                                 if k == 0:
-                                    nn = 1
+                                    nn = 0.3
                                 else:
-                                    nn = 4
+                                    nn = 1
 
+                                # plot arrows 3D beamUniform
                                 for i in np.arange(nep):
                                     ax.arrow3D(s_0[i, 0], s_0[i, 1], s_0[i, 2],
                                                nn * (s_p[i, 0] - s_0[i, 0]),
                                                nn * (s_p[i, 1] - s_0[i, 1]),
                                                nn * (s_p[i, 2] - s_0[i, 2]), mutation_scale=8)
 
-                            ax.text(sum(ecrd_eles[:, 0]) / 2,
-                                    sum(ecrd_eles[:, 1]) / 2,
-                                    sum(ecrd_eles[:, 2]) / 2,
-                                    text_string, va='bottom', ha='center', color='r')
+                                ax.text(s_p[5, 0], s_p[5, 1], s_p[5, 2],
+                                        f'{abs(Wi)}', va='bottom', ha='center', color='r')
 
                     # triangular or trapezoidal element load
                     elif n_ele_load_data == 7:
@@ -1853,55 +1832,6 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                             indx += 1
 
-                    # if Wx != 0:
-                    #     # for i, xl in enumerate(xl2[:-1]):
-                    #     #     plt.arrow(sa[i, 0], sa[i, 1],
-                    #     #               sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                    #     #               width = 0.01,
-                    #     #               # lw = 1,
-                    #     #               # head_width=0.02, head_length=0.05,
-                    #     #               # head_starts_at_zero=True,  # default False
-                    #     #               # overhang=0.5,
-                    #     #               fc='m', ec='m',
-                    #     #               length_includes_head=True, shape='full')
-
-                    #     ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
-                    #               s_0[1:, 0]-s_0[:-1, 0], s_0[1:, 1]-s_0[:-1, 1],
-                    #               scale_units='xy', angles='xy', scale=0.8, color='m')
-
-                    # if waa != 0 or wab != 0:
-                    #     sa = np.zeros((5, 2))
-                    #     sa[0, :] = [ex[0], ey[0]]
-                    #     sa[1:, 0] = sa[0, 0] + xl3[1:] * cosa
-                    #     sa[1:, 1] = sa[0, 1] + xl3[1:] * cosb
-
-                    #     for i, xl in enumerate(xl3[:-1]):
-                    #         ax.arrow(sa[i, 0], sa[i, 1],
-                    #                  sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                    #                  # width = 0.05,
-                    #                  width = 0.01*L,
-                    #                  # lw = 1,
-                    #                  # head_width=0.02, head_length=0.05,
-                    #                  # head_starts_at_zero=True,  # default False
-                    #                  # overhang=0.5,
-                    #                  fc='m', ec='m',
-                    #                  length_includes_head=True, shape='full')
-
-                    #     # ax.quiver(sa[:-1, 0], sa[:-1, 1],
-                    #     #            sa[1:, 0]-sa[:-1, 0], sa[1:, 1]-sa[:-1, 1],
-                    #     #            scale_units='xy', angles='xy', scale=0.8, color='g')
-
-                    #     # ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
-                    #     #          fmt_secforce, solid_capstyle='round',
-                    #     #          solid_joinstyle='round', dash_capstyle='butt',
-                    #     #          dash_joinstyle='round')
-                    #     # plot arrows
-                    #     # ax.annotate("",
-                    #     #              xy=(s_p[i, 0], s_p[i, 1]), xycoords='data',
-                    #     #              xytext=(s_0[i, 0], s_0[i, 1]), textcoords='data',
-                    #     #              arrowprops=dict(arrowstyle="->", color='r', lw=2,
-                    #     #                              connectionstyle="arc3"))
-
     for node_tag in node_tags:
         nd_crd = ops.nodeCoord(node_tag)
 
@@ -1910,7 +1840,11 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
         if nodal_loads_idx[0].size:
             for kier in nodal_loads_idx[0]:
-                if kier == 0 or kier == 1 or kier == 2 or kier == 3 or kier == 4 or kier == 5:
+                dx, dy, dz = 0., 0., 0.
+
+                # horizontal or vertical nodal force (load)
+                if kier == 0 or kier == 1 or kier == 2:
+                    kolor = 'b'
                     if kier == 0:
                         kier2 = np.sign(nodal_loads[kier])
                         if kier2 > 0:
@@ -1918,9 +1852,6 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                         elif kier2 < 0:
                             pos_or_neg = '-'
                         dx = sfac * np.sign(kier2)
-                        dy = 0.
-                        dz = 0.
-                        kolor = 'b'
 
                     elif kier == 1:
                         kier2 = np.sign(nodal_loads[kier])
@@ -1928,10 +1859,7 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                             pos_or_neg = '+'
                         elif kier2 < 0:
                             pos_or_neg = '-'
-                        dx = 0.
                         dy = sfac * np.sign(kier2)
-                        dz = 0.
-                        kolor = 'b'
 
                     elif kier == 2:
                         kier2 = np.sign(nodal_loads[kier])
@@ -1939,21 +1867,17 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                             pos_or_neg = '+'
                         elif kier2 < 0:
                             pos_or_neg = '-'
-                        dx = 0.
-                        dy = 0.
                         dz = sfac * np.sign(kier2)
-                        kolor = 'b'
 
-                    elif kier == 3:
+                elif kier == 3 or kier == 4 or kier == 5:
+                    kolor = 'g'
+                    if kier == 3:
                         kier2 = np.sign(nodal_loads[kier])
                         if kier2 > 0:
                             pos_or_neg = '+'
                         elif kier2 < 0:
                             pos_or_neg = '-'
                         dx = sfac * np.sign(kier2)
-                        dy = 0.
-                        dz = 0.
-                        kolor = 'r'
 
                     elif kier == 4:
                         kier2 = np.sign(nodal_loads[kier])
@@ -1961,10 +1885,7 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                             pos_or_neg = '+'
                         elif kier2 < 0:
                             pos_or_neg = '-'
-                        dx = 0.
                         dy = sfac * np.sign(kier2)
-                        dz = 0.
-                        kolor = 'r'
 
                     elif kier == 5:
                         kier2 = np.sign(nodal_loads[kier])
@@ -1972,66 +1893,41 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                             pos_or_neg = '+'
                         elif kier2 < 0:
                             pos_or_neg = '-'
-                        dx = 0.
-                        dy = 0.
                         dz = sfac * np.sign(kier2)
-                        kolor = 'r'
 
-                    ax.quiver(nd_crd[0], nd_crd[1], nd_crd[2],
-                              dx, dy, dz, length=2.0, color=kolor)
-                    if kier == 3 or kier == 4 or kier == 5:
-                        ax.quiver(nd_crd[0] + dx, nd_crd[1] + dy, nd_crd[2] + dz,
-                                  1.5 * dx, 1.5 * dy, 1.5 * dz, length=1.0, color=kolor)
-                    # ar1 = Arrow3D([nd_crd[0], nd_crd[0]+dx], [nd_crd[1], nd_crd[1]+dy], [nd_crd[2], nd_crd[2]+dz], mutation_scale=20,
-                    #               lw=1, arrowstyle="-|>", color="k")
-                    # ar1 = Arrow3D(nd_crd[0], nd_crd[1], nd_crd[2], dx, dy, dz)
+                nn = 1.0  # additional scaling for arrows
+                ax.arrow3D(*nd_crd,
+                           nn * dx,
+                           nn * dy,
+                           nn * dz,
+                           mutation_scale=10, ec=kolor, fc=kolor)
 
-                    # ax.add_artist(ar1)
-                    # ax.arrow3D(0,0,0,1,1,1, mutation_scale=20,
-                    #            arrowstyle="-|>")
-                    # ax.arrow3D(nd_crd[0], nd_crd[1], nd_crd[2],
-                    #            dx, dy, dz)
+                if kier == 3 or kier == 4 or kier == 5:
+                    nn = 0.5  # additional scaling for arrows
+                    ax.arrow3D(nd_crd[0] + dx/5, nd_crd[1] + dy/5, nd_crd[2] + dz/5,
+                               nn * dx,
+                               nn * dy,
+                               nn * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
 
-                    # ax.arrow3D(nd_crd[0], nd_crd[1], nd_crd[2],
-                    #            dx, dy, dz, mutation_scale=15,
-                    #            arrowstyle="-|>",
-                    #            ec='blue', fc='blue')
-
-                    #            # width = 0.01,
-                    #            head_starts_at_zero=True,  # default False
-                    #            overhang=0.2,
-                    #            lw=3,
-                    #            head_width=0.1*sfac, head_length=0.2*sfac,
-                    #            fc='b', ec='b',
-                    #            length_includes_head=True, shape='full')
-                    # ax.text(nd_crd[0]+dx, nd_crd[1]+dy, f' {nodal_loads[kier]:.5g}', color='b')
-
-                # concentrated bending moment
-                elif kier == 2:
-                    kier2 = np.sign(nodal_loads[kier])
-                    if kier2 > 0:
-                        pos_or_neg = 'anti-clockwise'
-                        # marker_type=r'$\circlearrowleft$'
-                        marker_type = r'$\curvearrowleft$'
-                    elif kier2 < 0:
-                        pos_or_neg = 'clockwise'
-                        # marker_type=r'$\circlearrowright$'
-                        marker_type = r'$\curvearrowright$'
-
-                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=35, color='b')
-                    ax.text(nd_crd[0], nd_crd[1], f'{nodal_loads[kier]:.5g}', color='b', va='bottom', ha='left')
-
-    # ax.axis('equal')
-    # ax.grid(False)
+                ax.text(nd_crd[0] + dx, nd_crd[1] + dy, nd_crd[2] + dz,
+                        f'{abs(nodal_loads[kier])}', va='bottom', ha='center', color='r')
 
     return ax
 
 
 def plot_load(nep=11, sfac=False, fig_wi_he=False,
               fig_lbrt=False, fmt_model_loads=fmt_model_loads,
-              node_supports=True, truss_node_offset=0, ax=False):
-    """
-    Plot loads for 2d and 3d models
+              node_supports=True, truss_node_offset=0, local_axes=False, ax=False):
+    """Display the nodal and element loads applied to the 2d and 3d models.
+
+    Args:
+        nep (int): number of arrows when displacing element distributed loads
+            (default: 11)
+
+        node_supports (bool): True - show the node support conditions.
+            Default: False.
+
     """
     ndim = ops.getNDM()[0]
 
@@ -2043,7 +1939,8 @@ def plot_load(nep=11, sfac=False, fig_wi_he=False,
     elif ndim == 3:
         ax = plot_loads_3d(nep, sfac, fig_wi_he,
                            fig_lbrt, fmt_model_loads,
-                           node_supports, truss_node_offset, ax)
+                           node_supports, truss_node_offset,
+                           local_axes, ax)
 
     # elif ndim == 1:
     #     ax = plot_loads_1d()
