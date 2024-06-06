@@ -99,6 +99,7 @@ class EleClassTag:
     MVLEM_3D = 212
     SFI_MVLEM_3D = 213
     TwoNodeLink = 86
+    MasonPan12 = 215
 
 
 class LoadTag:
