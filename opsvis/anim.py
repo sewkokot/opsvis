@@ -200,7 +200,132 @@ def _anim_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
     #     for s in range(-1, 1.4, 0.4):
     #         n += 1
     #     ...
+    elif nen == 12:
+        for j in range(1):    
+        #for ele_tag in ele_tags:
+            nd1, nd2, nd3, nd4, nd5, nd6, nd7, nd8, nd9, nd10, nd11, nd12 = ops.eleNodes(et)
 
+            # element x, y coordinates
+            # element x, y coordinates
+            ex = np.array([ops.nodeCoord(nd1)[0],
+                           ops.nodeCoord(nd2)[0],
+                           ops.nodeCoord(nd3)[0],
+                           ops.nodeCoord(nd4)[0],
+                           ops.nodeCoord(nd5)[0],
+                           ops.nodeCoord(nd6)[0],
+                           ops.nodeCoord(nd7)[0],
+                           ops.nodeCoord(nd8)[0],
+                           ops.nodeCoord(nd9)[0],
+                           ops.nodeCoord(nd10)[0],
+                           ops.nodeCoord(nd11)[0],
+                           ops.nodeCoord(nd12)[0]])
+            ey = np.array([ops.nodeCoord(nd1)[1],
+                           ops.nodeCoord(nd2)[1],
+                           ops.nodeCoord(nd3)[1],
+                           ops.nodeCoord(nd4)[1],
+                           ops.nodeCoord(nd5)[1],
+                           ops.nodeCoord(nd6)[1],
+                           ops.nodeCoord(nd7)[1],
+                           ops.nodeCoord(nd8)[1],
+                           ops.nodeCoord(nd9)[1],
+                           ops.nodeCoord(nd10)[1],
+                           ops.nodeCoord(nd11)[1],
+                           ops.nodeCoord(nd12)[1]])
+
+            if modeNo:
+                ed = np.array([ops.nodeEigenvector(nd1, modeNo)[0],
+                               ops.nodeEigenvector(nd1, modeNo)[1],
+                               ops.nodeEigenvector(nd2, modeNo)[0],
+                               ops.nodeEigenvector(nd2, modeNo)[1],
+                               ops.nodeEigenvector(nd3, modeNo)[0],
+                               ops.nodeEigenvector(nd3, modeNo)[1],
+                               ops.nodeEigenvector(nd4, modeNo)[0],
+                               ops.nodeEigenvector(nd4, modeNo)[1],
+                               ops.nodeEigenvector(nd5, modeNo)[0],
+                               ops.nodeEigenvector(nd5, modeNo)[1],
+                               ops.nodeEigenvector(nd6, modeNo)[0],
+                               ops.nodeEigenvector(nd6, modeNo)[1],
+                               ops.nodeEigenvector(nd7, modeNo)[0],
+                               ops.nodeEigenvector(nd7, modeNo)[1],
+                               ops.nodeEigenvector(nd8, modeNo)[0],
+                               ops.nodeEigenvector(nd8, modeNo)[1],
+                               ops.nodeEigenvector(nd9, modeNo)[0],
+                               ops.nodeEigenvector(nd9, modeNo)[1],
+                               ops.nodeEigenvector(nd10, modeNo)[0],
+                               ops.nodeEigenvector(nd10, modeNo)[1],                               
+                               ops.nodeEigenvector(nd11, modeNo)[0],
+                               ops.nodeEigenvector(nd11, modeNo)[1],
+                               ops.nodeEigenvector(nd12, modeNo)[0],
+                               ops.nodeEigenvector(nd12, modeNo)[1]])
+            else:
+                ed = np.array([ops.nodeDisp(nd1)[0],
+                               ops.nodeDisp(nd1)[1],
+                               ops.nodeDisp(nd2)[0],
+                               ops.nodeDisp(nd2)[1],
+                               ops.nodeDisp(nd3)[0],
+                               ops.nodeDisp(nd3)[1],
+                               ops.nodeDisp(nd4)[0],
+                               ops.nodeDisp(nd4)[1],
+                               ops.nodeDisp(nd5)[0],
+                               ops.nodeDisp(nd5)[1],
+                               ops.nodeDisp(nd6)[0],
+                               ops.nodeDisp(nd6)[1],
+                               ops.nodeDisp(nd7)[0],
+                               ops.nodeDisp(nd7)[1],
+                               ops.nodeDisp(nd8)[0],
+                               ops.nodeDisp(nd8)[1],
+                               ops.nodeDisp(nd9)[0],
+                               ops.nodeDisp(nd9)[1],
+                               ops.nodeDisp(nd10)[0],
+                               ops.nodeDisp(nd10)[1],                               
+                               ops.nodeDisp(nd11)[0],
+                               ops.nodeDisp(nd11)[1],
+                               ops.nodeDisp(nd12)[0],
+                               ops.nodeDisp(nd12)[1]])
+
+            if unDefoFlag:
+                plt.plot([ex[0], ex[6]],
+                         [ey[0], ey[6]], **fmt_undefo)
+                plt.plot([ex[9], ex[3]],
+                         [ey[9], ey[3]], **fmt_undefo)            
+                plt.plot([ex[1], ex[5]],
+                         [ey[1], ey[5]], **fmt_undefo)  
+                plt.plot([ex[10], ex[2]],
+                         [ey[10], ey[2]],**fmt_undefo) 
+                plt.plot([ex[11], ex[7]],
+                         [ey[11], ey[7]], **fmt_undefo) 
+                plt.plot([ex[8], ex[4]],
+                         [ey[8], ey[4]], **fmt_undefo)    
+                         
+            # xcdi, ycdi = beam_defo_interp_2d(ex, ey, ed, sfac, nep)
+            # xdi, ydi = beam_disp_ends(ex, ey, ed, sfac)
+            # # interpolated displacement field
+            # plt.plot(xcdi, ycdi, 'b.-')
+            # # translations of ends only
+            # plt.plot(xdi, ydi, 'ro')
+
+            # test it with one element
+            x = ex+sfac*ed[[0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]]
+            y = ey+sfac*ed[[1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]]            
+            plt.plot([x[0], x[6]],
+                     [y[0], y[6]], 'r.-')
+            plt.plot([x[9], x[3]],
+                     [y[9], y[3]], 'r.-')            
+            plt.plot([x[1], x[5]],
+                     [y[1], y[5]],  'r.-')  
+            plt.plot([x[10], x[2]],
+                     [y[10], y[2]], 'r.-') 
+            plt.plot([x[11], x[7]],
+                     [y[11], y[7]],  'r.-') 
+            plt.plot([x[8], x[4]],
+                     [y[8], y[4]],  'r.-')                     
+            plt.plot([x[11]], [y[11]], 'r.-')            
+            
+            
+
+        plt.axis('equal')        
+    
+    
     else:
         print(f'\nWarning! Elements not supported yet. nen: {nen}; must be: 2, 3, 4, 8.')  # noqa: E501
 

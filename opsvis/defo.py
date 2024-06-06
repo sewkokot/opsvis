@@ -34,7 +34,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
     for i, ele_tag in enumerate(ele_tags):
         ele_classtag = ops.getEleClassTags(ele_tag)[0]
         nen = np.shape(ops.eleNodes(ele_tag))[0]
-
+    
         if (ele_classtag == EleClassTag.truss
             or ele_classtag == EleClassTag.trussSection):
 
@@ -370,6 +370,53 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                      xy[0, 0]],
                     [xy[1, 1], xy[1, 1], xy[3, 1], xy[3, 1],
                      xy[1, 1]], **fmt_model_joint2d)
+
+        # MASONRY PANEL element plot_defo
+        elif (ele_classtag == EleClassTag.MasonPan12):
+            nen, ndf = 12, 2
+            ele_node_tags = ops.eleNodes(ele_tag)
+            ecrd = np.zeros((nen, 2))
+            ed = np.zeros((nen, ndf))
+            for i, ele_node_tag in enumerate(ele_node_tags[:]):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags[:]):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)[:2]
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags[:]):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)[:2]                
+            # displaced element coordinates (scaled by sfac factor)
+            xy = ecrd + sfac * ed
+
+            if unDefoFlag:
+#                ax.plot(ecrd[:, 0], ecrd[:, 1], **fmt_undefo)
+                ax.plot([ecrd[9, 0], ecrd[3, 0]],
+                        [ecrd[9,1],ecrd[3,1]], **fmt_undefo)    
+                ax.plot([ecrd[10, 0], ecrd[2, 0]],
+                        [ecrd[10,1],ecrd[2,1]], **fmt_undefo)                         
+                ax.plot([ecrd[8, 0], ecrd[4, 0]],
+                        [ecrd[8,1],ecrd[4,1]], **fmt_undefo)  
+                ax.plot([ecrd[0, 0], ecrd[6, 0]],
+                        [ecrd[0,1],ecrd[6,1]], **fmt_undefo) 
+                ax.plot([ecrd[1, 0], ecrd[5, 0]],
+                        [ecrd[1,1],ecrd[5 ,1]], **fmt_undefo)      
+                ax.plot([ecrd[11, 0], ecrd[7, 0]],
+                        [ecrd[11,1],ecrd[7,1]], **fmt_undefo)                
+
+#            ax.plot(xy[:, 0], xy[:, 1], **fmt_defo)                
+            ax.plot([xy[9, 0], xy[3, 0]],
+                    [xy[9,1],xy[3,1]], **fmt_defo)    
+            ax.plot([xy[10, 0], xy[2, 0]],
+                    [xy[10,1],xy[2,1]], **fmt_defo)                         
+            ax.plot([xy[8, 0], xy[4, 0]],
+                    [xy[8,1],xy[4,1]], **fmt_defo)  
+            ax.plot([xy[0, 0], xy[6, 0]],
+                    [xy[0,1],xy[6,1]], **fmt_defo) 
+            ax.plot([xy[1, 0], xy[5, 0]],
+                    [xy[1,1],xy[5 ,1]], **fmt_defo)      
+            ax.plot([xy[11, 0], xy[7, 0]],
+                    [xy[11,1],xy[7,1]], **fmt_defo)                  
+
 
         else:
             print(f'\nWarning! Elements not supported yet. nen: {nen}; must be: 2, 3, 4, 8.')  # noqa: E501
