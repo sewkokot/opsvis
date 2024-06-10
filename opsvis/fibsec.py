@@ -28,11 +28,11 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
 
             fib_sec_1 = [['section', 'Fiber', 1, '-GJ', 1.0e6],
                          ['patch', 'quad', 1, 4, 1,  0.032, 0.317, -0.311, 0.067, -0.266, 0.005, 0.077, 0.254],  # noqa: E501
-                         ['patch', 'quad', 1, 1, 4,  -0.075, 0.144, -0.114, 0.116, 0.075, -0.144, 0.114, -0.116],  # noqa: E501
+                         ['patch', 'quad', 101, 1, 4,  -0.075, 0.144, -0.114, 0.116, 0.075, -0.144, 0.114, -0.116],  # noqa: E501
                          ['patch', 'quad', 1, 4, 1,  0.266, -0.005,  -0.077, -0.254,  -0.032, -0.317,  0.311, -0.067]  # noqa: E501
                          ]
             opsv.fib_sec_list_to_cmds(fib_sec_1)
-            matcolor = ['r', 'lightgrey', 'gold', 'w', 'w', 'w']
+            matcolor = ['r', 'gold']    # colors for material tags 1 and 101, respectively.
             opsv.plot_fiber_section(fib_sec_1, matcolor=matcolor)
             plt.axis('equal')
             # plt.savefig('fibsec_rc.png')
@@ -51,9 +51,20 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
     ax.invert_xaxis()  # To make z-axis positive to the left
     ax.set_ylabel('y')
     ax.grid(False)
-
+    material_color = {} # Dictionary with material tag as key and color as values
+    color_index = 0
+                         
     for item in fib_sec_list:
-
+        if item[0] != 'section':
+            matTag = item[2]
+            if not matTag in material_color:
+                try:
+                  material_color[matTag] = matcolor[color_index]
+                except IndexError:
+                  material_color[matTag] = 'black'
+                  print(f'Note: Assigning black color to material {matTag} because it was not provided.')
+                color_index += 1
+              
         if item[0] == 'layer':
             matTag = item[2]
             if item[1] == 'straight':
@@ -64,7 +75,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                 Y = np.linspace(Iy, Jy, n_bars)
                 Z = np.linspace(Iz, Jz, n_bars)
                 for zi, yi in zip(Z, Y):
-                    bar = Circle((zi, yi), r, ec='k', fc='k', zorder=10)
+                    bar = Circle((zi, yi), r, ec='k', fc=material_color[matTag], zorder=10)
                     ax.add_patch(bar)
             if item[1] == 'circ':
                 n_bars, As = item[3], item[4]
@@ -82,7 +93,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                 Y = yC + arc_radius * np.cos(thetas)
                 Z = zC + arc_radius * np.sin(thetas)
                 for zi, yi in zip(Z, Y):
-                    bar = Circle((zi, yi), r_bar, ec='k', fc='k', zorder=10)
+                    bar = Circle((zi, yi), r_bar, ec='k', fc=material_color[matTag], zorder=10)
                     ax.add_patch(bar)
 
         if (item[0] == 'patch' and (item[1] == 'quad' or item[1] == 'quadr' or
@@ -126,7 +137,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                                        [Z[j, k+1], Y[j, k+1]],
                                        [Z[j+1, k+1], Y[j+1, k+1]],
                                        [Z[j+1, k], Y[j+1, k]]])
-                        poly = Polygon(zy, closed=True, ec='k', fc=matcolor[matTag-1])
+                        poly = Polygon(zy, closed=True, ec='k', fc=material_color[matTag])
                         ax.add_patch(poly)
 
             else:
@@ -155,7 +166,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                     thi = a0 + i * dth
                     thi1 = thi + dth
                     wedge = Wedge((zC, yC), rj1, thi, thi1, width=dr, ec='k',
-                                  lw=1, fc=matcolor[matTag-1])
+                                  lw=1, fc=material_color[matTag])
                     ax.add_patch(wedge)
 
             ax.axis('equal')
