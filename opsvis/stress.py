@@ -11,6 +11,7 @@ def stress_2d_ele_tags_only(ele_tags):
     Stress2dEleClasstags = set([EleClassTag.tri3n,
                                 EleClassTag.tri6n,
                                 EleClassTag.quad4n,
+                                EleClassTag.quadup,
                                 EleClassTag.quad8n,
                                 EleClassTag.quad9n])
 
@@ -51,8 +52,6 @@ def sig_out_per_node(how_many='all'):
     node_tags = ops.getNodeTags()
     n_nodes = len(node_tags)
 
-    ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
-
     # initialize helper arrays
     sig_out = np.zeros((n_nodes, 7))
 
@@ -60,7 +59,10 @@ def sig_out_per_node(how_many='all'):
     nodes_tag_count[:, 0] = node_tags
 
     nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
+    
+    # filter out 2d stress elements only
+    ele_tags = stress_2d_ele_tags_only(ele_tags)
+    
     for i, ele_tag in enumerate(ele_tags):
         ele_node_tags = ops.eleNodes(ele_tag)
 
@@ -69,12 +71,18 @@ def sig_out_per_node(how_many='all'):
             tmp_list[j] = node_tags.index(ele_node_tag)
 
         nodes_tag_count[tmp_list, 1] += 1
-
+        
+        ele_classtag = ops.getEleClassTags(ele_tag)[0]
         if ele_classtag == EleClassTag.SSPquad:
             sig_ip_el = ops.eleResponse(ele_tag, 'stress')
             # sigM_nd = sigM_ip
             sigM_np = np.tile(sig_ip_el, (nen, 1))
 
+        if ele_classtag == EleClassTag.quadup:
+            # material id can be 1 to 4, maybe there are 4 gauss points? I'm not sure so I'll average them
+            sig_nd_el = np.mean([ops.eleResponse(1, 'material',i , 'stress') for i in range(1,5)],0)
+            sigM_nd = np.tile(sig_nd_el, (nen, 1))
+            
         else:
             sig_nd_el = ops.eleResponse(ele_tag, 'stressAtNodes')
             sigM_nd = np.reshape(sig_nd_el, (-1, 3))
@@ -715,7 +723,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
     elif (ele_classtag == EleClassTag.tri6n):
         nen = 6
 
-    elif (ele_classtag == EleClassTag.quad4n):
+    elif (ele_classtag == EleClassTag.quad4n or ele_classtag == EleClassTag.quadup):
         nen = 4
 
     elif (ele_classtag == EleClassTag.quad8n):
@@ -755,7 +763,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
         nds_crd_all = nds_crd
         nds_val_all = nds_val
 
-    elif (ele_classtag == EleClassTag.quad4n):
+    elif (ele_classtag == EleClassTag.quad4n or ele_classtag == EleClassTag.quadup):
         tris_conn, nds_c_crd, nds_c_val = \
             quads_to_4tris(eles_conn, nds_crd, nds_val)
 
