@@ -624,7 +624,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
-            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d):
+            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
+            ele_classtag == EleClassTag.Pipe or
+            ele_classtag == EleClassTag.CurvedPipe):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)

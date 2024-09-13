@@ -99,6 +99,8 @@ class EleClassTag:
     MVLEM_3D = 212
     SFI_MVLEM_3D = 213
     TwoNodeLink = 86
+    Pipe = 269
+    CurvedPipe = 270
 
 
 class LoadTag:
