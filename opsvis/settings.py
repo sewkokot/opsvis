@@ -73,6 +73,7 @@ class EleClassTag:
     tri3n = 33
     tri6n = 209
     quad4n = 31
+    quadup = 40
     quad4n3d = 32
     quad9n = 207
     quad8n = 208

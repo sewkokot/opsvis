@@ -247,6 +247,36 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
             verts = [xy[nodes_geo_order]]
             ax.add_collection(PolyCollection(verts, **fmt_defo_faces))
 
+        elif (ele_classtag == EleClassTag.quadup):
+            nen, ndf = 4, 3
+            nodes_geo_order = [0, 1, 2, 3, 0]
+
+            ele_node_tags = ops.eleNodes(ele_tag)
+
+            ecrd = np.zeros((nen, 2))
+            ed = np.zeros((nen, ndf))  # dof3 is not rotations but pore pressure
+
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            if modeNo:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeEigenvector(ele_node_tag, modeNo)
+            else:
+                for i, ele_node_tag in enumerate(ele_node_tags):
+                    ed[i, :] = ops.nodeDisp(ele_node_tag)
+
+            if unDefoFlag:
+                ax.plot(ecrd[nodes_geo_order, 0],
+                        ecrd[nodes_geo_order, 1],
+                        **fmt_undefo)
+                # verts = [ecrd[nodes_geo_order]]
+                # ax.add_collection(PolyCollection(verts, **fmt_undefo_faces))
+            xy = ecrd + sfac * ed[:, :2]
+
+            verts = [xy[nodes_geo_order]]
+            ax.add_collection(PolyCollection(verts, **fmt_defo_faces))
+
         # 2d quadrilateral (quad8n) elements plot_defo
         elif (ele_classtag == EleClassTag.quad8n):
 
