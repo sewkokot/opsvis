@@ -35,8 +35,7 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         ele_classtag = ops.getEleClassTags(ele_tag)[0]
         nen = np.shape(ops.eleNodes(ele_tag))[0]
 
-        if (ele_classtag == EleClassTag.truss
-            or ele_classtag == EleClassTag.trussSection):
+        if ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen, ndf = 2, 2
             ele_node_tags = ops.eleNodes(ele_tag)
