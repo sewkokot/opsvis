@@ -186,7 +186,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.text(xt+offset_x, yt+offset_y, f'{ele_tag}', va=va, ha=ha,
                         color='red')
 
-        if ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClasasTag.CorotTruss]:
+        if ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
