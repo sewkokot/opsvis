@@ -257,7 +257,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.text(xt, yt, f'{ele_tag}', va=va, ha=ha, color='red')
 
         # 2d quadrilateral (quad) elements plot_model
-        elif (ele_classtag == EleClassTag.quad4n):
+        elif (ele_classtag == EleClassTag.quad4n or ele_classtag == EleClassTag.quadup):
 
             nen = 4
             nodes_geo_order = [0, 1, 2, 3, 0]
@@ -1737,6 +1737,9 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     Py, Pz, aL, Px = ele_load_data_i[1:5]
                     Pxyz = [Px, Py, Pz]
                     xa = aL * L
+                    # mycomment beg
+                    # Pxyz for string becomes Pyzx because in this is the syntax order
+                    # mycomment end
                     text_string = f'Pyzx:{Py},{Pz},{Px}'
 
                     s_0 = np.zeros(3)
