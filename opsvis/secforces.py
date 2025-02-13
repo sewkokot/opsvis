@@ -102,7 +102,6 @@ def section_force_distribution_2d(ecrd, pl, nep=2,
                 xl = np.insert(xl, xl.searchsorted(a+0.001), a+0.001)
                 nep += 2
 
-
     # xl is modified on the fly
     one = np.ones(nep)
 
@@ -507,7 +506,6 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 elif sf_type == 'M' or sf_type == 'moment':
                     ss = s_all[:, 2]
 
-
             if len(ss) == 2:  # for truss with zero shear force and moment
                 pass
 
@@ -687,17 +685,17 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
         ele_class_tag = ops.getEleClassTags(ele_tag)[0]
 
+        ele_node_tags = ops.eleNodes(ele_tag)
+        ecrd = np.zeros((2, 3))
+        for i, ele_node_tag in enumerate(ele_node_tags):
+            ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
         if (ele_class_tag == EleClassTag.ElasticBeam3d
             or ele_class_tag == EleClassTag.ForceBeamColumn3d
             or ele_class_tag == EleClassTag.DispBeamColumn3d
             or ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn3d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam3d):
-
-            ele_node_tags = ops.eleNodes(ele_tag)
-            ecrd = np.zeros((2, 3))
-            for i, ele_node_tag in enumerate(ele_node_tags):
-                ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
             # eo = Eo[i, :]
             xloc = ops.eleResponse(ele_tag, 'xlocal')
@@ -721,9 +719,12 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
             G, _ = model.rot_transf_3d(ecrd, g)
 
-            g = G[:3, :3]
-
             if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
+                Lxyz = ecrd[1, :] - ecrd[0, :]
+                L = np.sqrt(Lxyz @ Lxyz)
+                g0 = Lxyz / L
+                nep = 7  # for truss only
+
                 if sf_type == 'N' or sf_type == 'axial':
                     axial_force = ops.eleResponse(ele_tag, 'axialForce')[0]
                     ss = -axial_force * np.ones(nep)
@@ -776,9 +777,15 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                 if dir_plt == 0:
                     dir_plt = dir_plt_tmp
 
+            if ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]:
+                s_0 = np.zeros((nep, 3))
+                s_0[0, :] = [ecrd[0, 0], ecrd[0, 1], ecrd[0, 2]]
+                s_0[1:, 0] = s_0[0, 0] + xl[1:] * g0[0]
+                s_0[1:, 1] = s_0[0, 1] + xl[1:] * g0[1]
+                s_0[1:, 2] = s_0[0, 2] + xl[1:] * g0[2]
 
-            if len(ss) == 2:  # for truss with zero shear force and moment
-                pass
+                ax.plot(s_0[:, 0], s_0[:, 1], s_0[:, 2], color=fmt_color,
+                        linestyle='-', marker='.', markersize=abs(axial_force) * sfac)
 
             else:
                 # minVal = min(minVal, np.min(ss))
@@ -832,7 +839,9 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                 ha = 'center'
                 va = 'bottom'
                 if sf_type == 'N' or sf_type == 'axial':
-                    ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1], s_p[int(nep / 2), 2],
+                    ax.text(s_0[2, 0],
+                            s_0[2, 1],
+                            s_0[2, 2],
                             f'{abs(axial_force):.1f}', va=va, ha=ha, color=fmt_color)
                 # else:
                 #     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
