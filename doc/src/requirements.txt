@@ -1,5 +1,4 @@
 # Defining the exact version will make sure things don't break
-sphinx.ext.autodoc
 openseespy
 opsvis
 numpy
