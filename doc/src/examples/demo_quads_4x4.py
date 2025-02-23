@@ -73,7 +73,7 @@ opsv.plot_model()
 plt.axis('equal')
 
 # plt.figure()
-opsv.plot_loads_2d()
+opsv.plot_load()
 
 # - plot deformation
 opsv.plot_defo(unDefoFlag=1)
@@ -95,6 +95,29 @@ nds_val = sig_out[:, j]
 
 plt.figure()
 opsv.plot_stress_2d(nds_val)
+
+jstr = 'vmis'
+plt.figure()
+opsv.plot_stress(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
+
+
+jstr = 'exx'
+plt.figure()
+opsv.plot_strain(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
+
+jstr = 'eyy'
+plt.figure()
+opsv.plot_strain(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
+
 
 plt.show()
 

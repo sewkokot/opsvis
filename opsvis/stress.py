@@ -4,23 +4,128 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 
 from .settings import *
+from . import defo as opsvdefo
 
 
-def stress_2d_ele_tags_only(ele_tags):
+def extrapolate_ip_to_node_quad(yip):
+    """
+    Exprapolate values from 4 integration points to 4 nodes of a quad element.
 
-    Stress2dEleClasstags = set([EleClassTag.tri3n,
-                                EleClassTag.tri6n,
-                                EleClassTag.quad4n,
-                                EleClassTag.quad8n,
-                                EleClassTag.quad9n])
+    Integration points of Gauss quadrature.
+    Usefull for : stress and strain components (sxx, syy, sxy)
+
+    yip - either a single vector (4,) or array (4,3) /sxx syy sxy/
+          or array (4, n)
+    """
+
+    xep = 0.8660254037844386
+    W = np.array([[1. + xep, -1 / 2., 1. - xep, -1 / 2.],
+                  [-1 / 2., 1. + xep, -1 / 2., 1. - xep],
+                  [1. - xep, -1 / 2., 1. + xep, -1 / 2.],
+                  [-1 / 2., 1. - xep, -1 / 2., 1. + xep]])
+
+    ynp = W @ yip
+    return ynp
+
+
+def extrapolate_ip_to_node_quad8n(yip):
+    """
+    Exprapolate values from 8 integration points to 8 nodes of a quad element.
+
+    Integration points of Gauss quadrature.
+    Usefull for : stress and strain components (sxx, syy, sxy)
+
+    yip - either a single vector (4,) or array (4,3) /sxx syy sxy/
+          or array (4, n)
+    """
+
+    W = np.array([[2.0758287072798374, 0.1666666666666666, -0.075828707279838, 0.1666666666666666, -0.7636648162452683, 0.0969981495786018, 0.0969981495786018, -0.7636648162452683, 0.],  # noqa: E501
+                  [0.1666666666666666, 2.0758287072798374, 0.1666666666666666, -0.075828707279838, -0.7636648162452683, -0.7636648162452683, 0.0969981495786018, 0.0969981495786018, 0.],  # noqa: E501
+                  [-0.075828707279838, 0.1666666666666666, 2.0758287072798374, 0.1666666666666666, 0.0969981495786018, -0.7636648162452683, -0.7636648162452683, 0.0969981495786018, 0.],  # noqa: E501
+                  [0.1666666666666666, -0.075828707279838, 0.1666666666666666, 2.0758287072798374, 0.0969981495786018, 0.0969981495786018, -0.7636648162452683, -0.7636648162452683, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 1.1454972243679027, -0.3333333333333333, -0.1454972243679028, -0.3333333333333333, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.3333333333333333, 1.1454972243679027, -0.3333333333333333, -0.1454972243679028, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.1454972243679028, -0.3333333333333333, 1.1454972243679027, -0.3333333333333333, 0.],  # noqa: E501
+                  [0.1666666666666666, 0.1666666666666666, 0.1666666666666666, 0.1666666666666666, -0.3333333333333333, -0.1454972243679028, -0.3333333333333333, 1.1454972243679027, 0.]])  # noqa: E501
+
+    ynp = W @ yip
+
+    return ynp
+
+
+def extrapolate_ip_to_node_quad9n(yip):
+    """
+    Exprapolate values at 9 integration points to 9 nodes of a quad element.
+
+    Integration points of Gauss quadrature.
+    Usefull for : stress components (sxx, syy, sxy)
+
+    yip - either a single vector (4,) or array (4,3) /sxx syy sxy/
+          or array (4, n)
+    """
+
+    W = np.array([[2.1869398183909485, 0.2777777777777778, 0.0352824038312731, 0.2777777777777778, -0.9858870384674904, -0.1252240726436203, -0.1252240726436203, -0.9858870384674904, 0.4444444444444444],  # noqa: E501
+                  [0.2777777777777778, 2.1869398183909485, 0.2777777777777778, 0.0352824038312731, -0.9858870384674904, -0.9858870384674904, -0.1252240726436203, -0.1252240726436203, 0.4444444444444444],  # noqa: E501
+                  [0.0352824038312731, 0.2777777777777778, 2.1869398183909485, 0.2777777777777778, -0.1252240726436203, -0.9858870384674904, -0.9858870384674904, -0.1252240726436203, 0.4444444444444444],  # noqa: E501
+                  [0.2777777777777778, 0.0352824038312731, 0.2777777777777778, 2.1869398183909485, -0.1252240726436203, -0.1252240726436203, -0.9858870384674904, -0.9858870384674904, 0.4444444444444444],  # noqa: E501
+                  [0., 0., 0., 0., 1.4788305577012359, 0., 0.1878361089654305, 0., -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 1.4788305577012359, 0., 0.1878361089654305, -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0.1878361089654305, 0., 1.4788305577012359, 0., -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 0.1878361089654305, 0., 1.4788305577012359, -0.6666666666666667],  # noqa: E501
+                  [0., 0., 0., 0., 0., 0., 0., 0., 1.]])
+
+    ynp = W @ yip
+
+    return ynp
+
+
+def extrapolate_ip_to_node_tri6n(yip):
+    """Exprapolate from 3 integration points to 6 nodes of a tri6n element.
+
+    The integration points are at (2/3, 1/6), (1/6, 2/3), (1/6, 1/6).
+    Other possible 3 Gauss points are (1/2, 1/2), (1/2, 0), (0, 1/2).
+
+    Integration points of Gauss quadrature.
+    Usefull for : stress components (sxx, syy, sxy)
+
+    yip - either a single vector (6,) or array (6,3) /sxx syy sxy/
+          or array (6, n)
+    """
+
+    W = np.array([[1.6666666666666667, -0.3333333333333333, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333, 1.6666666666666667, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333, -0.3333333333333333, 1.6666666666666667],  # noqa: E501
+                  [0.6666666666666667, 0.6666666666666667, -0.3333333333333333],  # noqa: E501
+                  [-0.3333333333333333, 0.6666666666666667, 0.6666666666666667],  # noqa: E501
+                  [0.6666666666666667, -0.3333333333333333, 0.6666666666666667]])  # noqa: E501
+    ynp = W @ yip
+
+    return ynp
+
+
+def ele_tags_stress_related(ele_tags):
+
+    EleClasstagsForStress = set([EleClassTag.tri3n,
+                                 EleClassTag.tri6n,
+                                 EleClassTag.quad4n,
+                                 EleClassTag.quad8n,
+                                 EleClassTag.quad9n,
+                                 EleClassTag.ShellMITC4,
+                                 EleClassTag.ShellMITC9,
+                                 EleClassTag.ASDShellQ4,
+                                 EleClassTag.FourNodeTetrahedron,
+                                 EleClassTag.TenNodeTetrahedron,
+                                 EleClassTag.TenNodeTetrahedronSK,
+                                 EleClassTag.brick8n,
+                                 EleClassTag.brick20n])
 
     ele_classtags = ops.getEleClassTags()
 
-    idx = [i for i, e in enumerate(ele_classtags) if e in Stress2dEleClasstags]
+    idx = [i for i, e in enumerate(ele_classtags) if e in EleClasstagsForStress]
 
-    ele_tags_2d_tris_quads_only = [ele_tags[i] for i in idx]
+    ele_tags_for_stress = [ele_tags[i] for i in idx]
 
-    return ele_tags_2d_tris_quads_only
+    return ele_tags_for_stress
 
 
 def sig_out_per_node(how_many='all'):
@@ -108,8 +213,8 @@ def sig_out_per_node(how_many='all'):
     return sig_out
 
 
-def sig_component_per_node(stress_str):
-    """Return a 2d numpy array of stress components per OpenSees node.
+def sig_component_per_node(stress_str, nu):
+    """Return a 2d numpy array of stress components per node.
 
     Three first stress components (sxx, syy, sxy) are calculated and
     extracted from OpenSees, while the rest svm (Huber-Mieses-Hencky),
@@ -134,14 +239,13 @@ def sig_component_per_node(stress_str):
     """
 
     ele_tags_all = ops.getEleTags()
-    ele_tags = stress_2d_ele_tags_only(ele_tags_all)
+    ele_tags = ele_tags_stress_related(ele_tags_all)
 
     ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
 
     node_tags = ops.getNodeTags()
     n_nodes = len(node_tags)
 
-    # initialize helper arrays
     sig_out = np.zeros((n_nodes, 4))
 
     nodes_tag_count = np.zeros((n_nodes, 2), dtype=int)
@@ -160,7 +264,6 @@ def sig_component_per_node(stress_str):
 
         if ele_classtag == EleClassTag.SSPquad:
             sig_ip_el = ops.eleResponse(ele_tag, 'stress')
-            # sigM_nd = sigM_ip
             sigM_np = np.tile(sig_ip_el, (nen, 1))
 
         else:
@@ -173,13 +276,10 @@ def sig_component_per_node(stress_str):
         sig_out[tmp_list, 2] += sigM_nd[:nen, 2]
 
     indxs, = np.where(nodes_tag_count[:, 1] > 1)
-
-    # n_indxs < n_nodes: e.g. 21<25 (bous), 2<6 (2el) etc.
     n_indxs = np.shape(indxs)[0]
 
-    # divide summed stresses by the number of common nodes
     sig_out[indxs, :] = \
-        sig_out[indxs, :]/nodes_tag_count[indxs, 1].reshape(n_indxs, 1)
+        sig_out[indxs, :] / nodes_tag_count[indxs, 1].reshape(n_indxs, 1)
 
     if stress_str == 'sxx':
         sig_out_vec = sig_out[:, 0]
@@ -187,13 +287,13 @@ def sig_component_per_node(stress_str):
         sig_out_vec = sig_out[:, 1]
     elif stress_str == 'sxy':
         sig_out_vec = sig_out[:, 2]
+    elif stress_str == 'szz':
+        sig_out_vec = nu * (sig_out[:, 0] + sig_out[:, 1])
     elif stress_str == 'svm' or stress_str == 'vmis':
-        # warning reshape from (pts,ncomp) to (ncomp,pts)
         sig_out_vec = vm_stress(np.transpose(sig_out[:, :3]))
     elif (stress_str == 's1' or stress_str == 's2' or stress_str == 'angle'):
         princ_sig_out = princ_stress(np.transpose(sig_out[:, :3]))
         if stress_str == 's1':
-            # sig_out_vec = np.transpose(princ_sig_out)[:, 0]
             sig_out_vec = princ_sig_out[0, :]
         elif stress_str == 's2':
             sig_out_vec = princ_sig_out[1, :]
@@ -201,6 +301,93 @@ def sig_component_per_node(stress_str):
             sig_out_vec = princ_sig_out[2, :]
 
     return sig_out_vec
+
+
+def eps_component_per_node(strain_str, nu):
+    """Return a 2d numpy array of strain components per node.
+
+    Strain components (exx, eyy, exy) are extracted from OpenSees.
+
+    Args:
+        how_many (str): supported options are: 'all' - all components,
+            'exx', 'eyy', 'exy', 'ezz'.
+
+    Returns:
+        eps_out (ndarray): a 2d array of strain components per node with
+            the following components: exx, eyy, exy, szz.
+            Size (n_nodes x 4).
+    """
+
+    ele_tags_all = ops.getEleTags()
+    ele_tags = ele_tags_stress_related(ele_tags_all)
+    ele_classtag = ops.getEleClassTags(ele_tags[0])[0]
+    node_tags = ops.getNodeTags()
+    n_nodes = len(node_tags)
+    eps_out = np.zeros((n_nodes, 4))
+    nodes_tag_count = np.zeros((n_nodes, 2), dtype=int)
+    nodes_tag_count[:, 0] = node_tags
+
+    nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
+
+    for i, ele_tag in enumerate(ele_tags):
+        ele_node_tags = ops.eleNodes(ele_tag)
+
+        tmp_list = [0]*nen
+        for j, ele_node_tag in enumerate(ele_node_tags):
+            tmp_list[j] = node_tags.index(ele_node_tag)
+
+        nodes_tag_count[tmp_list, 1] += 1
+
+        if ele_classtag == EleClassTag.quad4n:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_ip = np.reshape(eps_ip_el, (-1, 3))
+            epsM_np = extrapolate_ip_to_node_quad(epsM_ip)
+
+        elif ele_classtag == EleClassTag.quad8n:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_ip = np.reshape(eps_ip_el, (-1, 3))
+            epsM_np = extrapolate_ip_to_node_quad8n(epsM_ip)
+
+        elif ele_classtag == EleClassTag.quad9n:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_ip = np.reshape(eps_ip_el, (-1, 3))
+            epsM_np = extrapolate_ip_to_node_quad9n(epsM_ip)
+
+        elif ele_classtag == EleClassTag.tri3n:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_np = np.tile(eps_ip_el, (nen, 1))
+
+        elif ele_classtag == EleClassTag.tri6n:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_ip = np.reshape(eps_ip_el, (-1, 3))
+            epsM_np = extrapolate_ip_to_node_tri6n(epsM_ip)
+
+        elif ele_classtag == EleClassTag.SSPquad:
+            eps_ip_el = ops.eleResponse(ele_tag, 'strain')
+            epsM_np = np.tile(eps_ip_el, (nen, 1))
+
+        # exx eyy exy components
+        eps_out[tmp_list, 0] += epsM_np[:nen, 0]
+        eps_out[tmp_list, 1] += epsM_np[:nen, 1]
+        eps_out[tmp_list, 2] += epsM_np[:nen, 2]
+
+    indxs, = np.where(nodes_tag_count[:, 1] > 1)
+
+    n_indxs = np.shape(indxs)[0]
+
+    eps_out[indxs, :] = \
+        eps_out[indxs, :] / nodes_tag_count[indxs, 1].reshape(n_indxs, 1)
+
+    if strain_str == 'exx':
+        eps_out_vec = eps_out[:, 0]
+    elif strain_str == 'eyy':
+        eps_out_vec = eps_out[:, 1]
+    elif strain_str == 'exy':
+        eps_out_vec = eps_out[:, 2]
+    elif strain_str == 'ezz':
+        eps_out_vec = - (nu / (1 - nu)) * (eps_out[:, 0] + eps_out[:, 1])
+
+    return eps_out_vec
 
 
 def princ_stress(sig):
@@ -238,7 +425,7 @@ def vm_stress(sig):
     return np.sqrt(_a)
 
 
-def quads_to_4tris(quads_conn, nds_crd, nds_val):
+def quads_to_4tris(quads_conn, nds_crd, nds_val, disps=None):
     """
     Get triangles connectivity, coordinates and new values at quad centroids.
 
@@ -262,11 +449,15 @@ def quads_to_4tris(quads_conn, nds_crd, nds_val):
         function: quads_to_8tris_9n, quads_to_8tris_8n
     """
     n_quads, _ = quads_conn.shape
-    n_nds, _ = nds_crd.shape
+    n_nds, ndm = nds_crd.shape
 
     # coordinates and values at quad centroids _c_
     nds_c_crd = np.zeros((n_quads, 2))
     nds_c_val = np.zeros(n_quads)
+
+    disps_c = None  # for pyvista on maps on deformed model
+    if disps is not None:
+        disps_c = np.zeros((n_quads, ndm))
 
     tris_conn = np.zeros((4*n_quads, 3), dtype=int)
 
@@ -285,7 +476,10 @@ def quads_to_4tris(quads_conn, nds_crd, nds_val):
         tris_conn[j+2] = np.array([n2, n3, n_nds+i])
         tris_conn[j+3] = np.array([n3, n0, n_nds+i])
 
-    return tris_conn, nds_c_crd, nds_c_val
+        if disps is not None:
+            disps_c[i] = np.sum(disps[[n0, n1, n2, n3]], axis=0) / 4.
+
+    return tris_conn, nds_c_crd, nds_c_val, disps_c
 
 
 def bricks_to_24tris(bricks_conn, nds_crd, nds_val, disps=None):
@@ -682,9 +876,7 @@ def plot_mesh_2d(nds_crd, eles_conn, lw=0.4, ec='k'):
             plt.fill(x, y, edgecolor=ec, lw=lw, fill=False)
 
 
-# def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50,
-#                    fig_wi_he=False, fig_lbrt=False, ax=False):
-def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
+def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50, sfac=False):
     """
     Plot stress distribution of a 2d elements of a 2d model.
 
@@ -703,7 +895,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
 
     node_tags, ele_tags_all = ops.getNodeTags(), ops.getEleTags()
 
-    ele_tags = stress_2d_ele_tags_only(ele_tags_all)
+    ele_tags = ele_tags_stress_related(ele_tags_all)
 
     n_nodes, n_eles = len(node_tags), len(ele_tags)
 
@@ -724,23 +916,20 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
     elif (ele_classtag == EleClassTag.quad9n):
         nen = 9
 
-    # nen = np.shape(ops.eleNodes(ele_tags[0]))[0]
-
-    # idiom coordinates as ordered in node_tags
-    # use node_tags.index(tag) for correspondence
     nds_crd = np.zeros((n_nodes, 2))
+    nds_uxy = np.zeros((n_nodes, 2))
     for i, node_tag in enumerate(node_tags):
         nds_crd[i] = ops.nodeCoord(node_tag)
 
-    # from utils / sig_out_per_node
-    # fixme: if this can be simplified
-    # index (starts from 0) to node_tag correspondence
-    # (a) data in np.array of integers
-    # nodes_tag_count = np.zeros((n_nodes, 2), dtype=int)
-    # nodes_tag_count[:, 0] = node_tags
-    #
-    # correspondence indx and node_tag is in node_tags.index
-    # after testing remove the above
+    for i, node_tag in enumerate(node_tags):
+        nds_uxy[i] = ops.nodeDisp(node_tag)
+
+    if not sfac:
+        sfac = opsvdefo.defo_scale(0)
+    else:
+        sfac = 0.
+
+    nds_crd = nds_crd + sfac * nds_uxy
 
     eles_conn = np.zeros((n_eles, nen), dtype=int)
 
@@ -756,7 +945,7 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
         nds_val_all = nds_val
 
     elif (ele_classtag == EleClassTag.quad4n):
-        tris_conn, nds_c_crd, nds_c_val = \
+        tris_conn, nds_c_crd, nds_c_val, disps_c = \
             quads_to_4tris(eles_conn, nds_crd, nds_val)
 
         nds_crd_all = np.vstack((nds_crd, nds_c_crd))
@@ -779,8 +968,6 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
         nds_crd_all = nds_crd
         nds_val_all = nds_val
 
-
-
     # 1. plot contour maps
     triangulation = tri.Triangulation(nds_crd_all[:, 0],
                                       nds_crd_all[:, 1],
@@ -790,7 +977,6 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50):
 
     # 2. plot original mesh (quad) without subdivision into triangles
     if mesh_outline:
-        # plot_mesh_2d(nds_crd, eles_conn, ax=ax)
         plot_mesh_2d(nds_crd, eles_conn)
 
     plt.colorbar()
@@ -923,7 +1109,7 @@ def quad8n_val_at_center(vals):
     return val_c1
 
 
-def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50):
+def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     """Plot stress distribution of the model.
 
     Args:
@@ -952,44 +1138,56 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50):
     ndim = ops.getNDM()[0]
 
     if ndim == 2:
-        _plot_stress_2d(stress_str, mesh_outline, cmap, levels)
-        # if axis_off:
-        #     plt.axis('off')
-
-    # not implemented yet
-    # elif ndim == 3:
-    #     _plot_stress_3d(stress_str, mesh_outline, cmap, levels)
+        _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu)
 
     else:
         print(f'\nWarning! ndim: {ndim} not implemented yet.')
 
-    # plt.show()  # call this from main py file for more control
+
+def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
+    """Plot strain distribution of the model.
+
+    Args:
+        strain_str (string): strain component string. Available options are:
+            'exx', 'eyy', 'exy', 'ezz'
+
+        mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.
+
+        cmap (str): Matplotlib color map (default is 'turbo')
+
+        levels (int): number and positions of the contour lines / regions.
+
+    Usage:
+        ::
+
+            opsv.plot_strain('vmis')
+            plt.xlabel('x [m]')
+            plt.ylabel('y [m]')
+            plt.show()
+
+    See also:
+
+    :ref:`opsvis_sig_out_per_node`
+    """
+
+    ndim = ops.getNDM()[0]
+
+    if ndim == 2:
+        _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu)
+
+    else:
+        print(f'\nWarning! ndim: {ndim} not implemented yet.')
 
 
-def _plot_stress_2d(stress_str, mesh_outline, cmap, levels):
+def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu):
     """See documentation for plot_stress command"""
 
-    # node_tags = ops.getNodeTags()
-    # ele_tags = ops.getEleTags()
-    # n_nodes = len(node_tags)
+    nds_val = sig_component_per_node(stress_str, nu)
+    plot_stress_2d(nds_val, mesh_outline, cmap, levels)
 
-    # second version - better - possible different types
-    # of elements (mix of quad and tri)
-    # for ele_tag in ele_tags:
-    #     nen = np.shape(ops.eleNodes(ele_tag))[0]
 
-    # avoid calculating and storing all stress components
-    # sig_out = sig_out_per_node(stress_str)
-    # switcher = {'sxx': 0,
-    #             'syy': 1,
-    #             'sxy': 2,
-    #             'svm': 3,
-    #             'vmis': 3,
-    #             's1': 4,
-    #             's2': 5,
-    #             'angle': 6}
+def _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu):
+    """See documentation for plot_strain command"""
 
-    # nds_val = sig_out[:, switcher[stress_str]]
-
-    nds_val = sig_component_per_node(stress_str)
+    nds_val = eps_component_per_node(strain_str, nu)
     plot_stress_2d(nds_val, mesh_outline, cmap, levels)

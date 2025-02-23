@@ -12,6 +12,77 @@ from .settings import *
 from . import model as opsvmodel
 
 
+def defo_scale(nep):
+    ndim = ops.getNDM()[0]
+
+    ratio = 0.1
+
+    node_tags = ops.getNodeTags()
+
+    if ndim == 1:
+        min_crds = np.array([np.inf, -1.])
+        max_crds = np.array([-np.inf, 1.])
+        max_u = [-np.inf, -np.inf, -np.inf]
+        for node_tag in node_tags:
+            crds = [0.] * 2
+            u = [0.] * 2
+            crds[0] = ops.nodeCoord(node_tag)
+            u[0] = ops.nodeDisp(node_tag)
+
+            min_crds[0] = min(min_crds[0], crds[0])
+            max_crds[0] = max(max_crds[0], crds[0])
+            max_u[0] = max(max_u[0], np.abs(u[0]))
+            max_u[1] = max(max_u[1], np.abs(u[1]))
+
+        max_u_abs = max(max_u)
+
+    elif ndim == 2:
+        min_crds = np.array([np.inf, np.inf])
+        max_crds = np.array([-np.inf, -np.inf])
+        max_u = [-np.inf, -np.inf, -np.inf]
+        for node_tag in node_tags:
+            crds = ops.nodeCoord(node_tag)
+            u = ops.nodeDisp(node_tag)
+
+            min_crds[0] = min(min_crds[0], crds[0])
+            min_crds[1] = min(min_crds[1], crds[1])
+            max_crds[0] = max(max_crds[0], crds[0])
+            max_crds[1] = max(max_crds[1], crds[1])
+            max_u[0] = max(max_u[0], np.abs(u[0]))
+            max_u[1] = max(max_u[1], np.abs(u[1]))
+
+        max_u_abs = max(max_u)
+        max_u_abs = max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep)
+
+    elif ndim == 3:
+        min_crds = np.array([np.inf, np.inf, np.inf])
+        max_crds = np.array([-np.inf, -np.inf, -np.inf])
+        max_u = np.array([-np.inf, -np.inf, -np.inf])
+        for node_tag in node_tags:
+            crds = ops.nodeCoord(node_tag)[0]
+            u = ops.nodeDisp(node_tag)
+
+            min_crds[0] = min(min_crds[0], crds[0])
+            min_crds[1] = min(min_crds[1], crds[1])
+            min_crds[2] = min(min_crds[2], crds[2])
+            max_crds[0] = max(max_crds[0], crds[0])
+            max_crds[1] = max(max_crds[1], crds[1])
+            max_crds[2] = max(max_crds[2], crds[2])
+            max_u[0] = max(max_u[0], np.abs(u[0]))
+            max_u[1] = max(max_u[1], np.abs(u[1]))
+            max_u[2] = max(max_u[2], np.abs(u[2]))
+
+        max_u_abs = max(max_u)
+        max_u_abs = max_u_abs_from_beam_defo_interp_3d(max_u_abs, nep)
+
+    dmax = max_crds - min_crds
+    dlmax = max(dmax)
+
+    sfac = ratio * dlmax / max_u_abs
+
+    return sfac
+
+
 def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                        fmt_defo_faces, fmt_undefo_faces,
                        interpFlag, endDispFlag, fmt_nodes,
@@ -894,40 +965,10 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     undeformed (original) mesh and without showing markers at the
     element ends.
     """
-    node_tags = ops.getNodeTags()
-
-    # calculate sfac
-    min_x, min_y, min_z = np.inf, np.inf, np.inf
-    max_x, max_y, max_z = -np.inf, -np.inf, -np.inf
-    max_ux, max_uy, max_uz = -np.inf, -np.inf, -np.inf
-    ratio = 0.1
-
     ndim = ops.getNDM()[0]
+    sfac = defo_scale(nep)
 
     if ndim == 2:
-        if not sfac:
-            for node_tag in node_tags:
-                x_crd = ops.nodeCoord(node_tag)[0]
-                y_crd = ops.nodeCoord(node_tag)[1]
-                ux = ops.nodeDisp(node_tag)[0]
-                uy = ops.nodeDisp(node_tag)[1]
-
-                min_x = min(min_x, x_crd)
-                min_y = min(min_y, y_crd)
-                max_x = max(max_x, x_crd)
-                max_y = max(max_y, y_crd)
-                max_ux = max(max_ux, np.abs(ux))
-                max_uy = max(max_uy, np.abs(uy))
-
-            dxmax = max_x - min_x
-            dymax = max_y - min_y
-            dlmax = max(dxmax, dymax)
-            max_u_abs = max(max_ux, max_uy)
-
-            max_u_abs = max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep)
-
-            sfac = ratio * dlmax/max_u_abs
-
         ax = _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo,
                                 fmt_undefo, fmt_defo_faces,
                                 fmt_undefo_faces, interpFlag,
@@ -935,35 +976,6 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
                                 fig_lbrt, node_supports, ax)
 
     elif ndim == 3:
-        if not sfac:
-            for node_tag in node_tags:
-                x_crd = ops.nodeCoord(node_tag)[0]
-                y_crd = ops.nodeCoord(node_tag)[1]
-                z_crd = ops.nodeCoord(node_tag)[2]
-                ux = ops.nodeDisp(node_tag)[0]
-                uy = ops.nodeDisp(node_tag)[1]
-                uz = ops.nodeDisp(node_tag)[2]
-
-                min_x = min(min_x, x_crd)
-                min_y = min(min_y, y_crd)
-                min_z = min(min_z, z_crd)
-                max_x = max(max_x, x_crd)
-                max_y = max(max_y, y_crd)
-                max_z = max(max_z, z_crd)
-                max_ux = max(max_ux, np.abs(ux))
-                max_uy = max(max_uy, np.abs(uy))
-                max_uz = max(max_uz, np.abs(uz))
-
-            dxmax = max_x - min_x
-            dymax = max_y - min_y
-            dzmax = max_z - min_z
-            dlmax = max(dxmax, dymax, dzmax)
-            max_u_abs = max(max_ux, max_uy, max_uz)
-
-            max_u_abs = max_u_abs_from_beam_defo_interp_3d(max_u_abs, nep)
-
-            sfac = ratio * dlmax/max_u_abs
-
         ax = _plot_defo_mode_3d(0, sfac, nep, unDefoFlag, fmt_defo,
                                 fmt_undefo, fmt_defo_faces,
                                 fmt_undefo_faces, interpFlag,
