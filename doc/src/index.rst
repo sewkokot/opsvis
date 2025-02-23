@@ -108,10 +108,12 @@ visualization are as follows:
 
 #. :doc:`plot_model`
 #. :doc:`plot_defo`
-#. :doc:`plot_loads_2d`
+#. :doc:`plot_load`
 #. :doc:`plot_mode_shape`
 #. :doc:`section_force_diagram_2d`
 #. :doc:`section_force_diagram_3d`
+#. :doc:`plot_stress`
+#. :doc:`plot_strain`
 #. :doc:`plot_stress_2d`
 #. :doc:`plot_extruded_model_rect_section_3d`
 #. :doc:`anim_defo`
