@@ -12,10 +12,12 @@ Welcome to Opsvis documentation!
 
    plot_model
    plot_defo
-   plot_loads_2d
+   plot_load
    plot_mode_shape
    section_force_diagram_2d
    section_force_diagram_3d
+   plot_stress
+   plot_strain
    plot_stress_2d
    plot_extruded_model_rect_section_3d
    anim_defo
