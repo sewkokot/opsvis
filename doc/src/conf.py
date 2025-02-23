@@ -18,11 +18,11 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'opsvis'
-copyright = '2022, Seweryn Kokot'
+copyright = '2024, Seweryn Kokot'
 author = 'Seweryn Kokot'
 
 # The full version, including alpha/beta/rc tags
-release = '0.99.1'
+release = '0.99.2'
 
 # -- General configuration ---------------------------------------------------
 
