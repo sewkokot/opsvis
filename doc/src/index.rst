@@ -32,7 +32,7 @@ Warning - Incompatible changes!
 Starting from Opsvis ver. 1.0.1 (May 2022):
 
 #. the ``plot_supports_and_loads_2d`` function is removed and instead
-   ``plot_loads_2d`` is available. The model supports can now be shown in
+   ``plot_load`` is available. The model supports can now be shown in
    the ``plot_model`` function. The additiona function argument
    ``node_supports`` (default is True) can be switched off (e.g.
    ``plot_model(node_supports=False)``).
