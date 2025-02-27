@@ -47,6 +47,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../plot_mode_shape.html">plot_mode_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_2d.html">section_force_diagram_2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_stress.html">plot_stress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_strain.html">plot_strain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_stress_2d.html">plot_stress_2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
@@ -1200,11 +1201,13 @@
     <span class="k">return</span> <span class="n">val_c1</span>
 
 
+<div class="viewcode-block" id="plot_stress">
+<a class="viewcode-back" href="../../plot_stress.html#opsvis.plot_stress">[docs]</a>
 <span class="k">def</span> <span class="nf">plot_stress</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot stress distribution of the model.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        stress_str (string): stress component string. Available options are:</span>
+<span class="sd">        stress_str (string): stress component. Available options are:</span>
 <span class="sd">            &#39;sxx&#39;, &#39;syy&#39;, &#39;sxy&#39;, &#39;vmis&#39;, &#39;s1&#39;, &#39;s2&#39;, &#39;alpha&#39;</span>
 
 <span class="sd">        mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.</span>
@@ -1232,7 +1235,8 @@
         <span class="n">_plot_stress_2d</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="plot_strain">
@@ -1241,7 +1245,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot strain distribution of the model.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        strain_str (string): strain component string. Available options are:</span>
+<span class="sd">        strain_str (string): strain component. Available options are:</span>
 <span class="sd">            &#39;exx&#39;, &#39;eyy&#39;, &#39;exy&#39;, &#39;ezz&#39;</span>
 
 <span class="sd">        mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.</span>
@@ -1253,14 +1257,10 @@
 <span class="sd">    Usage:</span>
 <span class="sd">        ::</span>
 
-<span class="sd">            opsv.plot_strain(&#39;vmis&#39;)</span>
+<span class="sd">            opsv.plot_strain(&#39;exx&#39;)</span>
 <span class="sd">            plt.xlabel(&#39;x [m]&#39;)</span>
 <span class="sd">            plt.ylabel(&#39;y [m]&#39;)</span>
 <span class="sd">            plt.show()</span>
-
-<span class="sd">    See also:</span>
-
-<span class="sd">    :ref:`opsvis_sig_out_per_node`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">ndim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNDM</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>

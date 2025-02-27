@@ -95,7 +95,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>strain_str</strong> (<em>string</em>) – strain component string. Available options are:
+<li><p><strong>strain_str</strong> (<em>string</em>) – strain component. Available options are:
 ‘exx’, ‘eyy’, ‘exy’, ‘ezz’</p></li>
 <li><p><strong>mesh_outline</strong> (<em>int</em>) – 1 - mesh is plotted, 0 - no mesh plotted.</p></li>
 <li><p><strong>cmap</strong> (<em>str</em>) – Matplotlib color map (default is ‘turbo’)</p></li>
@@ -104,7 +104,7 @@
 </dd>
 </dl>
 <dl>
-<dt>Usage:</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_strain</span><span class="p">(</span><span class="s1">&#39;vmis&#39;</span><span class="p">)</span>
+<dt>Usage:</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_strain</span><span class="p">(</span><span class="s1">&#39;exx&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x [m]&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;y [m]&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
@@ -112,8 +112,6 @@
 </div>
 </dd>
 </dl>
-<p>See also:</p>
-<p><a class="reference internal" href="sig_out_per_node.html#opsvis-sig-out-per-node"><span class="std std-ref">sig_out_per_node</span></a></p>
 </dd></dl>
 
 <p>See example <a class="reference internal" href="ex_quads_4x4.html#opsvis-ex3"><span class="std std-ref">Plot stress distribution of a plane stress quad model</span></a></p>

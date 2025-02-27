@@ -79,22 +79,26 @@ opsv.plot_load()
 opsv.plot_defo(unDefoFlag=1)
 plt.axis('equal')
 
-# get values at OpenSees nodes
-sig_out = opsv.sig_out_per_node()
-
-# !!! select from sig_out: e.g. vmises
-# j, jstr = 0, 'sxx'
-j, jstr = 1, 'syy'
-# j, jstr = 2, 'sxy'
-# j, jstr = 3, 'vmis'
-# j, jstr = 4, 's1'
-# j, jstr = 5, 's2'
-# j, jstr = 6, 'alfa'
-
-nds_val = sig_out[:, j]
-
+jstr = 'sxx'
 plt.figure()
-opsv.plot_stress_2d(nds_val)
+opsv.plot_stress(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
+
+jstr = 'syy'
+plt.figure()
+opsv.plot_stress(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
+
+jstr = 'sxy'
+plt.figure()
+opsv.plot_stress(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
 
 jstr = 'vmis'
 plt.figure()
@@ -118,6 +122,12 @@ plt.xlabel('x [m]')
 plt.ylabel('y [m]')
 plt.title(f'{jstr}')
 
+jstr = 'exy'
+plt.figure()
+opsv.plot_strain(jstr)
+plt.xlabel('x [m]')
+plt.ylabel('y [m]')
+plt.title(f'{jstr}')
 
 plt.show()
 

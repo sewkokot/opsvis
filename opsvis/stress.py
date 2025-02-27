@@ -1113,7 +1113,7 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     """Plot stress distribution of the model.
 
     Args:
-        stress_str (string): stress component string. Available options are:
+        stress_str (string): stress component. Available options are:
             'sxx', 'syy', 'sxy', 'vmis', 's1', 's2', 'alpha'
 
         mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.
@@ -1148,7 +1148,7 @@ def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     """Plot strain distribution of the model.
 
     Args:
-        strain_str (string): strain component string. Available options are:
+        strain_str (string): strain component. Available options are:
             'exx', 'eyy', 'exy', 'ezz'
 
         mesh_outline (int): 1 - mesh is plotted, 0 - no mesh plotted.
@@ -1160,14 +1160,10 @@ def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     Usage:
         ::
 
-            opsv.plot_strain('vmis')
+            opsv.plot_strain('exx')
             plt.xlabel('x [m]')
             plt.ylabel('y [m]')
             plt.show()
-
-    See also:
-
-    :ref:`opsvis_sig_out_per_node`
     """
 
     ndim = ops.getNDM()[0]
