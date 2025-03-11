@@ -59,7 +59,7 @@ def defo_scale(nep):
         max_crds = np.array([-np.inf, -np.inf, -np.inf])
         max_u = np.array([-np.inf, -np.inf, -np.inf])
         for node_tag in node_tags:
-            crds = ops.nodeCoord(node_tag)[0]
+            crds = ops.nodeCoord(node_tag)
             u = ops.nodeDisp(node_tag)
 
             min_crds[0] = min(min_crds[0], crds[0])
@@ -966,7 +966,9 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     element ends.
     """
     ndim = ops.getNDM()[0]
-    sfac = defo_scale(nep)
+
+    if not sfac:
+        sfac = defo_scale(nep)
 
     if ndim == 2:
         ax = _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo,
