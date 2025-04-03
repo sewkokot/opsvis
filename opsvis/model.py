@@ -2056,8 +2056,231 @@ def get_Ew_data_from_ops_domain_3d():
         else:
             print(f'\nWarning! ele_load_type:\n{ele_load_type} - Unknown element load Error')
 
-
     return Ew
+
+
+def plot_reactions_2d(sfac, fig_wi_he,
+                      fig_lbrt, fmt_model_loads,
+                      truss_node_offset, ax):
+    """Display support reactions of the 2d models.
+    This is a local function: use plot_reactions()
+    """
+
+    if not ax:
+        if fig_wi_he:
+            fig_wi, fig_he = fig_wi_he
+            fig, ax = plt.subplots(figsize=(fig_wi / 2.54, fig_he / 2.54))
+        else:
+            fig, ax = plt.subplots()
+
+        if fig_lbrt:
+            fleft, fbottom, fright, ftop = fig_lbrt
+            fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
+
+    ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
+                    node_supports=False,
+                    truss_node_offset=truss_node_offset, ax=ax)
+
+    if not sfac:
+        ratio = 0.1
+        min_x, max_x = ax.get_xlim()
+        min_y, max_y = ax.get_ylim()
+        xsfac = ratio * abs(max_x - min_x)
+        ysfac = ratio * abs(max_y - min_y)
+        sfac = max(xsfac, ysfac)
+
+    fixed_nodes = ops.getFixedNodes()
+
+    for node_tag in fixed_nodes:
+        nd_crd = ops.nodeCoord(node_tag)
+
+        fixed_dofs = ops.getFixedDOFs(node_tag)
+
+        for dof in fixed_dofs:
+            reaction = ops.nodeReaction(node_tag, dof)
+
+            if dof == 1:
+                dx = sfac * np.sign(reaction)
+                dy = 0.
+
+                ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
+                         dx, dy,
+                         lw=3,
+                         head_width=0.1 * sfac, head_length=0.2 * sfac,
+                         fc='b', ec='b',
+                         length_includes_head=True, shape='full',
+                         joinstyle='round')
+                ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
+                        f' {abs(reaction):.5g}', color='b', va='bottom', ha='center')
+
+            elif dof == 2:
+                dx = 0.
+                dy = sfac * np.sign(reaction)
+
+                ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
+                         dx, dy,
+                         lw=3,
+                         head_width=0.1 * sfac, head_length=0.2 * sfac,
+                         fc='b', ec='b',
+                         length_includes_head=True, shape='full',
+                         joinstyle='round')
+                ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
+                        f' {abs(reaction):.5g}', color='b', va='bottom', ha='left')
+
+            elif dof == 3:
+                kier2 = np.sign(reaction)
+                reaction_str = f'{abs(reaction):.5g}'
+                if kier2 > 0:
+                    marker_type = r'$\curvearrowleft$'
+                    ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                            color='b', va='top', ha='right')
+
+                elif kier2 < 0:
+                    marker_type = r'$\curvearrowright$'
+                    ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                            color='b', va='top', ha='left')
+
+                ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30, color='b')
+
+    ax.axis('equal')
+    ax.grid(False)
+
+    return ax
+
+
+def plot_reactions_3d(sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
+                      truss_node_offset, local_axes, ax):
+    """Display support reactions of the 3d models.
+    This is a local function: use plot_reactions()
+    """
+
+    if not ax:
+        if fig_wi_he:
+            fig_wi, fig_he = fig_wi_he
+
+            fig = plt.figure(figsize=(fig_wi / 2.54, fig_he / 2.54))
+
+        else:
+            fig = plt.figure()
+
+        if fig_lbrt:
+            fleft, fbottom, fright, ftop = fig_lbrt
+            fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
+
+        ax = fig.add_subplot(111, projection=Axes3D.name)
+
+    ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
+                    node_supports=False, local_axes=local_axes, ax=ax)
+
+    if not sfac:
+        ratio = 0.15  # initial scale 10% of the max dimension
+        min_x, max_x = ax.get_xlim()
+        min_y, max_y = ax.get_ylim()
+        min_z, max_z = ax.get_zlim()
+        xsfac = ratio * abs(max_x - min_x)
+        ysfac = ratio * abs(max_y - min_y)
+        zsfac = ratio * abs(max_z - min_z)
+        sfac = max(xsfac, ysfac, zsfac)
+
+    fixed_nodes = ops.getFixedNodes()
+
+    for node_tag in fixed_nodes:
+        nd_crd = ops.nodeCoord(node_tag)
+
+        fixed_dofs = ops.getFixedDOFs(node_tag)
+
+        for dof in fixed_dofs:
+            reaction = ops.nodeReaction(node_tag, dof)
+            dx, dy, dz = 0., 0., 0.
+
+            if dof in [1, 2, 3]:
+                kolor = 'b'
+
+                if dof == 1:
+                    dx = sfac * np.sign(reaction)
+
+                elif dof == 2:
+                    dy = sfac * np.sign(reaction)
+
+                elif dof == 3:
+                    dz = sfac * np.sign(reaction)
+
+                nn = 1.0  # additional scaling for arrows
+                ax.arrow3D(*nd_crd, nn * dx, nn * dy, nn * dz,
+                           mutation_scale=10, ec=kolor, fc=kolor)
+
+                ax.text(nd_crd[0] + dx,
+                        nd_crd[1] + dy,
+                        nd_crd[2] + dz,
+                        f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+
+            if dof in [4, 5, 6]:
+                kolor = 'g'
+
+                if dof == 4:
+                    dx = sfac * np.sign(reaction)
+
+                elif dof == 5:
+                    dy = sfac * np.sign(reaction)
+
+                elif dof == 6:
+                    dz = sfac * np.sign(reaction)
+
+                nn = 0.5  # additional scaling for arrows
+                ax.arrow3D(nd_crd[0] + dx,
+                           nd_crd[1] + dy,
+                           nd_crd[2] + dz,
+                           nn * 2 * dx,
+                           nn * 2 * dy,
+                           nn * 2 * dz,
+                           mutation_scale=10, ec=kolor, fc=kolor)
+                ax.arrow3D(nd_crd[0] + 1.5 * dx,
+                           nd_crd[1] + 1.5 * dy,
+                           nd_crd[2] + 1.5 * dz,
+                           nn * 2 * dx,
+                           nn * 2 * dy,
+                           nn * 2 * dz,
+                           mutation_scale=10, ec=kolor, fc=kolor)
+
+                ax.text(nd_crd[0] + 3 * dx,
+                        nd_crd[1] + 3 * dy,
+                        nd_crd[2] + 3 * dz,
+                        f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+
+    return ax
+
+
+def plot_reactions(sfac=False, fig_wi_he=False,
+                   fig_lbrt=False, fmt_model_loads=fmt_model_loads,
+                   truss_node_offset=0, local_axes=False, ax=False):
+    """Display the nodal and element loads applied to the 2d and 3d models.
+
+    Args:
+        nep (int): number of arrows when displacing element distributed loads
+            (default: 11)
+
+        node_supports (bool): True - show the node support conditions.
+            Default: False.
+
+    """
+    ndim = ops.getNDM()[0]
+    ops.reactions()
+
+    if ndim == 2:
+        ax = plot_reactions_2d(sfac, fig_wi_he,
+                               fig_lbrt, fmt_model_loads,
+                               truss_node_offset, ax)
+
+    elif ndim == 3:
+        ax = plot_reactions_3d(sfac, fig_wi_he,
+                               fig_lbrt, fmt_model_loads,
+                               truss_node_offset,
+                               local_axes, ax)
+
+    else:
+        print(f'\nWarning! ndim: {ndim} not supported yet.')
+
+    return ax
 
 
 def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
