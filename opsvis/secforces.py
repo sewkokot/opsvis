@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 from matplotlib.collections import PolyCollection
 from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
+from math import isclose
 import matplotlib.tri as tri
 
 from .settings import *
@@ -561,18 +562,22 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
             else:
                 if end_max_values:
-                    ha = 'left'
-                    va = 'bottom'
-                    ax.text(s_p[0, 0], s_p[0, 1],
-                            f'{ss[0]:.5g}', va=va, ha=ha)
-                    ax.text(s_p[-1, 0], s_p[-1, 1],
-                            f'{ss[-1]:.5g}', va=va, ha=ha)
+                    ha, va = 'left', 'bottom'
+                    ss_beg, ss_end = ss[0], ss[-1]
 
-                    if minVal_ind != 0 or minVal_ind != nep - 1:
+                    if not isclose(ss_beg, 0., abs_tol=1e-9):
+                        ax.text(s_p[0, 0], s_p[0, 1],
+                                f'{ss_beg:.5g}', va=va, ha=ha)
+
+                    if not isclose(ss_end, 0., abs_tol=1e-9):
+                        ax.text(s_p[-1, 0], s_p[-1, 1],
+                                f'{ss_end:.5g}', va=va, ha=ha)
+
+                    if minVal_ind != 0 and minVal_ind != nep - 1:
                         ax.text(s_p[minVal_ind, 0], s_p[minVal_ind, 1],
                                 f'{ss[minVal_ind]:.5g}', va=va, ha=ha)
 
-                    if maxVal_ind != 0 or maxVal_ind != nep - 1:
+                    if maxVal_ind != 0 and maxVal_ind != nep - 1:
                         ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1],
                                 f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
 
@@ -849,18 +854,22 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
             else:
                 if end_max_values:
-                    ha = 'left'
-                    va = 'bottom'
-                    ax.text(s_p[0, 0], s_p[0, 1], s_p[0, 2],
-                            f'{ss[0]:.5g}', va=va, ha=ha)
-                    ax.text(s_p[-1, 0], s_p[-1, 1], s_p[-1, 2],
-                            f'{ss[-1]:.5g}', va=va, ha=ha)
+                    ha, va = 'left', 'bottom'
+                    ss_beg, ss_end = ss[0], ss[-1]
 
-                    if minVal_ind != 0 or minVal_ind != nep - 1:
+                    if not isclose(ss_beg, 0., abs_tol=1e-9):
+                        ax.text(s_p[0, 0], s_p[0, 1], s_p[0, 2],
+                                f'{ss[0]:.5g}', va=va, ha=ha)
+
+                    if not isclose(ss_end, 0., abs_tol=1e-9):
+                        ax.text(s_p[-1, 0], s_p[-1, 1], s_p[-1, 2],
+                                f'{ss[-1]:.5g}', va=va, ha=ha)
+
+                    if minVal_ind != 0 and minVal_ind != nep - 1:
                         ax.text(s_p[minVal_ind, 0], s_p[minVal_ind, 1], s_p[minVal_ind, 2],
                                 f'{ss[minVal_ind]:.5g}', va=va, ha=ha)
 
-                    if maxVal_ind != 0 or maxVal_ind != nep - 1:
+                    if maxVal_ind != 0 and maxVal_ind != nep - 1:
                         ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
                                 f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
 

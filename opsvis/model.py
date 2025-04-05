@@ -8,6 +8,7 @@ from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
 from matplotlib.path import Path
 import matplotlib.tri as tri
+from math import isclose
 
 from .settings import *
 from .defo import *
@@ -2099,48 +2100,53 @@ def plot_reactions_2d(sfac, fig_wi_he,
         for dof in fixed_dofs:
             reaction = ops.nodeReaction(node_tag, dof)
 
-            if dof == 1:
-                dx = sfac * np.sign(reaction)
-                dy = 0.
+            if not isclose(reaction, 0., abs_tol=1e-9):
 
-                ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
-                         dx, dy,
-                         lw=3,
-                         head_width=0.1 * sfac, head_length=0.2 * sfac,
-                         fc='b', ec='b',
-                         length_includes_head=True, shape='full',
-                         joinstyle='round')
-                ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
-                        f' {abs(reaction):.5g}', color='b', va='bottom', ha='center')
+                if dof in [1, 2]:
+                    reac_sign = np.sign(reaction)
 
-            elif dof == 2:
-                dx = 0.
-                dy = sfac * np.sign(reaction)
+                    if dof == 1:
+                        dx = sfac * reac_sign
+                        dy = 0.
+                        ha_my = 'center'
 
-                ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
-                         dx, dy,
-                         lw=3,
-                         head_width=0.1 * sfac, head_length=0.2 * sfac,
-                         fc='b', ec='b',
-                         length_includes_head=True, shape='full',
-                         joinstyle='round')
-                ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
-                        f' {abs(reaction):.5g}', color='b', va='bottom', ha='left')
+                    elif dof == 2:
+                        reac_sign = np.sign(reaction)
+                        dx = 0.
+                        dy = sfac * reac_sign
+                        ha_my = 'left'
 
-            elif dof == 3:
-                kier2 = np.sign(reaction)
-                reaction_str = f'{abs(reaction):.5g}'
-                if kier2 > 0:
-                    marker_type = r'$\curvearrowleft$'
-                    ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
-                            color='b', va='top', ha='right')
+                    if reac_sign > 0:
+                        x0, y0 = nd_crd[0] - dx, nd_crd[1] - dy
+                        x0t, y0t = x0, y0
+                    else:
+                        x0, y0 = nd_crd[0], nd_crd[1]
+                        x0t, y0t = x0 + dx, y0 + dy
 
-                elif kier2 < 0:
-                    marker_type = r'$\curvearrowright$'
-                    ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
-                            color='b', va='top', ha='left')
+                    ax.arrow(x0, y0,
+                             dx, dy,
+                             lw=3,
+                             head_width=0.1 * sfac, head_length=0.2 * sfac,
+                             fc='b', ec='b',
+                             length_includes_head=True, shape='full',
+                             joinstyle='round')
+                    ax.text(x0t, y0t,
+                            f' {abs(reaction):.5g}', color='b', va='bottom', ha=ha_my)
 
-                ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30, color='b')
+                elif dof == 3:
+                    kier2 = np.sign(reaction)
+                    reaction_str = f'{abs(reaction):.5g}'
+                    if kier2 > 0:
+                        marker_type = r'$\curvearrowleft$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                                color='b', va='top', ha='right')
+
+                    elif kier2 < 0:
+                        marker_type = r'$\curvearrowright$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                                color='b', va='top', ha='left')
+
+                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30, color='b')
 
     ax.axis('equal')
     ax.grid(False)
@@ -2193,59 +2199,64 @@ def plot_reactions_3d(sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             reaction = ops.nodeReaction(node_tag, dof)
             dx, dy, dz = 0., 0., 0.
 
-            if dof in [1, 2, 3]:
-                kolor = 'b'
+            if not isclose(reaction, 0., abs_tol=1e-9):
 
-                if dof == 1:
-                    dx = sfac * np.sign(reaction)
+                if dof in [1, 2, 3]:
+                    kolor = 'b'
 
-                elif dof == 2:
-                    dy = sfac * np.sign(reaction)
+                    if dof == 1:
+                        dx = sfac * np.sign(reaction)
+                        # xcomp = 1
 
-                elif dof == 3:
-                    dz = sfac * np.sign(reaction)
+                    elif dof == 2:
+                        dy = sfac * np.sign(reaction)
+                        # ycomp = 1
 
-                nn = 1.0  # additional scaling for arrows
-                ax.arrow3D(*nd_crd, nn * dx, nn * dy, nn * dz,
-                           mutation_scale=10, ec=kolor, fc=kolor)
+                    elif dof == 3:
+                        dz = sfac * np.sign(reaction)
+                        # zcomp = 1
 
-                ax.text(nd_crd[0] + dx,
-                        nd_crd[1] + dy,
-                        nd_crd[2] + dz,
-                        f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+                    nn = 1.0  # additional scaling for arrows
+                    ax.arrow3D(*nd_crd, nn * dx, nn * dy, nn * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
 
-            if dof in [4, 5, 6]:
-                kolor = 'g'
+                    ax.text(nd_crd[0] + dx,
+                            nd_crd[1] + dy,
+                            nd_crd[2] + dz,
+                            f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
 
-                if dof == 4:
-                    dx = sfac * np.sign(reaction)
+                if dof in [4, 5, 6]:
+                    kolor = 'g'
 
-                elif dof == 5:
-                    dy = sfac * np.sign(reaction)
+                    if dof == 4:
+                        dx = sfac * np.sign(reaction)
 
-                elif dof == 6:
-                    dz = sfac * np.sign(reaction)
+                    elif dof == 5:
+                        dy = sfac * np.sign(reaction)
 
-                nn = 0.5  # additional scaling for arrows
-                ax.arrow3D(nd_crd[0] + dx,
-                           nd_crd[1] + dy,
-                           nd_crd[2] + dz,
-                           nn * 2 * dx,
-                           nn * 2 * dy,
-                           nn * 2 * dz,
-                           mutation_scale=10, ec=kolor, fc=kolor)
-                ax.arrow3D(nd_crd[0] + 1.5 * dx,
-                           nd_crd[1] + 1.5 * dy,
-                           nd_crd[2] + 1.5 * dz,
-                           nn * 2 * dx,
-                           nn * 2 * dy,
-                           nn * 2 * dz,
-                           mutation_scale=10, ec=kolor, fc=kolor)
+                    elif dof == 6:
+                        dz = sfac * np.sign(reaction)
 
-                ax.text(nd_crd[0] + 3 * dx,
-                        nd_crd[1] + 3 * dy,
-                        nd_crd[2] + 3 * dz,
-                        f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+                    nn = 0.5  # additional scaling for arrows
+                    ax.arrow3D(nd_crd[0] + dx,
+                               nd_crd[1] + dy,
+                               nd_crd[2] + dz,
+                               nn * 2 * dx,
+                               nn * 2 * dy,
+                               nn * 2 * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
+                    ax.arrow3D(nd_crd[0] + 1.5 * dx,
+                               nd_crd[1] + 1.5 * dy,
+                               nd_crd[2] + 1.5 * dz,
+                               nn * 2 * dx,
+                               nn * 2 * dy,
+                               nn * 2 * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
+
+                    ax.text(nd_crd[0] + 3 * dx,
+                            nd_crd[1] + 3 * dy,
+                            nd_crd[2] + 3 * dz,
+                            f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
 
     return ax
 
@@ -2253,15 +2264,7 @@ def plot_reactions_3d(sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 def plot_reactions(sfac=False, fig_wi_he=False,
                    fig_lbrt=False, fmt_model_loads=fmt_model_loads,
                    truss_node_offset=0, local_axes=False, ax=False):
-    """Display the nodal and element loads applied to the 2d and 3d models.
-
-    Args:
-        nep (int): number of arrows when displacing element distributed loads
-            (default: 11)
-
-        node_supports (bool): True - show the node support conditions.
-            Default: False.
-
+    """Display support reactions of 2d and 3d models.
     """
     ndim = ops.getNDM()[0]
     ops.reactions()
