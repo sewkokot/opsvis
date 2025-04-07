@@ -1336,7 +1336,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
     ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
                     node_supports=node_supports,
                     truss_node_offset=truss_node_offset, ax=ax)
-    # ax.axis('equal')
 
     if not sfac:
         ratio = 0.1
@@ -1353,7 +1352,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
     waa = False
     wab = False
 
-    ### get Ew data
     Ew = get_Ew_data_from_ops_domain()
 
     for ele_tag in ele_tags:
@@ -1388,29 +1386,16 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             else:
                 pass
 
-            # step 1: first plot model itself
-            # ax.plot(ecrd[:, 0], ecrd[:, 1], 'k-', solid_capstyle='round', solid_joinstyle='round',
-            #         dash_capstyle='butt', dash_joinstyle='round')
-
-            # step 2
             Lxy = ecrd_eles[1, :] - ecrd_eles[0, :]
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
-            # if not sfac:
-            #     sfac = ratio * L
-
             xl = np.linspace(0., L, nep)
             xl2 = np.linspace(0., L, 5)
-            # xl2 = np.logspace(0., 1., nep) * L / nep
             dxs = np.array([0.1, 0.2, 0.3, 0.4])
-            # dxs = np.array([0.15, 0.2, 0.275, 0.375])
             xl3 = np.append(0., np.cumsum(dxs)) * L
 
             one = np.ones(nep)
-            # pl = ops.eleResponse(ele_tag, 'localForces')
-
-            # s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, ele_load_data)
 
             for ele_load_data_i in ele_load_data:
                 ele_load_type = ele_load_data_i[0]
@@ -1421,7 +1406,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s = sfac * np.sign(Pt)
 
                     s_0 = np.zeros(2)
-                    # s_0 = [ecrd[0, 0], ecrd[0, 1]]
 
                     s_0[0] = ecrd_eles[0, 0] + a * cosa
                     s_0[1] = ecrd_eles[0, 1] + a * cosb
@@ -1431,38 +1415,24 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s_p[0] -= s * cosb
                     s_p[1] += s * cosa
 
-
-                    # plot arrows
                     ax.arrow(s_0[0], s_0[1],
                              s_p[0] - s_0[0], s_p[1] - s_0[1],
-                             # width = 0.01,
                              head_starts_at_zero=True,  # default False
-                             # overhang=0.2,
-                             # lw = 1,
                              head_width=0.1 * sfac, head_length=0.2 * sfac,
                              fc='b', ec='b',
                              length_includes_head=False, shape='full')
                     ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, f'{abs(Pt)}', color='b')
-                    # ax.annotate("", xy=(s_p[0], s_p[1]),
-                    #             xytext=(s_0[0], s_0[1]),
-                    #             arrowprops=dict(arrowstyle="->", color='r', lw=3,
-                    #                             connectionstyle="arc3"))
 
                 elif ele_load_type == '-beamUniform':
 
                     n_ele_load_data = len(ele_load_data_i)
 
-                    # constant uniform element load
                     if n_ele_load_data == 3:
-                        # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                         Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
                         text_string = f'q = {abs(Wy):.3g}, {abs(Wx):.3g}'
 
-                        # s = sfac * Wy * one
                         s = sfac * one * np.sign(Wy)
-                        # plt.text(sum(ecrd[:, 0])/2, sum(ecrd[:, 1])/2, f'q = {Wy}, {Wx}', va='bottom', ha='center', color='r')
 
-                    # triangular or trapezoidal element load
                     elif n_ele_load_data == 7:
                         wta, waa, aL, bL, wtb, wab = ele_load_data_i[1:7]
                         text_string = f'q = {abs(wta)}, {abs(waa)}, {aL}, {bL}, {abs(wtb)}, {abs(wab)}'
@@ -1487,7 +1457,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s = s * sfac
 
                     s_0 = np.zeros((nep, 2))
-                    # s_0[0, :] = [ex[0], ey[0]]
                     s_0[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
 
                     s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
@@ -1497,54 +1466,34 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                     s_p[:, 0] -= s * cosb
                     s_p[:, 1] += s * cosa
-                    # plt.axis('equal')
 
-                    # reference perpendicular lines
                     for i in np.arange(nep):
                         ax.arrow(s_0[i, 0], s_0[i, 1],
                                  s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],
-                                 # width = 0.005,
-                                 # lw = 2,
                                  head_width=0.1*sfac, head_length=0.2*sfac,
                                  head_starts_at_zero=True,  # default False
-                                 # overhang=0.5,
                                  fc='r', ec='r',
                                  length_includes_head=True, shape='full')
-                        # ax.annotate("", xy=(s_p[i, 0], s_p[i, 1]),
-                        #             xytext=(s_0[i, 0], s_0[i, 1]),
-                        #             arrowprops=dict(arrowstyle="->", color='r', lw=1,
-                        #                             connectionstyle="arc3"))
 
-                    # connecting beg-end line - redundant ?
-                    # plt.plot([s_p[0, 0], s_p[-1, 0]],[s_p[0, 1], s_p[-1, 1]], 'r')
                     ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, text_string, va='bottom', ha='center', color='r')
 
                     if Wx != 0:
-                        # for i, xl in enumerate(xl2[:-1]):
-                        #     plt.arrow(sa[i, 0], sa[i, 1],
-                        #               sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                        #               width = 0.01,
-                        #               # lw = 1,
-                        #               # head_width=0.02, head_length=0.05,
-                        #               # head_starts_at_zero=True,  # default False
-                        #               # overhang=0.5,
-                        #               fc='m', ec='m',
-                        #               length_includes_head=True, shape='full')
 
                         if Wx < 0:
                             ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
                                       -1 * (s_0[1:, 0] - s_0[:-1, 0]),
                                       -1 * (s_0[1:, 1] - s_0[:-1, 1]),
-                                      scale_units='xy', angles='xy', scale=0.8, color='m')
+                                      scale_units='xy', angles='xy', scale=0.8,
+                                      color='m')
                         else:
                             ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
                                       s_0[1:, 0] - s_0[:-1, 0],
                                       s_0[1:, 1] - s_0[:-1, 1],
-                                      scale_units='xy', angles='xy', scale=0.8, color='m')
+                                      scale_units='xy', angles='xy', scale=0.8,
+                                      color='m')
 
                     if waa != 0 or wab != 0:
                         sa = np.zeros((5, 2))
-                        # sa[0, :] = [ex[0], ey[0]]
                         sa[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
                         sa[1:, 0] = sa[0, 0] + xl3[1:] * cosa
                         sa[1:, 1] = sa[0, 1] + xl3[1:] * cosb
@@ -1552,84 +1501,53 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                         for i, xl in enumerate(xl3[:-1]):
                             ax.arrow(sa[i, 0], sa[i, 1],
                                      sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                                     # width = 0.05,
-                                     width = 0.01*L,
-                                     # lw = 1,
-                                     # head_width=0.02, head_length=0.05,
-                                     # head_starts_at_zero=True,  # default False
-                                     # overhang=0.5,
+                                     width=0.01*L,
                                      fc='m', ec='m',
                                      length_includes_head=True, shape='full')
-
-                        # ax.quiver(sa[:-1, 0], sa[:-1, 1],
-                        #            sa[1:, 0]-sa[:-1, 0], sa[1:, 1]-sa[:-1, 1],
-                        #            scale_units='xy', angles='xy', scale=0.8, color='g')
-
-                        # ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
-                        #          fmt_secforce, solid_capstyle='round',
-                        #          solid_joinstyle='round', dash_capstyle='butt',
-                        #          dash_joinstyle='round')
-                        # plot arrows
-                        # ax.annotate("",
-                        #              xy=(s_p[i, 0], s_p[i, 1]), xycoords='data',
-                        #              xytext=(s_0[i, 0], s_0[i, 1]), textcoords='data',
-                        #              arrowprops=dict(arrowstyle="->", color='r', lw=2,
-                        #                              connectionstyle="arc3"))
 
     for node_tag in node_tags:
         nd_crd = ops.nodeCoord(node_tag)
 
-        # 2. nodal loads 2d
         nodal_loads = ops.nodeUnbalance(node_tag)
         nodal_loads_idx = np.nonzero(nodal_loads)
 
         if nodal_loads_idx[0].size:
             for kier in nodal_loads_idx[0]:
-                # horizontal or vertical nodal force (load)
                 if kier == 0 or kier == 1:
+                    kolor = 'b'
                     if kier == 0:
                         kier2 = np.sign(nodal_loads[kier])
-                        if kier2 > 0:
-                            pos_or_neg = '+'
-                        elif kier2 < 0:
-                            pos_or_neg = '-'
-                        dx = sfac*np.sign(kier2)
-                        dy = 0.
+                        dx, dy = sfac * np.sign(kier2), 0.
 
                     elif kier == 1:
                         kier2 = np.sign(nodal_loads[kier])
-                        if kier2 > 0:
-                            pos_or_neg = '+'
-                        elif kier2 < 0:
-                            pos_or_neg = '-'
-                        dx = 0.
-                        dy = sfac*np.sign(kier2)
+                        dx, dy = 0., sfac * np.sign(kier2)
 
-                    ax.arrow(nd_crd[0], nd_crd[1],
+                    ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
                              dx, dy,
-                             # width = 0.01,
-                             # head_starts_at_zero=True,  # default False
-                             # overhang=0.2,
                              lw=3,
-                             head_width=0.1*sfac, head_length=0.2*sfac,
-                             fc='b', ec='b',
-                             length_includes_head=True, shape='full')
-                    ax.text(nd_crd[0]+dx, nd_crd[1]+dy, f' {abs(nodal_loads[kier]):.5g}', color='b')
+                             head_width=0.1 * sfac, head_length=0.2 * sfac,
+                             fc=kolor, ec=kolor,
+                             length_includes_head=True, shape='full',
+                             joinstyle='round')
+                    ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
+                            f' {abs(nodal_loads[kier]):.5g}', color=kolor)
 
-                # concentrated bending moment
                 elif kier == 2:
+                    kolor = 'r'
                     kier2 = np.sign(nodal_loads[kier])
+                    nodal_load_str = f'{abs(nodal_loads[kier]):.5g}'
                     if kier2 > 0:
-                        pos_or_neg = 'anti-clockwise'
-                        # marker_type=r'$\circlearrowleft$'
-                        marker_type=r'$\curvearrowleft$'
+                        marker_type = r'$\curvearrowleft$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {nodal_load_str}',
+                                color=kolor, va='top', ha='right')
                     elif kier2 < 0:
-                        pos_or_neg = 'clockwise'
-                        # marker_type=r'$\circlearrowright$'
-                        marker_type=r'$\curvearrowright$'
+                        marker_type = r'$\curvearrowright$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {nodal_load_str}',
+                                color=kolor, va='top', ha='left')
 
-                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=35, color='b')
-                    ax.text(nd_crd[0], nd_crd[1], f'{abs(nodal_loads[kier]):.5g}', color='b', va='bottom', ha='left')
+                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30,
+                            color=kolor)
 
     ax.axis('equal')
     ax.grid(False)
