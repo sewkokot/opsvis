@@ -150,14 +150,9 @@ def section_force_distribution_2d(ecrd, pl, nep=2,
                 for x in np.nditer(xl):
                     xma = x - a
                     wtx = wta + (wtb - wta) * xma / bma
-                    # xc = a + bma * (wtb + 2*wta) / (3 * (wta + wtb))
-                    if wtx == 0:
-                        xc = 0.
-                    else:
-                        xc = xma * (wtx + 2*wta) / (3 * (wta + wtx))
+                    xc = xma * (wtx + 2*wta) / (3 * (wta + wtx))
 
                     Ax = 0.5 * (wtx+wta) * xma
-                    # V1x = V_1 * x
                     Axxc = Ax * xc
 
                     if x < a:

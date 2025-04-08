@@ -1454,8 +1454,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                             indx += 1
 
-                    s = s * sfac
-
                     s_0 = np.zeros((nep, 2))
                     s_0[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
 
@@ -1464,18 +1462,33 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                     s_p = np.copy(s_0)
 
-                    s_p[:, 0] -= s * cosb
-                    s_p[:, 1] += s * cosa
+                    s_p[:, 0] += s * cosb
+                    s_p[:, 1] -= s * cosa
 
+                    # for i in np.arange(nep):
+                    #     ax.arrow(s_0[i, 0], s_0[i, 1],
+                    #              s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],
+                    #              head_width=0.1*sfac, head_length=0.2*sfac,
+                    #              head_starts_at_zero=True,  # default False
+                    #              fc='r', ec='r',
+                    #              length_includes_head=True, shape='full')
                     for i in np.arange(nep):
-                        ax.arrow(s_0[i, 0], s_0[i, 1],
-                                 s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],
-                                 head_width=0.1*sfac, head_length=0.2*sfac,
-                                 head_starts_at_zero=True,  # default False
+                        ax.arrow(s_p[i, 0], s_p[i, 1],
+                                 s_0[i, 0] - s_p[i, 0], s_0[i, 1] - s_p[i, 1],
+                                 # width = 0.005,
+                                 lw=1,
+                                 head_width=0.1 * sfac, head_length=0.2 * sfac,
+                                 # head_starts_at_zero=True,  # default False
+                                 # overhang=0.5,
                                  fc='r', ec='r',
-                                 length_includes_head=True, shape='full')
+                                 length_includes_head=True, shape='full',
+                                 joinstyle='round')
 
-                    ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, text_string, va='bottom', ha='center', color='r')
+                    plt.plot([s_p[0, 0], s_p[-1, 0]],
+                             [s_p[0, 1], s_p[-1, 1]], 'r', lw=1)
+                    ax.text(s_p[int((nep - 1) / 3), 0],
+                            s_p[int((nep - 1) / 3), 1],
+                            text_string, va='bottom', ha='center', color='r')
 
                     if Wx != 0:
 
@@ -2021,6 +2034,7 @@ def plot_reactions_2d(sfac, fig_wi_he,
             if not isclose(reaction, 0., abs_tol=1e-9):
 
                 if dof in [1, 2]:
+                    kolor = 'b'
                     reac_sign = np.sign(reaction)
 
                     if dof == 1:
@@ -2045,26 +2059,28 @@ def plot_reactions_2d(sfac, fig_wi_he,
                              dx, dy,
                              lw=3,
                              head_width=0.1 * sfac, head_length=0.2 * sfac,
-                             fc='b', ec='b',
+                             fc=kolor, ec=kolor,
                              length_includes_head=True, shape='full',
                              joinstyle='round')
                     ax.text(x0t, y0t,
-                            f' {abs(reaction):.5g}', color='b', va='bottom', ha=ha_my)
+                            f' {abs(reaction):.5g}', color=kolor, va='bottom', ha=ha_my)
 
                 elif dof == 3:
+                    kolor = 'r'
                     kier2 = np.sign(reaction)
                     reaction_str = f'{abs(reaction):.5g}'
                     if kier2 > 0:
                         marker_type = r'$\curvearrowleft$'
                         ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
-                                color='b', va='top', ha='right')
+                                color=kolor, va='top', ha='right')
 
                     elif kier2 < 0:
                         marker_type = r'$\curvearrowright$'
                         ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
-                                color='b', va='top', ha='left')
+                                color=kolor, va='top', ha='left')
 
-                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30, color='b')
+                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30,
+                            color=kolor)
 
     ax.axis('equal')
     ax.grid(False)
