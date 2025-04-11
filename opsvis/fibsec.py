@@ -152,7 +152,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                 rj1 = rj + dr
 
                 for i in range(nc):
-                    thi = a0 + i * dth
+                    thi = 90 + a0 + i * dth
                     thi1 = thi + dth
                     wedge = Wedge((zC, yC), rj1, thi, thi1, width=dr, ec='k',
                                   lw=1, fc=matcolor[matTag-1])
