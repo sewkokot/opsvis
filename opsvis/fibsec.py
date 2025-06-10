@@ -183,7 +183,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                                   lw=1, fc=face_color)
                     ax.add_patch(wedge)
 
-            ax.axis('equal')
+    ax.axis('equal')
 
 
 def fib_sec_list_to_cmds(fib_sec_list):
