@@ -10,7 +10,8 @@ from .settings import *
 # written by D. Vamvatsikos available at
 # http://users.ntua.gr/divamva/software.html (plotSection.zip)
 def plot_fiber_section(fib_sec_list, fillflag=1,
-                       matcolor=['y', 'b', 'r', 'g', 'm', 'k']):
+                       matcolor=['y', 'b', 'r', 'g', 'm', 'k'],
+                       matcolor_dict=False):
     """Plot fiber cross-section.
 
     Args:
@@ -86,8 +87,20 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                     ax.add_patch(bar)
 
         if (item[0] == 'patch' and (item[1] == 'quad' or item[1] == 'quadr' or
-                                  item[1] == 'rect')):
+                                    item[1] == 'rect')):
             matTag, nIJ, nJK = item[2], item[3], item[4]
+            if matcolor_dict:
+                if matTag in matcolor_dict.keys():
+                    face_color = matcolor_dict[matTag]
+                else:
+                    print(f'opsvis warning! matTag: {matTag} not found in matcolor_dict; white is used\n')
+                    face_color = 'w'
+            else:
+                if len(matcolor) < matTag:
+                    print(f'opsvis warning! matTag: {matTag} exceeds matcolor length; white is used\n')
+                    face_color = 'w'
+                else:
+                    face_color = matcolor[matTag - 1]
 
             if item[1] == 'quad' or item[1] == 'quadr':
                 Iy, Iz, Jy, Jz = item[5], item[6], item[7], item[8]
@@ -126,7 +139,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                                        [Z[j, k+1], Y[j, k+1]],
                                        [Z[j+1, k+1], Y[j+1, k+1]],
                                        [Z[j+1, k], Y[j+1, k]]])
-                        poly = Polygon(zy, closed=True, ec='k', fc=matcolor[matTag-1])
+                        poly = Polygon(zy, closed=True, ec='k', fc=face_color)
                         ax.add_patch(poly)
 
             else:
@@ -140,6 +153,18 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
 
         if item[0] == 'patch' and item[1] == 'circ':
             matTag, nc, nr = item[2], item[3], item[4]
+            if matcolor_dict:
+                if matTag in matcolor_dict.keys():
+                    face_color = matcolor_dict[matTag]
+                else:
+                    print(f'opsvis warning! matTag: {matTag} not found in matcolor_dict; white is used\n')
+                    face_color = 'w'
+            else:
+                if len(matcolor) < matTag:
+                    print(f'opsvis warning! matTag: {matTag} exceeds matcolor length; white is used\n')
+                    face_color = 'w'
+                else:
+                    face_color = matcolor[matTag - 1]
 
             yC, zC, ri, re = item[5], item[6], item[7], item[8]
             a0, a1 = item[9], item[10]
@@ -155,7 +180,7 @@ def plot_fiber_section(fib_sec_list, fillflag=1,
                     thi = 90 + a0 + i * dth
                     thi1 = thi + dth
                     wedge = Wedge((zC, yC), rj1, thi, thi1, width=dr, ec='k',
-                                  lw=1, fc=matcolor[matTag-1])
+                                  lw=1, fc=face_color)
                     ax.add_patch(wedge)
 
             ax.axis('equal')
