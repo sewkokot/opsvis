@@ -571,8 +571,7 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 xd, yd, zd = beam_disp_ends3d(ecrd, ed.flatten(), sfac)
                 ax.plot(xd, yd, zd, **fmt_nodes)
 
-        elif (ele_classtag == EleClassTag.truss
-              or ele_classtag == EleClassTag.trussSection):
+        elif ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen, ndf = 2, 3
 
