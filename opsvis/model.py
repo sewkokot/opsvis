@@ -714,8 +714,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
                     dzi = (ecrd_eles[1, 2] - ecrd_eles[0, 2]) * Lgpi / bar_length(ecrd_eles)
                     ax.plot(ecrd_eles[0, 0] + dxi, ecrd_eles[0, 1] + dyi, ecrd_eles[0, 2] + dzi, **fmt_gauss_points)
 
-        elif (ele_classtag == EleClassTag.truss
-              or ele_classtag == EleClassTag.trussSection):
+        elif ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
