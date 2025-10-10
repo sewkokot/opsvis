@@ -1,0 +1,223 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soil-structure interaction: 2d Portal Frame &mdash; opsvis 1.3.3 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=f5127f15" />
+
+  
+      <script src="_static/jquery.js?v=958b65b0"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=28d163b9"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            opsvis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="plot_model.html">plot_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_defo.html">plot_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_reactions.html">plot_reactions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mode_shape.html">plot_mode_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_2d.html">section_force_diagram_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress.html">plot_stress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_strain.html">plot_strain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress_2d.html">plot_stress_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_defo.html">anim_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_mode.html">anim_mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_fiber_section.html">plot_fiber_section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fib_sec_list_to_cmds.html">fib_sec_list_to_cmds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sig_out_per_node.html">sig_out_per_node</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">opsvis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Soil-structure interaction: 2d Portal Frame</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ex_2d_ssi_portal_frame.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="soil-structure-interaction-2d-portal-frame">
+<span id="opsvis-ex6"></span><h1>Soil-structure interaction: 2d Portal Frame<a class="headerlink" href="#soil-structure-interaction-2d-portal-frame" title="Link to this heading"></a></h1>
+<p>Example <code class="docutils literal notranslate"><span class="pre">.py</span></code> file can be downloaded <a class="reference download internal" download="" href="_downloads/9675d24ef54c3e1f6a713f406ab9fb10/demo_ssi_portal_frame.py"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a>:</p>
+<img alt="_images/ssi_portal_frame_1-model.png" src="_images/ssi_portal_frame_1-model.png" />
+<img alt="_images/ssi_portal_frame_1-load.png" src="_images/ssi_portal_frame_1-load.png" />
+<img alt="_images/ssi_portal_frame_1-defo.png" src="_images/ssi_portal_frame_1-defo.png" />
+<img alt="_images/ssi_portal_frame_1-sxx.png" src="_images/ssi_portal_frame_1-sxx.png" />
+<img alt="_images/ssi_portal_frame_1-syy.png" src="_images/ssi_portal_frame_1-syy.png" />
+<img alt="_images/ssi_portal_frame_1-sxy.png" src="_images/ssi_portal_frame_1-sxy.png" />
+<img alt="_images/ssi_portal_frame_1-vmis.png" src="_images/ssi_portal_frame_1-vmis.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">openseespy.opensees</span> <span class="k">as</span> <span class="nn">ops</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">opsvis</span> <span class="k">as</span> <span class="nn">opsv</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="n">ops</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s1">&#39;basic&#39;</span><span class="p">,</span> <span class="s1">&#39;-ndm&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;-ndf&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">Ls</span><span class="p">,</span> <span class="n">Hs</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">4</span>
+<span class="linenos"> 8</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span> <span class="o">=</span> <span class="n">Ls</span><span class="p">,</span> <span class="n">Hs</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="n">ops</span><span class="o">.</span><span class="n">nDMaterial</span><span class="p">(</span><span class="s1">&#39;ElasticIsotropic&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">1000.</span><span class="p">,</span> <span class="mf">.3</span><span class="p">)</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="n">ops</span><span class="o">.</span><span class="n">block2D</span><span class="p">(</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;PlaneStress&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>
+<span class="linenos">13</span>            <span class="mi">1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>
+<span class="linenos">14</span>            <span class="mi">2</span><span class="p">,</span> <span class="n">Ls</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span>
+<span class="linenos">15</span>            <span class="mi">3</span><span class="p">,</span> <span class="n">Ls</span><span class="p">,</span> <span class="n">Hs</span><span class="p">,</span>
+<span class="linenos">16</span>            <span class="mi">4</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">Hs</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="n">ops</span><span class="o">.</span><span class="n">fixY</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">19</span><span class="n">ops</span><span class="o">.</span><span class="n">fixX</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos">20</span><span class="n">ops</span><span class="o">.</span><span class="n">fixX</span><span class="p">(</span><span class="n">Ls</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="n">ops</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s1">&#39;basic&#39;</span><span class="p">,</span> <span class="s1">&#39;-ndm&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;-ndf&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">25</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span> <span class="mf">2.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">)</span>
+<span class="linenos">26</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">102</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">27</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">103</span><span class="p">,</span> <span class="mf">3.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">28</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">110</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">29</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="mf">8.</span><span class="p">,</span> <span class="mf">8.</span><span class="p">)</span>
+<span class="linenos">30</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">112</span><span class="p">,</span> <span class="mf">7.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">31</span><span class="n">ops</span><span class="o">.</span><span class="n">node</span><span class="p">(</span><span class="mi">113</span><span class="p">,</span> <span class="mf">9.</span><span class="p">,</span> <span class="mf">4.</span><span class="p">)</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">46</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">34</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">47</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">35</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">48</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">36</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">52</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">37</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">53</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">38</span><span class="n">ops</span><span class="o">.</span><span class="n">equalDOF</span><span class="p">(</span><span class="mi">54</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="linenos">39</span>
+<span class="linenos">40</span><span class="n">b</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="mf">.3</span><span class="p">,</span> <span class="mf">.2</span>
+<span class="linenos">41</span><span class="n">A</span><span class="p">,</span> <span class="n">Iz</span> <span class="o">=</span> <span class="n">b</span><span class="o">*</span><span class="n">h</span><span class="p">,</span> <span class="n">b</span><span class="o">*</span><span class="n">h</span><span class="o">**</span><span class="mf">3.</span><span class="o">/</span><span class="mf">12.</span>
+<span class="linenos">42</span><span class="n">E</span> <span class="o">=</span> <span class="mf">25.e6</span>
+<span class="linenos">43</span>
+<span class="linenos">44</span><span class="n">ops</span><span class="o">.</span><span class="n">geomTransf</span><span class="p">(</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">45</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">46</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">47</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">104</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">103</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">48</span>
+<span class="linenos">49</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">50</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">112</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">51</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">110</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">52</span>
+<span class="linenos">53</span><span class="n">ops</span><span class="o">.</span><span class="n">element</span><span class="p">(</span><span class="s1">&#39;elasticBeamColumn&#39;</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">101</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span><span class="n">Px</span><span class="p">,</span> <span class="n">Py</span><span class="p">,</span> <span class="n">Wy</span> <span class="o">=</span> <span class="mf">10.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.</span>
+<span class="linenos">56</span>
+<span class="linenos">57</span><span class="n">ops</span><span class="o">.</span><span class="n">timeSeries</span><span class="p">(</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">58</span><span class="n">ops</span><span class="o">.</span><span class="n">pattern</span><span class="p">(</span><span class="s1">&#39;Plain&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="linenos">59</span><span class="n">ops</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="mi">101</span><span class="p">,</span> <span class="n">Px</span><span class="p">,</span> <span class="o">-</span><span class="n">Py</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+<span class="linenos">60</span>
+<span class="linenos">61</span><span class="n">ops</span><span class="o">.</span><span class="n">eleLoad</span><span class="p">(</span><span class="s1">&#39;-ele&#39;</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="s1">&#39;-type&#39;</span><span class="p">,</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">,</span> <span class="n">Wy</span><span class="p">)</span>
+<span class="linenos">62</span>
+<span class="linenos">63</span><span class="n">ops</span><span class="o">.</span><span class="n">algorithm</span><span class="p">(</span><span class="s1">&#39;Linear&#39;</span><span class="p">)</span>
+<span class="linenos">64</span><span class="n">ops</span><span class="o">.</span><span class="n">analysis</span><span class="p">(</span><span class="s1">&#39;Static&#39;</span><span class="p">)</span>
+<span class="linenos">65</span><span class="n">ops</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="linenos">66</span>
+<span class="linenos">67</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_model</span><span class="p">()</span>
+<span class="linenos">68</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_load</span><span class="p">()</span>
+<span class="linenos">69</span>
+<span class="linenos">70</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">(</span><span class="n">node_supports</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="linenos">71</span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;opsv.plot_defo(node_supports=0)&#39;</span><span class="p">)</span>
+<span class="linenos">72</span>
+<span class="linenos">73</span><span class="n">sfac</span> <span class="o">=</span> <span class="mf">20.</span>
+<span class="linenos">74</span>
+<span class="linenos">75</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">(</span><span class="n">unDefoFlag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_supports</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">)</span>
+<span class="linenos">76</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_stress</span><span class="p">(</span><span class="s1">&#39;sxx&#39;</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="linenos">77</span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Stress sxx&#39;</span><span class="p">)</span>
+<span class="linenos">78</span>
+<span class="linenos">79</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">(</span><span class="n">unDefoFlag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_supports</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">)</span>
+<span class="linenos">80</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_stress</span><span class="p">(</span><span class="s1">&#39;syy&#39;</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="linenos">81</span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Stress syy&#39;</span><span class="p">)</span>
+<span class="linenos">82</span>
+<span class="linenos">83</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">(</span><span class="n">unDefoFlag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_supports</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">)</span>
+<span class="linenos">84</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_stress</span><span class="p">(</span><span class="s1">&#39;sxy&#39;</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="linenos">85</span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Stress sxy&#39;</span><span class="p">)</span>
+<span class="linenos">86</span>
+<span class="linenos">87</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">(</span><span class="n">unDefoFlag</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_supports</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">)</span>
+<span class="linenos">88</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_stress</span><span class="p">(</span><span class="s1">&#39;vmis&#39;</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="linenos">89</span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Stress vmis&#39;</span><span class="p">)</span>
+<span class="linenos">90</span>
+<span class="linenos">91</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="linenos">92</span>
+<span class="linenos">93</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Seweryn Kokot.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <OpenSees
+  xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation = "http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd">
+    <ElementOutput eleType="Twenty_Node_Brick" eleTag="1" node1="1" node2="2" node3="3" node4="4" node5="5" node6="6" node7="7" node8="8" node9="9" node10="10" node11="11" node12="12" node13="13" node14="14" node15="15" node16="16" node17="17" node18="18" node19="19" node20="20"/>
+    <Data>
+        
+        </Data>
+</OpenSees>

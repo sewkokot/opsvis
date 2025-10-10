@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <OpenSees
+  xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation = "http://OpenSees.berkeley.edu/xml-schema/xmlns/OpenSees.xsd">
+    <ElementOutput eleType="Twenty_Node_Brick" eleTag="1" node1="1" node2="2" node3="3" node4="4" node5="5" node6="6" node7="7" node8="8" node9="9" node10="10" node11="11" node12="12" node13="13" node14="14" node15="15" node16="16" node17="17" node18="18" node19="19" node20="20">
+        <GaussPoint number="1">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="2">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="3">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="4">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="5">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="6">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="7">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="8">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="9">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="10">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="11">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="12">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="13">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="14">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="15">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="16">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="17">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="18">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="19">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="20">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="21">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="22">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="23">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="24">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="25">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="26">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+        <GaussPoint number="27">
+            <NdMaterialOutput classType="16" tag="1">
+                <ResponseType>sigma11</ResponseType>
+                <ResponseType>sigma22</ResponseType>
+                <ResponseType>sigma33</ResponseType>
+                <ResponseType>sigma12</ResponseType>
+                <ResponseType>sigma23</ResponseType>
+                <ResponseType>sigma13</ResponseType>
+            </NdMaterialOutput>
+        </GaussPoint>
+    </ElementOutput>
+    <Data>
+        -143.308 -145.761 -367.027 22.204 63.354 -59.4363 -98.653 -103.559 -175.569 22.4627 5.21605 13.0514 -45.9495 -43.4963 -128.338 17.0052 -43.107 47.0247 -53.6537 -48.7473 -56.2244 25.062 -21.2161 -13.3807 65.9786 79.2004 -658.534 -120.383 217.981 -198.643 62.9952 89.4388 129.98 -69.5425 -46.1026 -7.42757 38.5128 25.291 -425.866 -96.2407 -117.621 136.958 69.095 42.6514 246.313 -81.6136 -33.0835 5.59153 -59.1052 -61.7456 -123.457 24.8913 43.746 -18.6226 -37.9501 -40.2162 -70.7611 22.2919 -22.8501 36.8169 -30.7717 -26.0524 -44.413 23.5916 -40.2815 24.9638 -49.8478 -49.6607 -97.1092 26.191 20.7364 -47.2106 113.86 141.876 -121.795 -74.8239 95.3999 -69.9019 79.7471 78.1746 -72.1091 -62.7527 -95.2876 71.5443 60.3318 48.6825 -47.2664 -68.7883 -83.4721 107.98 110.812 96.0174 -96.9519 -80.8594 82.5947 -107.328 -109.837 -111.553 -557.614 15.3355 110.815 -97.3053 -76.5746 -80.0077 -62.3026 30.2338 -50.296 -23.2774 -46.4872 -44.7706 -300.633 10.6056 -52.3929 65.9022 -47.4746 -44.0416 66.1878 32.5988 0.821217 27.8398 -29.8588 -35.3285 -102.955 31.7681 -60.0097 28.0913 -34.202 -27.0157 -72.0336 32.9506 -33.9058 69.2946 123.23 123.23 7.96566 -51.6672 -5.67589 17.0277 -32.7018 -36.455 -133.876 35.3156 50.7247 -45.5348 -37.5814 -35.5448 -164.797 34.1331 39.7203 -41.4397 -3.44638 -3.44638 13.919 26.7994 -0.386342 1.15902 2.92131 2.92131 -23.24 44.8903 -3.97196 11.9159 
+        </Data>
+</OpenSees>
