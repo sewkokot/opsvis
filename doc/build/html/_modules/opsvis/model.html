@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=f5127f15" />
 
   
-      <script src="../../_static/jquery.js?v=8dae8fb0"></script>
+      <script src="../../_static/jquery.js?v=958b65b0"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=ce4adff3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -44,9 +44,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../plot_model.html">plot_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_defo.html">plot_defo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_reactions.html">plot_reactions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_mode_shape.html">plot_mode_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_2d.html">section_force_diagram_2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_stress.html">plot_stress</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_strain.html">plot_strain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_stress_2d.html">plot_stress_2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
@@ -93,6 +95,7 @@
 <span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
 <span class="kn">from</span> <span class="nn">matplotlib.path</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">matplotlib.tri</span> <span class="k">as</span> <span class="nn">tri</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">isclose</span>
 
 <span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">.defo</span> <span class="kn">import</span> <span class="o">*</span>
@@ -215,7 +218,9 @@
                 <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">TimoshenkoBeamColumn2d</span>
                 <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam2d</span>
                 <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">MVLEM</span>
-                <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">SFI_MVLEM</span><span class="p">):</span>
+                <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">SFI_MVLEM</span>
+                <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn2dThermal</span>
+                <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn2dThermal</span><span class="p">):</span>
 
             <span class="n">nen</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
@@ -492,6 +497,32 @@
             <span class="k">if</span> <span class="n">element_labels</span><span class="p">:</span>
                 <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ele_tag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span>
                         <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+                        
+<span class="c1">## MASONRY PANEL 12 NODES</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">MasonPan12</span> <span class="p">):</span>
+            <span class="n">nen</span><span class="o">=</span> <span class="mi">12</span>
+            <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
+            <span class="n">ecrd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nen</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ele_node_tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ele_node_tags</span><span class="p">):</span>
+                <span class="n">ecrd</span><span class="p">[</span><span class="n">i</span><span class="p">,:]</span><span class="o">=</span><span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">ele_node_tag</span><span class="p">)</span>
+            <span class="n">xt</span><span class="o">=</span><span class="p">(</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">yt</span><span class="o">=</span><span class="p">(</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">9</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span>    
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span>                         
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">8</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span>  
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span> 
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">5</span> <span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span>      
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                    <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">11</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_model_truss</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">element_labels</span><span class="p">:</span>
+                <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span>
+                <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xt</span><span class="p">,</span> <span class="n">yt</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Panel: </span><span class="si">{</span><span class="n">ele_tag</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>                    
 
     <span class="k">if</span> <span class="n">node_supports</span><span class="p">:</span>
         <span class="n">_plot_supports</span><span class="p">(</span><span class="n">node_tags</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
@@ -710,7 +741,9 @@
             <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3d</span> <span class="ow">or</span>
             <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam3d</span> <span class="ow">or</span>
             <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">Pipe</span> <span class="ow">or</span>
-            <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">CurvedPipe</span><span class="p">):</span>
+            <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">CurvedPipe</span> <span class="ow">or</span>
+            <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3dThermal</span> <span class="ow">or</span>
+            <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn3dThermal</span><span class="p">):</span>
 
             <span class="n">nen</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
@@ -798,8 +831,7 @@
                     <span class="n">dzi</span> <span class="o">=</span> <span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span> <span class="o">*</span> <span class="n">Lgpi</span> <span class="o">/</span> <span class="n">bar_length</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">)</span>
                     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dxi</span><span class="p">,</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dyi</span><span class="p">,</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dzi</span><span class="p">,</span> <span class="o">**</span><span class="n">fmt_gauss_points</span><span class="p">)</span>
 
-        <span class="k">elif</span> <span class="p">(</span><span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span>
-              <span class="ow">or</span> <span class="n">ele_classtag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">ele_classtag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">,</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">CorotTruss</span><span class="p">]:</span>
 
             <span class="n">nen</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
@@ -1423,7 +1455,6 @@
     <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_model</span><span class="p">(</span><span class="n">node_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">element_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fmt_model</span><span class="o">=</span><span class="n">fmt_model_loads</span><span class="p">,</span>
                     <span class="n">node_supports</span><span class="o">=</span><span class="n">node_supports</span><span class="p">,</span>
                     <span class="n">truss_node_offset</span><span class="o">=</span><span class="n">truss_node_offset</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
-    <span class="c1"># ax.axis(&#39;equal&#39;)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sfac</span><span class="p">:</span>
         <span class="n">ratio</span> <span class="o">=</span> <span class="mf">0.1</span>
@@ -1440,7 +1471,6 @@
     <span class="n">waa</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">wab</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1">### get Ew data</span>
     <span class="n">Ew</span> <span class="o">=</span> <span class="n">get_Ew_data_from_ops_domain</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">ele_tag</span> <span class="ow">in</span> <span class="n">ele_tags</span><span class="p">:</span>
@@ -1451,7 +1481,9 @@
             <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn2d</span>
             <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn2d</span>
             <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">TimoshenkoBeamColumn2d</span>
-            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam2d</span><span class="p">):</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam2d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn2dThermal</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn2dThermal</span><span class="p">):</span>
 
             <span class="c1"># by default no element load</span>
             <span class="n">ele_load_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1475,29 +1507,16 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span>
 
-            <span class="c1"># step 1: first plot model itself</span>
-            <span class="c1"># ax.plot(ecrd[:, 0], ecrd[:, 1], &#39;k-&#39;, solid_capstyle=&#39;round&#39;, solid_joinstyle=&#39;round&#39;,</span>
-            <span class="c1">#         dash_capstyle=&#39;butt&#39;, dash_joinstyle=&#39;round&#39;)</span>
-
-            <span class="c1"># step 2</span>
             <span class="n">Lxy</span> <span class="o">=</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
             <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxy</span> <span class="o">@</span> <span class="n">Lxy</span><span class="p">)</span>
             <span class="n">cosa</span><span class="p">,</span> <span class="n">cosb</span> <span class="o">=</span> <span class="n">Lxy</span> <span class="o">/</span> <span class="n">L</span>
 
-            <span class="c1"># if not sfac:</span>
-            <span class="c1">#     sfac = ratio * L</span>
-
             <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nep</span><span class="p">)</span>
             <span class="n">xl2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-            <span class="c1"># xl2 = np.logspace(0., 1., nep) * L / nep</span>
             <span class="n">dxs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
-            <span class="c1"># dxs = np.array([0.15, 0.2, 0.275, 0.375])</span>
             <span class="n">xl3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">dxs</span><span class="p">))</span> <span class="o">*</span> <span class="n">L</span>
 
             <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nep</span><span class="p">)</span>
-            <span class="c1"># pl = ops.eleResponse(ele_tag, &#39;localForces&#39;)</span>
-
-            <span class="c1"># s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, ele_load_data)</span>
 
             <span class="k">for</span> <span class="n">ele_load_data_i</span> <span class="ow">in</span> <span class="n">ele_load_data</span><span class="p">:</span>
                 <span class="n">ele_load_type</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1508,7 +1527,6 @@
                     <span class="n">s</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">Pt</span><span class="p">)</span>
 
                     <span class="n">s_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="c1"># s_0 = [ecrd[0, 0], ecrd[0, 1]]</span>
 
                     <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cosa</span>
                     <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">cosb</span>
@@ -1518,38 +1536,24 @@
                     <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosb</span>
                     <span class="n">s_p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosa</span>
 
-
-                    <span class="c1"># plot arrows</span>
                     <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                              <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                             <span class="c1"># width = 0.01,</span>
                              <span class="n">head_starts_at_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># default False</span>
-                             <span class="c1"># overhang=0.2,</span>
-                             <span class="c1"># lw = 1,</span>
                              <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span>
                              <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span>
                              <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">)</span>
                     <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">Pt</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
-                    <span class="c1"># ax.annotate(&quot;&quot;, xy=(s_p[0], s_p[1]),</span>
-                    <span class="c1">#             xytext=(s_0[0], s_0[1]),</span>
-                    <span class="c1">#             arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, color=&#39;r&#39;, lw=3,</span>
-                    <span class="c1">#                             connectionstyle=&quot;arc3&quot;))</span>
 
                 <span class="k">elif</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">:</span>
 
                     <span class="n">n_ele_load_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele_load_data_i</span><span class="p">)</span>
 
-                    <span class="c1"># constant uniform element load</span>
                     <span class="k">if</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="c1"># eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]</span>
                         <span class="n">Wy</span><span class="p">,</span> <span class="n">Wx</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
                         <span class="n">text_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;q = </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">Wy</span><span class="p">)</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">Wx</span><span class="p">)</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1">&#39;</span>
 
-                        <span class="c1"># s = sfac * Wy * one</span>
                         <span class="n">s</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">one</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">Wy</span><span class="p">)</span>
-                        <span class="c1"># plt.text(sum(ecrd[:, 0])/2, sum(ecrd[:, 1])/2, f&#39;q = {Wy}, {Wx}&#39;, va=&#39;bottom&#39;, ha=&#39;center&#39;, color=&#39;r&#39;)</span>
 
-                    <span class="c1"># triangular or trapezoidal element load</span>
                     <span class="k">elif</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
                         <span class="n">wta</span><span class="p">,</span> <span class="n">waa</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">bL</span><span class="p">,</span> <span class="n">wtb</span><span class="p">,</span> <span class="n">wab</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
                         <span class="n">text_string</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;q = </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">wta</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">waa</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">aL</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="n">bL</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">wtb</span><span class="p">)</span><span class="si">}</span><span class="s1">, </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">wab</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -1571,10 +1575,7 @@
 
                             <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                    <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">sfac</span>
-
                     <span class="n">s_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nep</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-                    <span class="c1"># s_0[0, :] = [ex[0], ey[0]]</span>
                     <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
 
                     <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">cosa</span>
@@ -1582,56 +1583,51 @@
 
                     <span class="n">s_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">s_0</span><span class="p">)</span>
 
-                    <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosb</span>
-                    <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosa</span>
-                    <span class="c1"># plt.axis(&#39;equal&#39;)</span>
+                    <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosb</span>
+                    <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosa</span>
 
-                    <span class="c1"># reference perpendicular lines</span>
+                    <span class="c1"># for i in np.arange(nep):</span>
+                    <span class="c1">#     ax.arrow(s_0[i, 0], s_0[i, 1],</span>
+                    <span class="c1">#              s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],</span>
+                    <span class="c1">#              head_width=0.1*sfac, head_length=0.2*sfac,</span>
+                    <span class="c1">#              head_starts_at_zero=True,  # default False</span>
+                    <span class="c1">#              fc=&#39;r&#39;, ec=&#39;r&#39;,</span>
+                    <span class="c1">#              length_includes_head=True, shape=&#39;full&#39;)</span>
                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nep</span><span class="p">):</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                 <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                 <span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                                  <span class="c1"># width = 0.005,</span>
-                                 <span class="c1"># lw = 2,</span>
-                                 <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span><span class="o">*</span><span class="n">sfac</span><span class="p">,</span>
-                                 <span class="n">head_starts_at_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># default False</span>
+                                 <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                 <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span>
+                                 <span class="c1"># head_starts_at_zero=True,  # default False</span>
                                  <span class="c1"># overhang=0.5,</span>
                                  <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span>
-                                 <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">)</span>
-                        <span class="c1"># ax.annotate(&quot;&quot;, xy=(s_p[i, 0], s_p[i, 1]),</span>
-                        <span class="c1">#             xytext=(s_0[i, 0], s_0[i, 1]),</span>
-                        <span class="c1">#             arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, color=&#39;r&#39;, lw=1,</span>
-                        <span class="c1">#                             connectionstyle=&quot;arc3&quot;))</span>
+                                 <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">,</span>
+                                 <span class="n">joinstyle</span><span class="o">=</span><span class="s1">&#39;round&#39;</span><span class="p">)</span>
 
-                    <span class="c1"># connecting beg-end line - redundant ?</span>
-                    <span class="c1"># plt.plot([s_p[0, 0], s_p[-1, 0]],[s_p[0, 1], s_p[-1, 1]], &#39;r&#39;)</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">ecrd_eles</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">text_string</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                             <span class="p">[</span><span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span>
+                            <span class="n">s_p</span><span class="p">[</span><span class="nb">int</span><span class="p">((</span><span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">),</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">text_string</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">Wx</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="c1"># for i, xl in enumerate(xl2[:-1]):</span>
-                        <span class="c1">#     plt.arrow(sa[i, 0], sa[i, 1],</span>
-                        <span class="c1">#               sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],</span>
-                        <span class="c1">#               width = 0.01,</span>
-                        <span class="c1">#               # lw = 1,</span>
-                        <span class="c1">#               # head_width=0.02, head_length=0.05,</span>
-                        <span class="c1">#               # head_starts_at_zero=True,  # default False</span>
-                        <span class="c1">#               # overhang=0.5,</span>
-                        <span class="c1">#               fc=&#39;m&#39;, ec=&#39;m&#39;,</span>
-                        <span class="c1">#               length_includes_head=True, shape=&#39;full&#39;)</span>
 
                         <span class="k">if</span> <span class="n">Wx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                             <span class="n">ax</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                                       <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
                                       <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span>
-                                      <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+                                      <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                                      <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">ax</span><span class="o">.</span><span class="n">quiver</span><span class="p">(</span><span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                                       <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
                                       <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">s_0</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                      <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
+                                      <span class="n">scale_units</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">angles</span><span class="o">=</span><span class="s1">&#39;xy&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+                                      <span class="n">color</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="n">waa</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">wab</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">sa</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-                        <span class="c1"># sa[0, :] = [ex[0], ey[0]]</span>
                         <span class="n">sa</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd_eles</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
                         <span class="n">sa</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sa</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl3</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">cosa</span>
                         <span class="n">sa</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">sa</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl3</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">cosb</span>
@@ -1639,84 +1635,53 @@
                         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">xl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xl3</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]):</span>
                             <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                                      <span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">sa</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                                     <span class="c1"># width = 0.05,</span>
-                                     <span class="n">width</span> <span class="o">=</span> <span class="mf">0.01</span><span class="o">*</span><span class="n">L</span><span class="p">,</span>
-                                     <span class="c1"># lw = 1,</span>
-                                     <span class="c1"># head_width=0.02, head_length=0.05,</span>
-                                     <span class="c1"># head_starts_at_zero=True,  # default False</span>
-                                     <span class="c1"># overhang=0.5,</span>
+                                     <span class="n">width</span><span class="o">=</span><span class="mf">0.01</span><span class="o">*</span><span class="n">L</span><span class="p">,</span>
                                      <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;m&#39;</span><span class="p">,</span>
                                      <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">)</span>
-
-                        <span class="c1"># ax.quiver(sa[:-1, 0], sa[:-1, 1],</span>
-                        <span class="c1">#            sa[1:, 0]-sa[:-1, 0], sa[1:, 1]-sa[:-1, 1],</span>
-                        <span class="c1">#            scale_units=&#39;xy&#39;, angles=&#39;xy&#39;, scale=0.8, color=&#39;g&#39;)</span>
-
-                        <span class="c1"># ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],</span>
-                        <span class="c1">#          fmt_secforce, solid_capstyle=&#39;round&#39;,</span>
-                        <span class="c1">#          solid_joinstyle=&#39;round&#39;, dash_capstyle=&#39;butt&#39;,</span>
-                        <span class="c1">#          dash_joinstyle=&#39;round&#39;)</span>
-                        <span class="c1"># plot arrows</span>
-                        <span class="c1"># ax.annotate(&quot;&quot;,</span>
-                        <span class="c1">#              xy=(s_p[i, 0], s_p[i, 1]), xycoords=&#39;data&#39;,</span>
-                        <span class="c1">#              xytext=(s_0[i, 0], s_0[i, 1]), textcoords=&#39;data&#39;,</span>
-                        <span class="c1">#              arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, color=&#39;r&#39;, lw=2,</span>
-                        <span class="c1">#                              connectionstyle=&quot;arc3&quot;))</span>
 
     <span class="k">for</span> <span class="n">node_tag</span> <span class="ow">in</span> <span class="n">node_tags</span><span class="p">:</span>
         <span class="n">nd_crd</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
 
-        <span class="c1"># 2. nodal loads 2d</span>
         <span class="n">nodal_loads</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeUnbalance</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
         <span class="n">nodal_loads_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">nodal_loads_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">kier</span> <span class="ow">in</span> <span class="n">nodal_loads_idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                <span class="c1"># horizontal or vertical nodal force (load)</span>
                 <span class="k">if</span> <span class="n">kier</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">kier</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
                     <span class="k">if</span> <span class="n">kier</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">kier2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span>
-                        <span class="k">if</span> <span class="n">kier2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
-                        <span class="k">elif</span> <span class="n">kier2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
-                        <span class="n">dx</span> <span class="o">=</span> <span class="n">sfac</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kier2</span><span class="p">)</span>
-                        <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.</span>
+                        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kier2</span><span class="p">),</span> <span class="mf">0.</span>
 
                     <span class="k">elif</span> <span class="n">kier</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="n">kier2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span>
-                        <span class="k">if</span> <span class="n">kier2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;+&#39;</span>
-                        <span class="k">elif</span> <span class="n">kier2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                            <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span>
-                        <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.</span>
-                        <span class="n">dy</span> <span class="o">=</span> <span class="n">sfac</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kier2</span><span class="p">)</span>
+                        <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">kier2</span><span class="p">)</span>
 
-                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span>
                              <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
-                             <span class="c1"># width = 0.01,</span>
-                             <span class="c1"># head_starts_at_zero=True,  # default False</span>
-                             <span class="c1"># overhang=0.2,</span>
                              <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
-                             <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span><span class="o">*</span><span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span><span class="o">*</span><span class="n">sfac</span><span class="p">,</span>
-                             <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span>
-                             <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">)</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">dx</span><span class="p">,</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="n">dy</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+                             <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span>
+                             <span class="n">fc</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span>
+                             <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">,</span>
+                             <span class="n">joinstyle</span><span class="o">=</span><span class="s1">&#39;round&#39;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dy</span><span class="p">,</span>
+                            <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
 
-                <span class="c1"># concentrated bending moment</span>
                 <span class="k">elif</span> <span class="n">kier</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
                     <span class="n">kier2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span>
+                    <span class="n">nodal_load_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span>
                     <span class="k">if</span> <span class="n">kier2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;anti-clockwise&#39;</span>
-                        <span class="c1"># marker_type=r&#39;$\circlearrowleft$&#39;</span>
-                        <span class="n">marker_type</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\curvearrowleft$&#39;</span>
+                        <span class="n">marker_type</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\curvearrowleft$&#39;</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="n">nodal_load_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="n">kier2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">pos_or_neg</span> <span class="o">=</span> <span class="s1">&#39;clockwise&#39;</span>
-                        <span class="c1"># marker_type=r&#39;$\circlearrowright$&#39;</span>
-                        <span class="n">marker_type</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39;$\curvearrowright$&#39;</span>
+                        <span class="n">marker_type</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\curvearrowright$&#39;</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="n">nodal_load_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
 
-                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker_type</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">35</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">nodal_loads</span><span class="p">[</span><span class="n">kier</span><span class="p">])</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker_type</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
 
     <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
@@ -1775,7 +1740,9 @@
 
         <span class="k">if</span> <span class="p">(</span><span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticBeam3d</span>
             <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn3d</span>
-            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3d</span><span class="p">):</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3dThermal</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn3dThermal</span><span class="p">):</span>
 
             <span class="c1"># by default no element load</span>
             <span class="n">ele_load_data</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2147,8 +2114,239 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ele_load_type:</span><span class="se">\n</span><span class="si">{</span><span class="n">ele_load_type</span><span class="si">}</span><span class="s1"> - Unknown element load Error&#39;</span><span class="p">)</span>
 
-
     <span class="k">return</span> <span class="n">Ew</span>
+
+
+<span class="k">def</span> <span class="nf">plot_reactions_2d</span><span class="p">(</span><span class="n">sfac</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span>
+                      <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">fmt_model_loads</span><span class="p">,</span>
+                      <span class="n">truss_node_offset</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display support reactions of the 2d models.</span>
+<span class="sd">    This is a local function: use plot_reactions()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fig_wi_he</span><span class="p">:</span>
+            <span class="n">fig_wi</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">=</span> <span class="n">fig_wi_he</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_wi</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fig_lbrt</span><span class="p">:</span>
+            <span class="n">fleft</span><span class="p">,</span> <span class="n">fbottom</span><span class="p">,</span> <span class="n">fright</span><span class="p">,</span> <span class="n">ftop</span> <span class="o">=</span> <span class="n">fig_lbrt</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">fleft</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">fbottom</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">fright</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">ftop</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_model</span><span class="p">(</span><span class="n">node_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">element_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fmt_model</span><span class="o">=</span><span class="n">fmt_model_loads</span><span class="p">,</span>
+                    <span class="n">node_supports</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="n">truss_node_offset</span><span class="o">=</span><span class="n">truss_node_offset</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sfac</span><span class="p">:</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+        <span class="n">min_y</span><span class="p">,</span> <span class="n">max_y</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+        <span class="n">xsfac</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span>
+        <span class="n">ysfac</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span>
+        <span class="n">sfac</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">xsfac</span><span class="p">,</span> <span class="n">ysfac</span><span class="p">)</span>
+
+    <span class="n">fixed_nodes</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getFixedNodes</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">node_tag</span> <span class="ow">in</span> <span class="n">fixed_nodes</span><span class="p">:</span>
+        <span class="n">nd_crd</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
+
+        <span class="n">fixed_dofs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getFixedDOFs</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="n">fixed_dofs</span><span class="p">:</span>
+            <span class="n">reaction</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeReaction</span><span class="p">(</span><span class="n">node_tag</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isclose</span><span class="p">(</span><span class="n">reaction</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="n">dof</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+                    <span class="n">reac_sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">dx</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">reac_sign</span>
+                        <span class="n">dy</span> <span class="o">=</span> <span class="mf">0.</span>
+                        <span class="n">ha_my</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span>
+
+                    <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">reac_sign</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                        <span class="n">dx</span> <span class="o">=</span> <span class="mf">0.</span>
+                        <span class="n">dy</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">reac_sign</span>
+                        <span class="n">ha_my</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+
+                    <span class="k">if</span> <span class="n">reac_sign</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">dx</span><span class="p">,</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dy</span>
+                        <span class="n">x0t</span><span class="p">,</span> <span class="n">y0t</span> <span class="o">=</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span> <span class="o">=</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">x0t</span><span class="p">,</span> <span class="n">y0t</span> <span class="o">=</span> <span class="n">x0</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span> <span class="n">y0</span> <span class="o">+</span> <span class="n">dy</span>
+
+                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span>
+                             <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span>
+                             <span class="n">lw</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                             <span class="n">head_width</span><span class="o">=</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">head_length</span><span class="o">=</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">,</span>
+                             <span class="n">fc</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span>
+                             <span class="n">length_includes_head</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="s1">&#39;full&#39;</span><span class="p">,</span>
+                             <span class="n">joinstyle</span><span class="o">=</span><span class="s1">&#39;round&#39;</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x0t</span><span class="p">,</span> <span class="n">y0t</span><span class="p">,</span>
+                            <span class="sa">f</span><span class="s1">&#39; </span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha_my</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
+                    <span class="n">kier2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                    <span class="n">reaction_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="k">if</span> <span class="n">kier2</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">marker_type</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\curvearrowleft$&#39;</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="n">reaction_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;right&#39;</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">kier2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">marker_type</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;$\curvearrowright$&#39;</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">  </span><span class="si">{</span><span class="n">reaction_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                                <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">)</span>
+
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">marker</span><span class="o">=</span><span class="n">marker_type</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                            <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span>
+
+
+<span class="k">def</span> <span class="nf">plot_reactions_3d</span><span class="p">(</span><span class="n">sfac</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">fmt_model_loads</span><span class="p">,</span>
+                      <span class="n">truss_node_offset</span><span class="p">,</span> <span class="n">local_axes</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display support reactions of the 3d models.</span>
+<span class="sd">    This is a local function: use plot_reactions()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fig_wi_he</span><span class="p">:</span>
+            <span class="n">fig_wi</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">=</span> <span class="n">fig_wi_he</span>
+
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_wi</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fig_lbrt</span><span class="p">:</span>
+            <span class="n">fleft</span><span class="p">,</span> <span class="n">fbottom</span><span class="p">,</span> <span class="n">fright</span><span class="p">,</span> <span class="n">ftop</span> <span class="o">=</span> <span class="n">fig_lbrt</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">fleft</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">fbottom</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">fright</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">ftop</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">Axes3D</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_model</span><span class="p">(</span><span class="n">node_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">element_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">fmt_model</span><span class="o">=</span><span class="n">fmt_model_loads</span><span class="p">,</span>
+                    <span class="n">node_supports</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">local_axes</span><span class="o">=</span><span class="n">local_axes</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sfac</span><span class="p">:</span>
+        <span class="n">ratio</span> <span class="o">=</span> <span class="mf">0.15</span>  <span class="c1"># initial scale 10% of the max dimension</span>
+        <span class="n">min_x</span><span class="p">,</span> <span class="n">max_x</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+        <span class="n">min_y</span><span class="p">,</span> <span class="n">max_y</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+        <span class="n">min_z</span><span class="p">,</span> <span class="n">max_z</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_zlim</span><span class="p">()</span>
+        <span class="n">xsfac</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_x</span> <span class="o">-</span> <span class="n">min_x</span><span class="p">)</span>
+        <span class="n">ysfac</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_y</span> <span class="o">-</span> <span class="n">min_y</span><span class="p">)</span>
+        <span class="n">zsfac</span> <span class="o">=</span> <span class="n">ratio</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">max_z</span> <span class="o">-</span> <span class="n">min_z</span><span class="p">)</span>
+        <span class="n">sfac</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">xsfac</span><span class="p">,</span> <span class="n">ysfac</span><span class="p">,</span> <span class="n">zsfac</span><span class="p">)</span>
+
+    <span class="n">fixed_nodes</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getFixedNodes</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">node_tag</span> <span class="ow">in</span> <span class="n">fixed_nodes</span><span class="p">:</span>
+        <span class="n">nd_crd</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
+
+        <span class="n">fixed_dofs</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getFixedDOFs</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">dof</span> <span class="ow">in</span> <span class="n">fixed_dofs</span><span class="p">:</span>
+            <span class="n">reaction</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeReaction</span><span class="p">(</span><span class="n">node_tag</span><span class="p">,</span> <span class="n">dof</span><span class="p">)</span>
+            <span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isclose</span><span class="p">(</span><span class="n">reaction</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">abs_tol</span><span class="o">=</span><span class="mf">1e-9</span><span class="p">):</span>
+
+                <span class="k">if</span> <span class="n">dof</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+
+                    <span class="k">if</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">dx</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                        <span class="c1"># xcomp = 1</span>
+
+                    <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">dy</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                        <span class="c1"># ycomp = 1</span>
+
+                    <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">dz</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+                        <span class="c1"># zcomp = 1</span>
+
+                    <span class="n">nn</span> <span class="o">=</span> <span class="mf">1.0</span>  <span class="c1"># additional scaling for arrows</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow3D</span><span class="p">(</span><span class="o">*</span><span class="n">nd_crd</span><span class="p">,</span> <span class="n">nn</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span> <span class="n">nn</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span> <span class="n">nn</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span>
+                               <span class="n">mutation_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span>
+                            <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span>
+                            <span class="n">nd_crd</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dz</span><span class="p">,</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">dof</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]:</span>
+                    <span class="n">kolor</span> <span class="o">=</span> <span class="s1">&#39;g&#39;</span>
+
+                    <span class="k">if</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="n">dx</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
+                        <span class="n">dy</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+                    <span class="k">elif</span> <span class="n">dof</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                        <span class="n">dz</span> <span class="o">=</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span>
+
+                    <span class="n">nn</span> <span class="o">=</span> <span class="mf">0.5</span>  <span class="c1"># additional scaling for arrows</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow3D</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dy</span><span class="p">,</span>
+                               <span class="n">nd_crd</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">dz</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span>
+                               <span class="n">mutation_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">arrow3D</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+                               <span class="n">nd_crd</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+                               <span class="n">nn</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span>
+                               <span class="n">mutation_scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="n">kolor</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">nd_crd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">dx</span><span class="p">,</span>
+                            <span class="n">nd_crd</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">dy</span><span class="p">,</span>
+                            <span class="n">nd_crd</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">dz</span><span class="p">,</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">reaction</span><span class="p">)</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">kolor</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span>
+
+
+<div class="viewcode-block" id="plot_reactions">
+<a class="viewcode-back" href="../../plot_reactions.html#opsvis.plot_reactions">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_reactions</span><span class="p">(</span><span class="n">sfac</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                   <span class="n">fig_lbrt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fmt_model_loads</span><span class="o">=</span><span class="n">fmt_model_loads</span><span class="p">,</span>
+                   <span class="n">truss_node_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">local_axes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display support reactions of 2d and 3d models.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ndim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNDM</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ops</span><span class="o">.</span><span class="n">reactions</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_reactions_2d</span><span class="p">(</span><span class="n">sfac</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span>
+                               <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">fmt_model_loads</span><span class="p">,</span>
+                               <span class="n">truss_node_offset</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_reactions_3d</span><span class="p">(</span><span class="n">sfac</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span>
+                               <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">fmt_model_loads</span><span class="p">,</span>
+                               <span class="n">truss_node_offset</span><span class="p">,</span>
+                               <span class="n">local_axes</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not supported yet.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
+
 
 
 <div class="viewcode-block" id="plot_extruded_shapes_3d">

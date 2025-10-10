@@ -10,7 +10,7 @@
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=f5127f15" />
 
   
-      <script src="../../_static/jquery.js?v=8dae8fb0"></script>
+      <script src="../../_static/jquery.js?v=958b65b0"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=ce4adff3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
@@ -44,6 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../plot_model.html">plot_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_defo.html">plot_defo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_reactions.html">plot_reactions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../plot_mode_shape.html">plot_mode_shape</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_2d.html">section_force_diagram_2d</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_3d.html">section_force_diagram_3d</a></li>
@@ -967,7 +968,8 @@
 
 <div class="viewcode-block" id="plot_stress_2d">
 <a class="viewcode-back" href="../../plot_stress_2d.html#opsvis.plot_stress_2d">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                   <span class="n">fig_wi_he</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Plot stress distribution of a 2d elements of a 2d model.</span>
 
@@ -1013,12 +1015,10 @@
         <span class="n">nds_crd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">node_tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_tags</span><span class="p">):</span>
-        <span class="n">nds_uxy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeDisp</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)</span>
+        <span class="n">nds_uxy</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeDisp</span><span class="p">(</span><span class="n">node_tag</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sfac</span><span class="p">:</span>
-        <span class="n">sfac</span> <span class="o">=</span> <span class="n">opsvdefo</span><span class="o">.</span><span class="n">defo_scale</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">sfac</span> <span class="o">=</span> <span class="mf">0.</span>
+        <span class="n">sfac</span> <span class="o">=</span> <span class="n">opsvdefo</span><span class="o">.</span><span class="n">defo_scale</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_tags</span><span class="p">,</span> <span class="n">ratio</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
 
     <span class="n">nds_crd</span> <span class="o">=</span> <span class="n">nds_crd</span> <span class="o">+</span> <span class="n">sfac</span> <span class="o">*</span> <span class="n">nds_uxy</span>
 
@@ -1203,7 +1203,8 @@
 
 <div class="viewcode-block" id="plot_stress">
 <a class="viewcode-back" href="../../plot_stress.html#opsvis.plot_stress">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_stress</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_stress</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">fig_wi_he</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot stress distribution of the model.</span>
 
 <span class="sd">    Args:</span>
@@ -1232,16 +1233,20 @@
     <span class="n">ndim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNDM</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">_plot_stress_2d</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">_plot_stress_2d</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span>
+                             <span class="n">fig_wi_he</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
 
 
 
 <div class="viewcode-block" id="plot_strain">
 <a class="viewcode-back" href="../../plot_strain.html#opsvis.plot_strain">[docs]</a>
-<span class="k">def</span> <span class="nf">plot_strain</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">plot_strain</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;turbo&#39;</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+                <span class="n">fig_wi_he</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nu</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot strain distribution of the model.</span>
 
 <span class="sd">    Args:</span>
@@ -1266,25 +1271,36 @@
     <span class="n">ndim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNDM</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">_plot_strain_2d</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">_plot_strain_2d</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span>
+                             <span class="n">fig_wi_he</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span></div>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! ndim: </span><span class="si">{</span><span class="n">ndim</span><span class="si">}</span><span class="s1"> not implemented yet.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_plot_stress_2d</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_stress_2d</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span>
+                    <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;See documentation for plot_stress command&quot;&quot;&quot;</span>
 
     <span class="n">nds_val</span> <span class="o">=</span> <span class="n">sig_component_per_node</span><span class="p">(</span><span class="n">stress_str</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
-    <span class="n">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span>
+                        <span class="n">fig_wi_he</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span>
 
 
-<span class="k">def</span> <span class="nf">_plot_strain_2d</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">nu</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_plot_strain_2d</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">fig_wi_he</span><span class="p">,</span>
+                    <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">nu</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;See documentation for plot_strain command&quot;&quot;&quot;</span>
 
     <span class="n">nds_val</span> <span class="o">=</span> <span class="n">eps_component_per_node</span><span class="p">(</span><span class="n">strain_str</span><span class="p">,</span> <span class="n">nu</span><span class="p">)</span>
-    <span class="n">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">)</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">plot_stress_2d</span><span class="p">(</span><span class="n">nds_val</span><span class="p">,</span> <span class="n">mesh_outline</span><span class="p">,</span> <span class="n">cmap</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span>
+                        <span class="n">fig_wi_he</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="p">,</span> <span class="n">sfac</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ax</span>
 </pre></div>
 
            </div>

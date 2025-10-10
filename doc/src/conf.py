@@ -21,7 +21,7 @@ copyright = '2024, Seweryn Kokot'
 author = 'Seweryn Kokot'
 
 # The full version, including alpha/beta/rc tags
-release = '0.99.2'
+release = '1.3.3'
 
 # -- General configuration ---------------------------------------------------
 
