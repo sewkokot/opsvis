@@ -131,7 +131,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
                 or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
                 or ele_classtag == EleClassTag.MVLEM
-                or ele_classtag == EleClassTag.SFI_MVLEM):
+                or ele_classtag == EleClassTag.SFI_MVLEM
+                or ele_classtag == EleClassTag.DispBeamColumn2dThermal
+                or ele_classtag == EleClassTag.ForceBeamColumn2dThermal):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -626,7 +628,9 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
             ele_classtag == EleClassTag.DispBeamColumn3d or
             ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
             ele_classtag == EleClassTag.Pipe or
-            ele_classtag == EleClassTag.CurvedPipe):
+            ele_classtag == EleClassTag.CurvedPipe or
+            ele_classtag == EleClassTag.DispBeamColumn3dThermal or
+            ele_classtag == EleClassTag.ForceBeamColumn3dThermal):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -1361,7 +1365,9 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
-            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
+            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d
+            or ele_class_tag == EleClassTag.DispBeamColumn2dThermal
+            or ele_class_tag == EleClassTag.ForceBeamColumn2dThermal):
 
             # by default no element load
             ele_load_data = []
@@ -1618,7 +1624,9 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
         if (ele_class_tag == EleClassTag.ElasticBeam3d
             or ele_class_tag == EleClassTag.ForceBeamColumn3d
-            or ele_class_tag == EleClassTag.DispBeamColumn3d):
+            or ele_class_tag == EleClassTag.DispBeamColumn3d
+            or ele_class_tag == EleClassTag.DispBeamColumn3dThermal
+            or ele_class_tag == EleClassTag.ForceBeamColumn3dThermal):
 
             # by default no element load
             ele_load_data = []

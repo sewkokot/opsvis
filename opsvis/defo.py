@@ -174,7 +174,9 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
               or ele_classtag == EleClassTag.ForceBeamColumn2d
               or ele_classtag == EleClassTag.DispBeamColumn2d
               or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
-              or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d):
+              or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
+              or ele_classtag == EleClassTag.DispBeamColumn2dThermal
+              or ele_classtag == EleClassTag.ForceBeamColumn2dThermal):
 
             nen, ndf = 2, 3
 
@@ -526,7 +528,9 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         if (ele_classtag == EleClassTag.ElasticBeam3d
             or ele_classtag == EleClassTag.ForceBeamColumn3d
             or ele_classtag == EleClassTag.DispBeamColumn3d
-            or ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d):
+            or ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d
+            or ele_classtag == EleClassTag.DispBeamColumn3dThermal
+            or ele_classtag == EleClassTag.ForceBeamColumn3dThermal):
 
             nen, ndf = 2, 6
 
@@ -1258,7 +1262,9 @@ def max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep):
 
         if (ele_classtag == EleClassTag.ElasticBeam2d or
             ele_classtag == EleClassTag.ForceBeamColumn2d or
-            ele_classtag == EleClassTag.DispBeamColumn2d):
+            ele_classtag == EleClassTag.DispBeamColumn2d or
+            ele_classtag == EleClassTag.DispBeamColumn2dThermal or
+            ele_classtag == EleClassTag.ForceBeamColumn2dThermal):
 
             nen, ndf = 2, 3
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -1306,7 +1312,9 @@ def max_u_abs_from_beam_defo_interp_3d(max_u_abs, nep):
 
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
-            ele_classtag == EleClassTag.DispBeamColumn3d):
+            ele_classtag == EleClassTag.DispBeamColumn3d or
+            ele_classtag == EleClassTag.DispBeamColumn3dThermal or
+            ele_classtag == EleClassTag.ForceBeamColumn3dThermal):
 
             ele_node_tags = ops.eleNodes(ele_tag)
 
