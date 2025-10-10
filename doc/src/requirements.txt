@@ -1,0 +1,8 @@
+# Defining the exact version will make sure things don't break
+openseespy
+opsvis
+numpy
+matplotlib
+sphinx
+sphinx_rtd_theme
+readthedocs-sphinx-search

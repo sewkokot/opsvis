@@ -1,0 +1,226 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plot steel and reinforced concrete fiber sections &mdash; opsvis 0.99.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=f5127f15" />
+
+  
+      <script src="_static/jquery.js?v=8dae8fb0"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ce4adff3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Animation of dynamic analysis and mode shapes of a 2d Portal Frame" href="ex_2d_portal_frame_th_mode_anim.html" />
+    <link rel="prev" title="Plot stress distribution of a plane stress quad model" href="ex_quads_4x4.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            opsvis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="plot_model.html">plot_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_defo.html">plot_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mode_shape.html">plot_mode_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_2d.html">section_force_diagram_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress.html">plot_stress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_strain.html">plot_strain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress_2d.html">plot_stress_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_defo.html">anim_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_mode.html">anim_mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_fiber_section.html">plot_fiber_section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fib_sec_list_to_cmds.html">fib_sec_list_to_cmds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sig_out_per_node.html">sig_out_per_node</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="ex_2d_portal_frame.html">2d Portal Frame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ex_3d_3el_cantilever.html">Statics of a 3d 3-element cantilever beam</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ex_quads_4x4.html">Plot stress distribution of a plane stress quad model</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Plot steel and reinforced concrete fiber sections</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ex_2d_portal_frame_th_mode_anim.html">Animation of dynamic analysis and mode shapes of a 2d Portal Frame</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">opsvis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="examples.html">Examples</a></li>
+      <li class="breadcrumb-item active">Plot steel and reinforced concrete fiber sections</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ex_plot_fiber_section.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plot-steel-and-reinforced-concrete-fiber-sections">
+<span id="opsvis-ex4"></span><h1>Plot steel and reinforced concrete fiber sections<a class="headerlink" href="#plot-steel-and-reinforced-concrete-fiber-sections" title="Link to this heading"></a></h1>
+<p>Example <code class="docutils literal notranslate"><span class="pre">.py</span></code> file can be downloaded <a class="reference download internal" download="" href="_downloads/0fc02fe2faab11b3375742145454f2b4/demo_plot_fiber_section.py"><code class="xref download docutils literal notranslate"><span class="pre">here</span></code></a>:</p>
+<img alt="_images/fibsec_rc.png" src="_images/fibsec_rc.png" />
+<img alt="_images/fibsec_wshape.png" src="_images/fibsec_wshape.png" />
+<img alt="_images/fibsec_circ.png" src="_images/fibsec_circ.png" />
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">openseespy.opensees</span> <span class="k">as</span> <span class="nn">ops</span>
+<span class="linenos"> 2</span><span class="c1"># import opensees as ops  # local compilation</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">opsvis</span> <span class="k">as</span> <span class="nn">opsv</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="n">ops</span><span class="o">.</span><span class="n">wipe</span><span class="p">()</span>
+<span class="linenos"> 8</span><span class="n">ops</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="s1">&#39;basic&#39;</span><span class="p">,</span> <span class="s1">&#39;-ndm&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;-ndf&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># frame 2D</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="c1"># 1. rotated steel shape</span>
+<span class="linenos">11</span>
+<span class="linenos">12</span><span class="n">fib_sec_1</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;Fiber&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;-GJ&#39;</span><span class="p">,</span> <span class="mf">1.0e6</span><span class="p">],</span>
+<span class="linenos">13</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>  <span class="mf">0.032</span><span class="p">,</span> <span class="mf">0.317</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.311</span><span class="p">,</span> <span class="mf">0.067</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.266</span><span class="p">,</span> <span class="mf">0.005</span><span class="p">,</span> <span class="mf">0.077</span><span class="p">,</span> <span class="mf">0.254</span><span class="p">],</span>
+<span class="linenos">14</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.075</span><span class="p">,</span> <span class="mf">0.144</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.114</span><span class="p">,</span> <span class="mf">0.116</span><span class="p">,</span> <span class="mf">0.075</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.144</span><span class="p">,</span> <span class="mf">0.114</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.116</span><span class="p">],</span>
+<span class="linenos">15</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span>  <span class="mf">0.266</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.077</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.254</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.032</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.317</span><span class="p">,</span>  <span class="mf">0.311</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.067</span><span class="p">]</span>
+<span class="linenos">16</span>             <span class="p">]</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="c1"># fib_sec_1 list can be used both for plotting and OpenSees commands defining</span>
+<span class="linenos">19</span><span class="c1"># the actual fiber section in the OpenSees domain. Normally you would have to</span>
+<span class="linenos">20</span><span class="c1"># use regular section(&#39;Fiber&#39;, ...), fiber(), layer(), patch() commands with</span>
+<span class="linenos">21</span><span class="c1"># the same data to define the fiber section. However do not use both</span>
+<span class="linenos">22</span><span class="c1"># ways in the same model.</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span><span class="c1"># opsv.fib_sec_list_to_cmds(fib_sec_1)</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="c1"># 2. RC section</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span><span class="n">Bcol</span> <span class="o">=</span> <span class="mf">0.711</span>
+<span class="linenos">29</span><span class="n">Hcol</span> <span class="o">=</span> <span class="n">Bcol</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="n">c</span> <span class="o">=</span> <span class="mf">0.076</span>  <span class="c1"># cover</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span><span class="n">y1col</span> <span class="o">=</span> <span class="n">Hcol</span><span class="o">/</span><span class="mf">2.0</span>
+<span class="linenos">34</span><span class="n">z1col</span> <span class="o">=</span> <span class="n">Bcol</span><span class="o">/</span><span class="mf">2.0</span>
+<span class="linenos">35</span>
+<span class="linenos">36</span><span class="n">y2col</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">Hcol</span><span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">c</span><span class="p">)</span><span class="o">/</span><span class="mf">3.0</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span><span class="n">nFibZ</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="linenos">39</span><span class="n">nFib</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="linenos">40</span><span class="n">nFibCover</span><span class="p">,</span> <span class="n">nFibCore</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">16</span>
+<span class="linenos">41</span><span class="n">As9</span> <span class="o">=</span> <span class="mf">0.0006446</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="n">fib_sec_2</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;Fiber&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">&#39;-GJ&#39;</span><span class="p">,</span> <span class="mf">1.0e6</span><span class="p">],</span>
+<span class="linenos">44</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nFibCore</span><span class="p">,</span> <span class="n">nFibZ</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">,</span> <span class="n">y1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">],</span>
+<span class="linenos">45</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nFib</span><span class="p">,</span> <span class="n">nFibZ</span><span class="p">,</span> <span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="o">-</span><span class="n">z1col</span><span class="p">,</span> <span class="n">y1col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">],</span>
+<span class="linenos">46</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nFib</span><span class="p">,</span> <span class="n">nFibZ</span><span class="p">,</span> <span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">y1col</span><span class="p">,</span> <span class="n">z1col</span><span class="p">],</span>
+<span class="linenos">47</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nFibCover</span><span class="p">,</span> <span class="n">nFibZ</span><span class="p">,</span> <span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">],</span>
+<span class="linenos">48</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nFibCover</span><span class="p">,</span> <span class="n">nFibZ</span><span class="p">,</span> <span class="n">y1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">,</span> <span class="n">y1col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">],</span>
+<span class="linenos">49</span>             <span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span> <span class="s1">&#39;straight&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">As9</span><span class="p">,</span> <span class="n">y1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">y1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">],</span>
+<span class="linenos">50</span>             <span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span> <span class="s1">&#39;straight&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">As9</span><span class="p">,</span> <span class="n">y2col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">y2col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">],</span>
+<span class="linenos">51</span>             <span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span> <span class="s1">&#39;straight&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">As9</span><span class="p">,</span> <span class="o">-</span><span class="n">y2col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">-</span><span class="n">y2col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">],</span>
+<span class="linenos">52</span>             <span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span> <span class="s1">&#39;straight&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">As9</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">z1col</span><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">y1col</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="n">z1col</span><span class="p">]]</span>
+<span class="linenos">53</span>
+<span class="linenos">54</span>
+<span class="linenos">55</span><span class="c1"># opsv.fib_sec_list_to_cmds(fib_sec_2)</span>
+<span class="linenos">56</span>
+<span class="linenos">57</span><span class="n">matcolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;lightgrey&#39;</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">]</span>
+<span class="linenos">58</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_fiber_section</span><span class="p">(</span><span class="n">fib_sec_1</span><span class="p">,</span> <span class="n">matcolor</span><span class="o">=</span><span class="n">matcolor</span><span class="p">)</span>
+<span class="linenos">59</span><span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="linenos">60</span><span class="c1"># plt.savefig(&#39;fibsec_wshape.png&#39;)</span>
+<span class="linenos">61</span>
+<span class="linenos">62</span><span class="n">matcolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;lightgrey&#39;</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">]</span>
+<span class="linenos">63</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_fiber_section</span><span class="p">(</span><span class="n">fib_sec_2</span><span class="p">,</span> <span class="n">matcolor</span><span class="o">=</span><span class="n">matcolor</span><span class="p">)</span>
+<span class="linenos">64</span><span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="linenos">65</span><span class="c1"># plt.savefig(&#39;fibsec_rc.png&#39;)</span>
+<span class="linenos">66</span>
+<span class="linenos">67</span><span class="c1"># 3. circular cross-section</span>
+<span class="linenos">68</span><span class="n">nc1</span><span class="p">,</span> <span class="n">nr1</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">3</span>
+<span class="linenos">69</span><span class="n">nc2</span><span class="p">,</span> <span class="n">nr2</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">2</span>
+<span class="linenos">70</span><span class="n">ri1</span><span class="p">,</span> <span class="n">re1</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span>
+<span class="linenos">71</span><span class="n">ri2</span><span class="p">,</span> <span class="n">re2</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.25</span>
+<span class="linenos">72</span><span class="n">a_beg</span><span class="p">,</span> <span class="n">a_end</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span>
+<span class="linenos">73</span><span class="n">rbar3</span> <span class="o">=</span> <span class="mf">0.225</span>
+<span class="linenos">74</span><span class="n">a_beg2</span><span class="p">,</span> <span class="n">a_end2</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span>
+<span class="linenos">75</span>
+<span class="linenos">76</span><span class="n">fib_sec_3</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;Fiber&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;-GJ&#39;</span><span class="p">,</span> <span class="mf">1.0e6</span><span class="p">],</span>
+<span class="linenos">77</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">nc1</span><span class="p">,</span> <span class="n">nr1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">ri1</span><span class="p">,</span> <span class="n">re1</span><span class="p">,</span> <span class="n">a_beg</span><span class="p">,</span> <span class="n">a_end</span><span class="p">],</span>
+<span class="linenos">78</span>             <span class="p">[</span><span class="s1">&#39;patch&#39;</span><span class="p">,</span> <span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="n">nc2</span><span class="p">,</span> <span class="n">nr2</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">ri2</span><span class="p">,</span> <span class="n">re2</span><span class="p">,</span> <span class="n">a_beg</span><span class="p">,</span> <span class="n">a_end</span><span class="p">],</span>
+<span class="linenos">79</span>             <span class="p">[</span><span class="s1">&#39;layer&#39;</span><span class="p">,</span> <span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">As9</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">rbar3</span><span class="p">,</span> <span class="n">a_beg2</span><span class="p">,</span> <span class="n">a_end2</span><span class="p">],</span>
+<span class="linenos">80</span>             <span class="p">]</span>
+<span class="linenos">81</span>
+<span class="linenos">82</span>
+<span class="linenos">83</span><span class="n">matcolor</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;lightgrey&#39;</span><span class="p">,</span> <span class="s1">&#39;gold&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">]</span>
+<span class="linenos">84</span><span class="n">opsv</span><span class="o">.</span><span class="n">plot_fiber_section</span><span class="p">(</span><span class="n">fib_sec_3</span><span class="p">,</span> <span class="n">matcolor</span><span class="o">=</span><span class="n">matcolor</span><span class="p">)</span>
+<span class="linenos">85</span><span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="linenos">86</span><span class="c1"># plt.savefig(&#39;fibsec_circ.png&#39;)</span>
+<span class="linenos">87</span>
+<span class="linenos">88</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="ex_quads_4x4.html" class="btn btn-neutral float-left" title="Plot stress distribution of a plane stress quad model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ex_2d_portal_frame_th_mode_anim.html" class="btn btn-neutral float-right" title="Animation of dynamic analysis and mode shapes of a 2d Portal Frame" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Seweryn Kokot.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

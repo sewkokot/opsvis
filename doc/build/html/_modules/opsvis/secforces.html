@@ -1,0 +1,992 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsvis.secforces &mdash; opsvis 0.99.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=f5127f15" />
+
+  
+      <script src="../../_static/jquery.js?v=8dae8fb0"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=ce4adff3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsvis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_model.html">plot_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_defo.html">plot_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_mode_shape.html">plot_mode_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_2d.html">section_force_diagram_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_strain.html">plot_strain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_stress_2d.html">plot_stress_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anim_defo.html">anim_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anim_mode.html">anim_mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_fiber_section.html">plot_fiber_section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fib_sec_list_to_cmds.html">fib_sec_list_to_cmds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sig_out_per_node.html">sig_out_per_node</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsvis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">opsvis.secforces</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for opsvis.secforces</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">openseespy.opensees</span> <span class="k">as</span> <span class="nn">ops</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d</span> <span class="kn">import</span> <span class="n">Axes3D</span>
+<span class="kn">from</span> <span class="nn">mpl_toolkits.mplot3d.art3d</span> <span class="kn">import</span> <span class="n">Poly3DCollection</span>
+<span class="kn">from</span> <span class="nn">matplotlib.collections</span> <span class="kn">import</span> <span class="n">PolyCollection</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Circle</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">Wedge</span>
+<span class="kn">from</span> <span class="nn">matplotlib.animation</span> <span class="kn">import</span> <span class="n">FuncAnimation</span>
+<span class="kn">import</span> <span class="nn">matplotlib.tri</span> <span class="k">as</span> <span class="nn">tri</span>
+
+<span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">model</span>
+
+
+<span class="k">def</span> <span class="nf">section_force_distribution_2d</span><span class="p">(</span><span class="n">ecrd</span><span class="p">,</span> <span class="n">pl</span><span class="p">,</span> <span class="n">nep</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                  <span class="n">ele_load_data</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;-beamUniform&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate section forces (N, V, M) for an elastic 2D Euler-Bernoulli beam.</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">    ecrd - x, y element coordinates in global system</span>
+<span class="sd">    nep - number of evaluation points, by default (2) at element ends</span>
+<span class="sd">    ele_load_list - list of transverse and longitudinal element load</span>
+<span class="sd">      syntax: [ele_load_type, Wy, Wx]</span>
+<span class="sd">      For now only &#39;-beamUniform&#39; element load type is acceptable</span>
+
+<span class="sd">    Output:</span>
+<span class="sd">    s = [N V M]; shape: (nep,3)</span>
+<span class="sd">        section forces at nep points along local x</span>
+<span class="sd">    xl: coordinates of local x-axis; shape: (nep,)</span>
+
+<span class="sd">    Use it with dia_sf to draw N, V, M diagrams.</span>
+
+<span class="sd">    nep : int</span>
+<span class="sd">        number of evaluation points, by default (2) at element ends</span>
+<span class="sd">        If the element load is between the points then nep is increased by 1 or 2</span>
+
+<span class="sd">    TODO: add &#39;-beamPoint&#39; element load type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+    <span class="n">Lxy</span> <span class="o">=</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxy</span> <span class="o">@</span> <span class="n">Lxy</span><span class="p">)</span>
+
+    <span class="n">nlf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
+    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nep</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ele_load_data_i</span> <span class="ow">in</span> <span class="n">ele_load_data</span><span class="p">:</span>
+        <span class="n">ele_load_type</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># trusses</span>
+            <span class="n">N_1</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>  <span class="c1"># plane frames</span>
+            <span class="c1"># N_1, V_1, M_1 = pl[0], pl[1], pl[2]</span>
+            <span class="n">N_1</span><span class="p">,</span> <span class="n">V_1</span><span class="p">,</span> <span class="n">M_1</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! Not supported. Number of nodal forces: </span><span class="si">{nlf}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">:</span>
+            <span class="c1"># raise ValueError</span>
+            <span class="c1"># raise NameError</span>
+
+            <span class="n">n_ele_load_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele_load_data_i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="c1"># eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]</span>
+                <span class="n">Wy</span><span class="p">,</span> <span class="n">Wx</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+            <span class="k">elif</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="n">wta</span><span class="p">,</span> <span class="n">waa</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">bL</span><span class="p">,</span> <span class="n">wtb</span><span class="p">,</span> <span class="n">wab</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+                <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">aL</span><span class="o">*</span><span class="n">L</span><span class="p">,</span> <span class="n">bL</span><span class="o">*</span><span class="n">L</span>
+
+                <span class="n">bma</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+
+                <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">xl</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="n">nep</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">xl</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">b</span><span class="p">),</span> <span class="n">b</span><span class="p">)</span>
+                    <span class="n">nep</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamPoint&#39;</span><span class="p">:</span>
+            <span class="n">Pt</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">Pa</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">aL</span> <span class="o">*</span> <span class="n">L</span>
+
+            <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">xl</span><span class="p">:</span>
+                <span class="c1"># idx = xl.searchsorted(a)</span>
+                <span class="c1"># np.concatenate((xl[:idx], [a], xl[idx:]))</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">)</span>
+                <span class="n">nep</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># idx = xl.searchsorted(a)</span>
+                <span class="c1"># xl = np.concatenate((xl[:idx], [a], xl[idx:]))</span>
+                <span class="c1"># idx = xl.searchsorted(a+0.001)</span>
+                <span class="c1"># xl = np.concatenate((xl[:idx], [a+0.001], xl[idx:]))</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">a</span><span class="p">)</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">)</span>
+                <span class="n">nep</span> <span class="o">+=</span> <span class="mi">2</span>
+
+    <span class="c1"># xl is modified on the fly</span>
+    <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nep</span><span class="p">)</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">N_1</span> <span class="o">*</span> <span class="n">one</span>
+
+    <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+        <span class="c1"># s = np.zeros((nep, 3))</span>
+        <span class="n">V</span> <span class="o">=</span> <span class="n">V_1</span> <span class="o">*</span> <span class="n">one</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="o">-</span><span class="n">M_1</span> <span class="o">*</span> <span class="n">one</span> <span class="o">+</span> <span class="n">V_1</span> <span class="o">*</span> <span class="n">xl</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># s = np.zeros((nep, 1))</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ele_load_data_i</span> <span class="ow">in</span> <span class="n">ele_load_data</span><span class="p">:</span>
+        <span class="n">ele_load_type</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">:</span>
+            <span class="c1"># raise ValueError</span>
+            <span class="c1"># raise NameError</span>
+
+            <span class="n">n_ele_load_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele_load_data_i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="c1"># eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]</span>
+                <span class="n">Wy</span><span class="p">,</span> <span class="n">Wx</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">*</span><span class="p">(</span><span class="n">Wx</span> <span class="o">*</span> <span class="n">xl</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+                    <span class="n">V</span> <span class="o">=</span> <span class="n">Wy</span> <span class="o">*</span> <span class="n">xl</span>
+                    <span class="n">M</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Wy</span> <span class="o">*</span> <span class="n">xl</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">V</span><span class="p">,</span> <span class="n">M</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">))</span>
+
+            <span class="k">elif</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">7</span><span class="p">:</span>
+                <span class="n">wta</span><span class="p">,</span> <span class="n">waa</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">bL</span><span class="p">,</span> <span class="n">wtb</span><span class="p">,</span> <span class="n">wab</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+                <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">aL</span><span class="o">*</span><span class="n">L</span><span class="p">,</span> <span class="n">bL</span><span class="o">*</span><span class="n">L</span>
+
+                <span class="n">bma</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span>
+
+                <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">xl</span><span class="p">):</span>
+                    <span class="n">xma</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">a</span>
+                    <span class="n">wtx</span> <span class="o">=</span> <span class="n">wta</span> <span class="o">+</span> <span class="p">(</span><span class="n">wtb</span> <span class="o">-</span> <span class="n">wta</span><span class="p">)</span> <span class="o">*</span> <span class="n">xma</span> <span class="o">/</span> <span class="n">bma</span>
+                    <span class="c1"># xc = a + bma * (wtb + 2*wta) / (3 * (wta + wtb))</span>
+                    <span class="k">if</span> <span class="n">wtx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">xc</span> <span class="o">=</span> <span class="mf">0.</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">xc</span> <span class="o">=</span> <span class="n">xma</span> <span class="o">*</span> <span class="p">(</span><span class="n">wtx</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">wta</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">wta</span> <span class="o">+</span> <span class="n">wtx</span><span class="p">))</span>
+
+                    <span class="n">Ax</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">wtx</span><span class="o">+</span><span class="n">wta</span><span class="p">)</span> <span class="o">*</span> <span class="n">xma</span>
+                    <span class="c1"># V1x = V_1 * x</span>
+                    <span class="n">Axxc</span> <span class="o">=</span> <span class="n">Ax</span> <span class="o">*</span> <span class="n">xc</span>
+
+                    <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;=</span> <span class="n">a</span> <span class="ow">and</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">*</span><span class="p">((</span><span class="n">wab</span> <span class="o">-</span> <span class="n">waa</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Ax</span>
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Axxc</span>
+
+                    <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">b</span><span class="p">:</span>
+                        <span class="n">xmb</span> <span class="o">=</span> <span class="n">x</span> <span class="o">-</span> <span class="n">b</span>
+                        <span class="n">xc</span> <span class="o">=</span> <span class="n">bma</span> <span class="o">*</span> <span class="p">(</span><span class="n">wtb</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wta</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="p">(</span><span class="n">wta</span> <span class="o">+</span> <span class="n">wtb</span><span class="p">))</span> <span class="o">+</span> <span class="n">xmb</span>
+                        <span class="n">Ab</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">wtb</span> <span class="o">+</span> <span class="n">wta</span><span class="p">)</span> <span class="o">*</span> <span class="n">bma</span>
+                        <span class="n">Abxc</span> <span class="o">=</span> <span class="n">Ab</span> <span class="o">*</span> <span class="n">xc</span>
+
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="p">((</span><span class="n">wab</span> <span class="o">-</span> <span class="n">waa</span><span class="p">)</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Ab</span>
+                        <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Abxc</span>
+
+                    <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">aL</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bL</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">*</span><span class="p">(</span><span class="n">N_1</span> <span class="o">*</span> <span class="n">one</span> <span class="o">+</span> <span class="n">wta</span> <span class="o">*</span> <span class="n">xl</span><span class="p">)</span>
+                    <span class="n">V</span> <span class="o">=</span> <span class="n">V_1</span> <span class="o">*</span> <span class="n">one</span> <span class="o">+</span> <span class="n">wta</span> <span class="o">*</span> <span class="n">xl</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">N</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">elif</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamPoint&#39;</span><span class="p">:</span>
+            <span class="n">Pt</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">Pa</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">aL</span> <span class="o">*</span> <span class="n">L</span>
+
+            <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">xl</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                    <span class="c1"># s[indx, 0] += -1. * N_1</span>
+                    <span class="c1"># s[indx, 1] += V_1</span>
+                    <span class="c1"># s[indx, 2] += -M_1 + V_1 * x</span>
+                <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="p">(</span><span class="n">Pa</span><span class="p">)</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Pt</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Pt</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">a</span><span class="p">)</span>
+
+                <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># if eload_type == &#39;-beamUniform&#39;:</span>
+    <span class="c1"># else:</span>
+
+    <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="n">xl</span><span class="p">,</span> <span class="n">nep</span>
+
+
+<span class="k">def</span> <span class="nf">section_force_distribution_3d</span><span class="p">(</span><span class="n">ecrd</span><span class="p">,</span> <span class="n">pl</span><span class="p">,</span> <span class="n">nep</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                                  <span class="n">ele_load_data</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;-beamUniform&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate section forces (N, Vy, Vz, T, My, Mz) for an elastic 3d beam.</span>
+
+<span class="sd">    Longer description</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    ecrd : ndarray</span>
+<span class="sd">        x, y, z element coordinates</span>
+<span class="sd">    pl : ndarray</span>
+<span class="sd">    nep : int</span>
+<span class="sd">        number of evaluation points, by default (2) at element ends</span>
+
+<span class="sd">    ele_load_list : list</span>
+<span class="sd">        list of transverse and longitudinal element load</span>
+<span class="sd">        syntax: [ele_load_type, Wy, Wz, Wx]</span>
+<span class="sd">        For now only &#39;-beamUniform&#39; element load type is acceptable.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+
+<span class="sd">    s : ndarray</span>
+<span class="sd">        [N Vx Vy T My Mz]; shape: (nep,6)</span>
+<span class="sd">        column vectors of section forces along local x-axis</span>
+
+<span class="sd">    uvwfi : ndarray</span>
+<span class="sd">        [u v w fi]; shape (nep,4)</span>
+<span class="sd">        displacements at nep points along local x</span>
+
+<span class="sd">    xl : ndarray</span>
+<span class="sd">        coordinates of local x-axis; shape (nep,)</span>
+
+<span class="sd">    nep : int</span>
+<span class="sd">        number of evaluation points, by default (2) at element ends</span>
+<span class="sd">        If the element load is between the points then nep is increased by 1 or 2</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+
+<span class="sd">    Todo: add &#39;-beamPoint&#39; element load type</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Lxyz</span> <span class="o">=</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxyz</span> <span class="o">@</span> <span class="n">Lxyz</span><span class="p">)</span>
+
+    <span class="n">nlf</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span>
+    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nep</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">ele_load_data_i</span> <span class="ow">in</span> <span class="n">ele_load_data</span><span class="p">:</span>
+        <span class="n">ele_load_type</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">N1</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="n">N1</span><span class="p">,</span> <span class="n">Vy1</span><span class="p">,</span> <span class="n">Vz1</span><span class="p">,</span> <span class="n">T1</span><span class="p">,</span> <span class="n">My1</span><span class="p">,</span> <span class="n">Mz1</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! Not supported. Number of nodal forces: </span><span class="si">{nlf}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">:</span>
+            <span class="n">n_ele_load_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele_load_data_i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">elif</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamPoint&#39;</span><span class="p">:</span>
+            <span class="n">Py</span><span class="p">,</span> <span class="n">Pz</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">Px</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">aL</span> <span class="o">*</span> <span class="n">L</span>
+
+            <span class="k">if</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">xl</span><span class="p">:</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">)</span>
+                <span class="n">nep</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="p">),</span> <span class="n">a</span><span class="p">)</span>
+                <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">xl</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">),</span> <span class="n">a</span><span class="o">+</span><span class="mf">0.001</span><span class="p">)</span>
+                <span class="n">nep</span> <span class="o">+=</span> <span class="mi">2</span>
+
+    <span class="n">one</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nep</span><span class="p">)</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="p">(</span><span class="n">N1</span> <span class="o">*</span> <span class="n">one</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+        <span class="n">Vy</span> <span class="o">=</span> <span class="n">Vy1</span> <span class="o">*</span> <span class="n">one</span>
+        <span class="n">Vz</span> <span class="o">=</span> <span class="n">Vz1</span> <span class="o">*</span> <span class="n">one</span>
+        <span class="n">T</span> <span class="o">=</span> <span class="o">-</span><span class="n">T1</span> <span class="o">*</span> <span class="n">one</span>
+        <span class="n">Mz</span> <span class="o">=</span> <span class="o">-</span><span class="n">Mz1</span> <span class="o">*</span> <span class="n">one</span> <span class="o">+</span> <span class="n">Vy1</span> <span class="o">*</span> <span class="n">xl</span>
+        <span class="n">My</span> <span class="o">=</span> <span class="o">-</span><span class="n">My1</span> <span class="o">*</span> <span class="n">one</span> <span class="o">-</span> <span class="n">Vz1</span> <span class="o">*</span> <span class="n">xl</span>
+
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">Vy</span><span class="p">,</span> <span class="n">Vz</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">My</span><span class="p">,</span> <span class="n">Mz</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">ele_load_data_i</span> <span class="ow">in</span> <span class="n">ele_load_data</span><span class="p">:</span>
+        <span class="n">ele_load_type</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamUniform&#39;</span><span class="p">:</span>
+            <span class="n">n_ele_load_data</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ele_load_data_i</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">n_ele_load_data</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="n">Wy</span><span class="p">,</span> <span class="n">Wz</span><span class="p">,</span> <span class="n">Wx</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+
+                <span class="n">N</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="p">(</span><span class="n">Wx</span> <span class="o">*</span> <span class="n">xl</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">12</span><span class="p">:</span>
+                    <span class="n">Vy</span> <span class="o">=</span> <span class="n">Wy</span> <span class="o">*</span> <span class="n">xl</span>
+                    <span class="n">Vz</span> <span class="o">=</span> <span class="n">Wz</span> <span class="o">*</span> <span class="n">xl</span>
+                    <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">one</span><span class="p">)</span>
+                    <span class="n">Mz</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">Wy</span> <span class="o">*</span> <span class="n">xl</span><span class="o">**</span><span class="mi">2</span>
+                    <span class="n">My</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">Wz</span> <span class="o">*</span> <span class="n">xl</span><span class="o">**</span><span class="mi">2</span>
+
+                    <span class="n">s</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">Vy</span><span class="p">,</span> <span class="n">Vz</span><span class="p">,</span> <span class="n">T</span><span class="p">,</span> <span class="n">My</span><span class="p">,</span> <span class="n">Mz</span><span class="p">))</span>
+
+                <span class="k">elif</span> <span class="n">nlf</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">N</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="n">ele_load_type</span> <span class="o">==</span> <span class="s1">&#39;-beamPoint&#39;</span><span class="p">:</span>
+            <span class="n">Py</span><span class="p">,</span> <span class="n">Pz</span><span class="p">,</span> <span class="n">aL</span><span class="p">,</span> <span class="n">Px</span> <span class="o">=</span> <span class="n">ele_load_data_i</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">aL</span> <span class="o">*</span> <span class="n">L</span>
+
+            <span class="n">indx</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nditer</span><span class="p">(</span><span class="n">xl</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">x</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">elif</span> <span class="n">x</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">:</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span><span class="mf">1.</span> <span class="o">*</span> <span class="n">Px</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Py</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Pz</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="o">-</span> <span class="n">Pz</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+                    <span class="n">s</span><span class="p">[</span><span class="n">indx</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">+=</span> <span class="n">Py</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span>
+
+                <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">s</span><span class="p">,</span> <span class="n">xl</span><span class="p">,</span> <span class="n">nep</span>
+
+
+<div class="viewcode-block" id="section_force_diagram_2d">
+<a class="viewcode-back" href="../../section_force_diagram_2d.html#opsvis.section_force_diagram_2d">[docs]</a>
+<span class="k">def</span> <span class="nf">section_force_diagram_2d</span><span class="p">(</span><span class="n">sf_type</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">nep</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+                             <span class="n">fmt_secforce1</span><span class="o">=</span><span class="n">fmt_secforce1</span><span class="p">,</span>
+                             <span class="n">fmt_secforce2</span><span class="o">=</span><span class="n">fmt_secforce2</span><span class="p">,</span>
+                             <span class="n">fig_wi_he</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fig_lbrt</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">ref_vert_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">end_max_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">node_supports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">alt_model_plot</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display section forces diagram for 2d beam column model.</span>
+
+<span class="sd">    This function plots a section forces diagram for 2d beam column elements</span>
+<span class="sd">    with or without element loads. For now only &#39;-beamUniform&#39; constant</span>
+<span class="sd">    transverse or axial element loads are supported.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sf_type (str): type of section force: &#39;N&#39; - normal force,</span>
+<span class="sd">            &#39;V&#39; - shear force, &#39;M&#39; - bending moments.</span>
+
+<span class="sd">        sfac (float): scale factor by wich the values of section forces are</span>
+<span class="sd">            multiplied.</span>
+
+<span class="sd">        nep (int): number of evaluation points including both end nodes</span>
+<span class="sd">            (default: 17)</span>
+
+<span class="sd">        fmt_secforce1 (dict): line format dictionary for section force distribution</span>
+<span class="sd">            curve.</span>
+
+<span class="sd">        fmt_secforce2 (dict): line format dictionary for auxiliary reference lines.</span>
+
+<span class="sd">        fig_wi_he (tuple): contains width and height of the figure</span>
+
+<span class="sd">        fig_lbrt (tuple): a tuple contating left, bottom, right and top offsets</span>
+
+<span class="sd">        ref_vert_lines (bool): True means plot the vertical reference lines</span>
+<span class="sd">            on the section force diagrams.</span>
+
+<span class="sd">        end_max_values (bool): True means show the values at element ends and</span>
+<span class="sd">            extreme (max, min) value between the ends.</span>
+
+<span class="sd">        node_supports (bool): True - show the supports.</span>
+<span class="sd">            Default: True.</span>
+
+<span class="sd">        ax: the axes object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        minVal (float): the minimum overall value of the section force.</span>
+
+<span class="sd">        maxVal (float): the maximum overall value of the section force.</span>
+
+<span class="sd">        ax: the axes object.</span>
+
+<span class="sd">        alt_model_plot (int): 1 - for using the plot_model command,  2 - for using</span>
+<span class="sd">            simplified model plotting. Other integer - for no model plotting.</span>
+<span class="sd">            In this case the model can be plotted outside this command</span>
+<span class="sd">            using the axes (ax) object. Default is 1.</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        See example: demo_portal_frame.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fig_wi_he</span><span class="p">:</span>
+            <span class="n">fig_wi</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">=</span> <span class="n">fig_wi_he</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_wi</span><span class="o">/</span><span class="mf">2.54</span><span class="p">,</span> <span class="n">fig_he</span><span class="o">/</span><span class="mf">2.54</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">fig_lbrt</span><span class="p">:</span>
+            <span class="n">fleft</span><span class="p">,</span> <span class="n">fbottom</span><span class="p">,</span> <span class="n">fright</span><span class="p">,</span> <span class="n">ftop</span> <span class="o">=</span> <span class="n">fig_lbrt</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="n">fleft</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="n">fbottom</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="n">fright</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="n">ftop</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">alt_model_plot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_model</span><span class="p">(</span><span class="n">node_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">element_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">fmt_model</span><span class="o">=</span><span class="n">fmt_model_secforce</span><span class="p">,</span>
+                              <span class="n">node_supports</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">fmt_model_truss</span><span class="o">=</span><span class="n">fmt_model_secforce</span><span class="p">,</span>
+                              <span class="n">truss_node_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">fmt_secforce1_orig</span> <span class="o">=</span> <span class="n">fmt_secforce1</span>
+    <span class="n">maxVal</span><span class="p">,</span> <span class="n">minVal</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">ele_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getEleTags</span><span class="p">()</span>
+
+    <span class="n">Ew</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_Ew_data_from_ops_domain</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">ele_tag</span> <span class="ow">in</span> <span class="n">ele_tags</span><span class="p">:</span>
+
+        <span class="n">ele_class_tag</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getEleClassTags</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticBeam2d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn2d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn2d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">TimoshenkoBeamColumn2d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam2d</span><span class="p">):</span>
+
+            <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
+            <span class="n">ecrd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ele_node_tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ele_node_tags</span><span class="p">):</span>
+                <span class="n">ecrd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">ele_node_tag</span><span class="p">)</span>
+
+            <span class="n">Lxy</span> <span class="o">=</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxy</span> <span class="o">@</span> <span class="n">Lxy</span><span class="p">)</span>
+            <span class="n">cosa</span><span class="p">,</span> <span class="n">cosb</span> <span class="o">=</span> <span class="n">Lxy</span> <span class="o">/</span> <span class="n">L</span>
+
+            <span class="k">if</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;axial&#39;</span><span class="p">:</span>
+                    <span class="n">axial_force</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;axialForce&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="o">-</span><span class="n">axial_force</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nep</span><span class="p">)</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nep</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">axial_force</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+                        <span class="n">fmt_color</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+                        <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce_tension</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                        <span class="n">fmt_color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
+                        <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce_compression</span>
+
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># for sf_type = &#39;V&#39; or &#39;M&#39;</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>  <span class="c1"># for other elements than truss</span>
+                <span class="c1"># by default no element load</span>
+                <span class="n">eload_data</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;-beamUniform&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">ele_tag</span> <span class="ow">in</span> <span class="n">Ew</span><span class="p">:</span>
+                    <span class="n">eload_data</span> <span class="o">=</span> <span class="n">Ew</span><span class="p">[</span><span class="n">ele_tag</span><span class="p">]</span>
+
+                <span class="n">pl</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;localForces&#39;</span><span class="p">)</span>
+
+                <span class="c1"># rigid offsets for 2d</span>
+                <span class="n">ele_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;offsets&#39;</span><span class="p">))</span>
+                <span class="n">nz_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">ele_offsets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># tuple of arrays</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">nz_offsets</span><span class="p">):</span>
+                    <span class="c1"># modify ecrd_eles</span>
+                    <span class="c1"># ex += ele_offsets[[0, 3]]</span>
+                    <span class="c1"># ey += ele_offsets[[1, 4]]</span>
+                    <span class="n">ecrd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ele_offsets</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+                    <span class="n">ecrd</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ele_offsets</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+                    <span class="c1"># modify the following due to rigid offsets</span>
+                    <span class="c1"># Lxy = np.array([ex[1]-ex[0], ey[1]-ey[0]])</span>
+                    <span class="n">Lxy</span> <span class="o">=</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                    <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxy</span> <span class="o">@</span> <span class="n">Lxy</span><span class="p">)</span>
+                    <span class="n">cosa</span><span class="p">,</span> <span class="n">cosb</span> <span class="o">=</span> <span class="n">Lxy</span> <span class="o">/</span> <span class="n">L</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+                <span class="n">s_all</span><span class="p">,</span> <span class="n">xl</span><span class="p">,</span> <span class="n">nep</span> <span class="o">=</span> <span class="n">section_force_distribution_2d</span><span class="p">(</span><span class="n">ecrd</span><span class="p">,</span> <span class="n">pl</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span> <span class="n">eload_data</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;axial&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;V&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;shear&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;M&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;moment&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># for truss with zero shear force and moment</span>
+                <span class="k">pass</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># minVal = min(minVal, np.min(ss))</span>
+                <span class="c1"># maxVal = max(maxVal, np.max(ss))</span>
+                <span class="n">minVal</span><span class="p">,</span> <span class="n">minVal_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">ss</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+                <span class="n">maxVal</span><span class="p">,</span> <span class="n">maxVal_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">ss</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+
+                <span class="n">s</span> <span class="o">=</span> <span class="n">ss</span> <span class="o">*</span> <span class="n">sfac</span>
+
+                <span class="n">s_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nep</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]</span>
+
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">cosa</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">cosb</span>
+
+                <span class="n">s_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">s_0</span><span class="p">)</span>
+
+                <span class="c1"># positive M are opposite to N and V</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;M&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;moment&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+
+                <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosb</span>
+                <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">cosa</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+                <span class="c1"># section force curve</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="n">fmt_secforce1</span><span class="p">)</span>
+                <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce1_orig</span>
+
+                <span class="c1"># reference perpendicular lines</span>
+                <span class="k">if</span> <span class="n">ref_vert_lines</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nep</span><span class="p">):</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                                <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                            <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span> <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                            <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]:</span>
+                <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span>
+                <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;axial&#39;</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">nep</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">nep</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">axial_force</span><span class="p">)</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">fmt_color</span><span class="p">)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],</span>
+                <span class="c1">#             &#39;0.0&#39;, va=va, ha=ha)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">end_max_values</span><span class="p">:</span>
+                    <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+                    <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">minVal_ind</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">minVal_ind</span> <span class="o">!=</span> <span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">maxVal_ind</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">maxVal_ind</span> <span class="o">!=</span> <span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">node_supports</span><span class="p">:</span>
+        <span class="n">node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNodeTags</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_plot_supports</span><span class="p">(</span><span class="n">node_tags</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="c1"># ax.grid(False)</span>
+
+    <span class="k">return</span> <span class="n">minVal</span><span class="p">,</span> <span class="n">maxVal</span><span class="p">,</span> <span class="n">ax</span></div>
+
+
+
+<div class="viewcode-block" id="section_force_diagram_3d">
+<a class="viewcode-back" href="../../section_force_diagram_3d.html#opsvis.section_force_diagram_3d">[docs]</a>
+<span class="k">def</span> <span class="nf">section_force_diagram_3d</span><span class="p">(</span><span class="n">sf_type</span><span class="p">,</span> <span class="n">sfac</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span> <span class="n">nep</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+                             <span class="n">fmt_secforce1</span><span class="o">=</span><span class="n">fmt_secforce1</span><span class="p">,</span>
+                             <span class="n">fmt_secforce2</span><span class="o">=</span><span class="n">fmt_secforce2</span><span class="p">,</span>
+                             <span class="n">ref_vert_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">end_max_values</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">dir_plt</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node_supports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                             <span class="n">alt_model_plot</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Display section forces diagram of a 3d beam column model.</span>
+
+<span class="sd">    This function plots section forces diagrams for 3d beam column elements</span>
+<span class="sd">    with or without element loads. For now only &#39;-beamUniform&#39; constant</span>
+<span class="sd">    transverse or axial element loads are supported.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        sf_type (str): type of section force: &#39;N&#39; - normal force,</span>
+<span class="sd">            &#39;Vy&#39; or &#39;Vz&#39; - shear force, &#39;My&#39; or &#39;Mz&#39; - bending moments,</span>
+<span class="sd">            &#39;T&#39; - torsional moment.</span>
+
+<span class="sd">        sfac (float): scale factor by wich the values of section forces are</span>
+<span class="sd">            multiplied.</span>
+
+<span class="sd">        nep (int): number of evaluation points including both end nodes</span>
+<span class="sd">            (default: 17)</span>
+
+<span class="sd">        fmt_secforce1 (dict): line format dictionary for section force distribution</span>
+<span class="sd">            curve.</span>
+
+<span class="sd">        fmt_secforce2 (dict): line format dictionary for auxiliary reference lines.</span>
+
+<span class="sd">        end_max_values (bool): True means show the values at element ends and</span>
+<span class="sd">            extreme (max, min) value between the ends.</span>
+
+<span class="sd">        dir_plt {0, 1, 2}: direction in which to plot the load effects:</span>
+<span class="sd">            0 (default) - as defined in the code for each load effect type</span>
+<span class="sd">            1 - in the y-axis (default for N, Vy, T, Mz)</span>
+<span class="sd">            2 - in the z-axis (default for Vz, My)</span>
+
+<span class="sd">        ax: Optional axis to plot to.</span>
+
+<span class="sd">        alt_model_plot (int): 1 - for using the plot_model command,  2 - for using</span>
+<span class="sd">            simplified model plotting. Other integer - for no model plotting.</span>
+<span class="sd">            In this case the model can be plotted outside this command</span>
+<span class="sd">            using the axes (ax) object. Default is 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        minVal (float): the minimum overall value of the section force.</span>
+
+<span class="sd">        maxVal (float): the maximum overall value of the section force.</span>
+
+<span class="sd">        ax: the axes object.</span>
+
+<span class="sd">    Usage:</span>
+<span class="sd">        See example: demo_cantilever_3el_3d.py</span>
+
+<span class="sd">    Todo:</span>
+
+<span class="sd">    Add support for other element loads available in OpenSees: partial</span>
+<span class="sd">    (trapezoidal) uniform element load, and &#39;beamPoint&#39; element load.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># If supplied axis can be plotted to</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">ax</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;3d&quot;</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">azim</span><span class="p">,</span> <span class="n">elev</span> <span class="o">=</span> <span class="n">az_el</span>
+        <span class="n">fig_wi</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">=</span> <span class="n">fig_wi_he</span>
+        <span class="n">fleft</span><span class="p">,</span> <span class="n">fbottom</span><span class="p">,</span> <span class="n">fright</span><span class="p">,</span> <span class="n">ftop</span> <span class="o">=</span> <span class="n">fig_lbrt</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">fig_wi</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">,</span> <span class="n">fig_he</span> <span class="o">/</span> <span class="mf">2.54</span><span class="p">))</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">left</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mf">0.08</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.985</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="mf">0.94</span><span class="p">)</span>
+
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">Axes3D</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">azim</span><span class="o">=</span><span class="n">azim</span><span class="p">,</span> <span class="n">elev</span><span class="o">=</span><span class="n">elev</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">&#39;Z&#39;</span><span class="p">)</span>
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">view_init</span><span class="p">(</span><span class="n">azim</span><span class="o">=</span><span class="n">azim</span><span class="p">,</span> <span class="n">elev</span><span class="o">=</span><span class="n">elev</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">alt_model_plot</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">plot_model</span><span class="p">(</span><span class="n">node_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">element_labels</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">fmt_model</span><span class="o">=</span><span class="n">fmt_model_secforce</span><span class="p">,</span>
+                              <span class="n">node_supports</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                              <span class="n">fmt_model_truss</span><span class="o">=</span><span class="n">fmt_model_secforce</span><span class="p">,</span>
+                              <span class="n">truss_node_offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">fmt_secforce1_orig</span> <span class="o">=</span> <span class="n">fmt_secforce1</span>
+    <span class="n">maxVal</span><span class="p">,</span> <span class="n">minVal</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">ele_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getEleTags</span><span class="p">()</span>
+
+    <span class="n">Ew</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_Ew_data_from_ops_domain_3d</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ele_tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ele_tags</span><span class="p">):</span>
+
+        <span class="n">ele_class_tag</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getEleClassTags</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">ele_node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleNodes</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">)</span>
+        <span class="n">ecrd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ele_node_tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ele_node_tags</span><span class="p">):</span>
+            <span class="n">ecrd</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">nodeCoord</span><span class="p">(</span><span class="n">ele_node_tag</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticBeam3d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ForceBeamColumn3d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">DispBeamColumn3d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">TimoshenkoBeamColumn3d</span>
+            <span class="ow">or</span> <span class="n">ele_class_tag</span> <span class="o">==</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">ElasticTimoshenkoBeam3d</span><span class="p">):</span>
+
+            <span class="c1"># eo = Eo[i, :]</span>
+            <span class="n">xloc</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;xlocal&#39;</span><span class="p">)</span>
+            <span class="n">yloc</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;ylocal&#39;</span><span class="p">)</span>
+            <span class="n">zloc</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;zlocal&#39;</span><span class="p">)</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">xloc</span><span class="p">,</span> <span class="n">yloc</span><span class="p">,</span> <span class="n">zloc</span><span class="p">))</span>
+
+            <span class="c1"># rigid offsets for 3d</span>
+            <span class="n">ele_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;offsets&#39;</span><span class="p">))</span>
+            <span class="n">nz_offsets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">ele_offsets</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># tuple of arrays</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">nz_offsets</span><span class="p">):</span>
+                <span class="c1"># modify ecrd_eles</span>
+                <span class="c1"># ex += ele_offsets[[0, 3]]</span>
+                <span class="c1"># ey += ele_offsets[[1, 4]]</span>
+                <span class="n">ecrd</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ele_offsets</span><span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span>
+                <span class="n">ecrd</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ele_offsets</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">]]</span>
+                <span class="n">ecrd</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">ele_offsets</span><span class="p">[[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]</span>
+                <span class="c1"># modify the following due to rigid offsets</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="n">G</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">rot_transf_3d</span><span class="p">(</span><span class="n">ecrd</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]:</span>
+                <span class="n">Lxyz</span> <span class="o">=</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="n">L</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">Lxyz</span> <span class="o">@</span> <span class="n">Lxyz</span><span class="p">)</span>
+                <span class="n">g0</span> <span class="o">=</span> <span class="n">Lxyz</span> <span class="o">/</span> <span class="n">L</span>
+                <span class="n">nep</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># for truss only</span>
+
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;axial&#39;</span><span class="p">:</span>
+                    <span class="n">axial_force</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;axialForce&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="o">-</span><span class="n">axial_force</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">nep</span><span class="p">)</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">nep</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">axial_force</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;top&#39;</span>
+                        <span class="n">fmt_color</span> <span class="o">=</span> <span class="s1">&#39;b&#39;</span>
+                        <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce_tension</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                        <span class="n">fmt_color</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span>
+                        <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce_compression</span>
+
+                <span class="k">else</span><span class="p">:</span>  <span class="c1"># for sf_type = &#39;V&#39; or &#39;M&#39;</span>
+                    <span class="n">xl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># by default no element load</span>
+                <span class="n">eload_data</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;-beamUniform&#39;</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="n">ele_tag</span> <span class="ow">in</span> <span class="n">Ew</span><span class="p">:</span>
+                    <span class="n">eload_data</span> <span class="o">=</span> <span class="n">Ew</span><span class="p">[</span><span class="n">ele_tag</span><span class="p">]</span>
+
+                <span class="n">pl</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">eleResponse</span><span class="p">(</span><span class="n">ele_tag</span><span class="p">,</span> <span class="s1">&#39;localForces&#39;</span><span class="p">)</span>
+
+                <span class="n">s_all</span><span class="p">,</span> <span class="n">xl</span><span class="p">,</span> <span class="n">nep</span> <span class="o">=</span> <span class="n">section_force_distribution_3d</span><span class="p">(</span><span class="n">ecrd</span><span class="p">,</span> <span class="n">pl</span><span class="p">,</span> <span class="n">nep</span><span class="p">,</span>
+                                                               <span class="n">eload_data</span><span class="p">)</span>
+
+                <span class="c1"># 1:&#39;y&#39; 2:&#39;z&#39;</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;Vy&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;Vz&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;T&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;My&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">4</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">2</span>
+                <span class="k">elif</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;Mz&#39;</span><span class="p">:</span>
+                    <span class="n">ss</span> <span class="o">=</span> <span class="n">s_all</span><span class="p">[:,</span> <span class="mi">5</span><span class="p">]</span>
+                    <span class="n">dir_plt_tmp</span> <span class="o">=</span> <span class="mi">1</span>
+
+                <span class="k">if</span> <span class="n">dir_plt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">dir_plt</span> <span class="o">=</span> <span class="n">dir_plt_tmp</span>
+
+            <span class="k">if</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]:</span>
+                <span class="n">s_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nep</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g0</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_0</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_0</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">fmt_color</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">axial_force</span><span class="p">)</span> <span class="o">*</span> <span class="n">sfac</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># minVal = min(minVal, np.min(ss))</span>
+                <span class="c1"># maxVal = max(maxVal, np.max(ss))</span>
+                <span class="n">minVal</span><span class="p">,</span> <span class="n">minVal_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">ss</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+                <span class="n">maxVal</span><span class="p">,</span> <span class="n">maxVal_ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">ss</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+
+                <span class="n">s</span> <span class="o">=</span> <span class="n">ss</span> <span class="o">*</span> <span class="n">sfac</span>
+
+                <span class="c1"># FIXME - can be simplified</span>
+                <span class="n">s_0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nep</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">ecrd</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]]</span>
+
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">s_0</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">xl</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+                <span class="n">s_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">s_0</span><span class="p">)</span>
+
+                <span class="c1"># positive M are opposite to N and V</span>
+                <span class="c1"># if sf_type == &#39;Mz&#39; or sf_type == &#39;My&#39;:</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;Mz&#39;</span><span class="p">:</span>
+                    <span class="n">s</span> <span class="o">*=</span> <span class="o">-</span><span class="mf">1.</span>
+
+                <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="n">dir_plt</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+                <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="n">dir_plt</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">g</span><span class="p">[</span><span class="n">dir_plt</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+                <span class="c1"># plt.axis(&#39;equal&#39;)</span>
+
+                <span class="c1"># section force curve</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">s_p</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="o">**</span><span class="n">fmt_secforce1</span><span class="p">)</span>
+                <span class="n">fmt_secforce1</span> <span class="o">=</span> <span class="n">fmt_secforce1_orig</span>
+
+                <span class="c1"># reference perpendicular lines</span>
+                <span class="k">if</span> <span class="n">ref_vert_lines</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nep</span><span class="p">):</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                                <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                                <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                            <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                            <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">s_0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]],</span>
+                            <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+                            <span class="p">[</span><span class="n">s_0</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]],</span> <span class="o">**</span><span class="n">fmt_secforce2</span><span class="p">)</span>
+
+            <span class="c1"># dodane FIXME</span>
+            <span class="k">if</span> <span class="n">ele_class_tag</span> <span class="ow">in</span> <span class="p">[</span><span class="n">EleClassTag</span><span class="o">.</span><span class="n">truss</span><span class="p">,</span> <span class="n">EleClassTag</span><span class="o">.</span><span class="n">trussSection</span><span class="p">]:</span>
+                <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;center&#39;</span>
+                <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                <span class="k">if</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;N&#39;</span> <span class="ow">or</span> <span class="n">sf_type</span> <span class="o">==</span> <span class="s1">&#39;axial&#39;</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_0</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                            <span class="n">s_0</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                            <span class="n">s_0</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">abs</span><span class="p">(</span><span class="n">axial_force</span><span class="p">)</span><span class="si">:</span><span class="s1">.1f</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">fmt_color</span><span class="p">)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],</span>
+                <span class="c1">#             &#39;0.0&#39;, va=va, ha=ha)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">end_max_values</span><span class="p">:</span>
+                    <span class="n">ha</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span>
+                    <span class="n">va</span> <span class="o">=</span> <span class="s1">&#39;bottom&#39;</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">minVal_ind</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">minVal_ind</span> <span class="o">!=</span> <span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="n">minVal_ind</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+                    <span class="k">if</span> <span class="n">maxVal_ind</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">maxVal_ind</span> <span class="o">!=</span> <span class="n">nep</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">s_p</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">s_p</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+                                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">ss</span><span class="p">[</span><span class="n">maxVal_ind</span><span class="p">]</span><span class="si">:</span><span class="s1">.5g</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="n">va</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="n">ha</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">node_supports</span><span class="p">:</span>
+        <span class="n">node_tags</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">getNodeTags</span><span class="p">()</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">_plot_supports</span><span class="p">(</span><span class="n">node_tags</span><span class="p">,</span> <span class="n">ax</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">minVal</span><span class="p">,</span> <span class="n">maxVal</span><span class="p">,</span> <span class="n">ax</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Seweryn Kokot.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

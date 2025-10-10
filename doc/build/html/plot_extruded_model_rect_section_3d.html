@@ -1,0 +1,167 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>plot_extruded_model_rect_section_3d &mdash; opsvis 0.99.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=f5127f15" />
+
+  
+      <script src="_static/jquery.js?v=8dae8fb0"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ce4adff3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="anim_defo" href="anim_defo.html" />
+    <link rel="prev" title="plot_stress_2d" href="plot_stress_2d.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            opsvis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="plot_model.html">plot_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_defo.html">plot_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_mode_shape.html">plot_mode_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_2d.html">section_force_diagram_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress.html">plot_stress</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_strain.html">plot_strain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_stress_2d.html">plot_stress_2d</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">plot_extruded_model_rect_section_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_defo.html">anim_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="anim_mode.html">anim_mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot_fiber_section.html">plot_fiber_section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fib_sec_list_to_cmds.html">fib_sec_list_to_cmds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sig_out_per_node.html">sig_out_per_node</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">opsvis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">plot_extruded_model_rect_section_3d</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/plot_extruded_model_rect_section_3d.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="plot-extruded-model-rect-section-3d">
+<h1>plot_extruded_model_rect_section_3d<a class="headerlink" href="#plot-extruded-model-rect-section-3d" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">opsvis.</span></span><span class="sig-name descname"><span class="pre">plot_extruded_shapes_3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ele_shapes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">az_el</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(-60.0,</span> <span class="pre">30.0)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_wi_he</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fig_lbrt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/opsvis/model.html#plot_extruded_shapes_3d"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Plot an extruded 3d model based on cross-section dimenions.</p>
+<p>Three arrows present local section axes: green - local x-axis,
+red - local z-axis, blue - local y-axis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ele_shapes</strong> (<em>dict</em>) – keys are ele_tags and values are lists of:
+shape_type (str): ‘rect’ - rectangular shape, ‘I’ - double T shape
+and shape_args (list): list of floats, which necessary section
+dimensions.
+For ‘rect’ the list is [b d]; width and depth,
+for ‘I’ shape - [bf d tw tf]; flange width, section depth, web
+and flange thicknesses
+Example: ele_shapes = {1: [‘rect’, [b, d]],
+2: [‘I’, [bf, d, tw, tf]]}</p></li>
+<li><p><strong>az_el</strong> (<em>tuple</em>) – azimuth and elevation</p></li>
+<li><p><strong>fig_wi_he</strong> – figure width and height in centimeters</p></li>
+<li><p><strong>fig_lbrt</strong> – figure left, bottom, right, top boundaries</p></li>
+</ul>
+</dd>
+</dl>
+<dl>
+<dt>Usage:</dt><dd><div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ele_shapes</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="p">]],</span>
+              <span class="mi">2</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">]],</span>
+              <span class="mi">3</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;I&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">b</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">b</span><span class="o">/</span><span class="mf">10.</span><span class="p">,</span> <span class="n">h</span><span class="o">/</span><span class="mf">6.</span><span class="p">]]}</span>
+<span class="n">opsv</span><span class="o">.</span><span class="n">plot_extruded_shapes_3d</span><span class="p">(</span><span class="n">ele_shapes</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>Notes:</p>
+<ul class="simple">
+<li><p>For now only rectangular, circular and double T sections are supported.</p></li>
+<li><p>This function can be a source of inconsistency because OpenSees lacks
+functions to return section dimensions. A workaround is to have own
+Python helper functions to reuse data specified once</p></li>
+</ul>
+</dd></dl>
+
+<p>See example <a class="reference internal" href="ex_3d_3el_cantilever.html#opsvis-ex2"><span class="std std-ref">Statics of a 3d 3-element cantilever beam</span></a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_stress_2d.html" class="btn btn-neutral float-left" title="plot_stress_2d" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="anim_defo.html" class="btn btn-neutral float-right" title="anim_defo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Seweryn Kokot.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

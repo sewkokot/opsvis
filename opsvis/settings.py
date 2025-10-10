@@ -64,8 +64,12 @@ class EleClassTag:
     ElasticBeam3d = 5
     DispBeamColumn2d = 62
     DispBeamColumn3d = 64
+    DispBeamColumn2dThermal = 128
+    DispBeamColumn3dThermal = 130    
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
+    ForceBeamColumn2dThermal = 171
+    ForceBeamColumn3dThermal = 172    
     TimoshenkoBeamColumn2d = 63
     TimoshenkoBeamColumn3d = 631
     ElasticTimoshenkoBeam2d = 145
@@ -100,6 +104,8 @@ class EleClassTag:
     SFI_MVLEM_3D = 213
     TwoNodeLink = 86
     MasonPan12 = 215
+    Pipe = 269
+    CurvedPipe = 270
 
 
 class LoadTag:

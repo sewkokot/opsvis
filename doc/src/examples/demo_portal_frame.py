@@ -64,7 +64,9 @@ ops.printModel()
 opsv.plot_model()
 plt.title('plot_model after defining elements')
 
-opsv.plot_loads_2d()
+opsv.plot_load()
+
+opsv.plot_reactions()
 
 # sfac = 80.
 

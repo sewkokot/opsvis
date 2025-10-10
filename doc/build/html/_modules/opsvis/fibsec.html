@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsvis.fibsec &mdash; opsvis 0.99.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=f5127f15" />
+
+  
+      <script src="../../_static/jquery.js?v=8dae8fb0"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=ce4adff3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsvis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_model.html">plot_model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_defo.html">plot_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_load.html">plot_load</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_mode_shape.html">plot_mode_shape</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_2d.html">section_force_diagram_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../section_force_diagram_3d.html">section_force_diagram_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_strain.html">plot_strain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_stress_2d.html">plot_stress_2d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_extruded_model_rect_section_3d.html">plot_extruded_model_rect_section_3d</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anim_defo.html">anim_defo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../anim_mode.html">anim_mode</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot_fiber_section.html">plot_fiber_section</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fib_sec_list_to_cmds.html">fib_sec_list_to_cmds</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sig_out_per_node.html">sig_out_per_node</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsvis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">opsvis.fibsec</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for opsvis.fibsec</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">openseespy.opensees</span> <span class="k">as</span> <span class="nn">ops</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Circle</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">Wedge</span>
+
+<span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<span class="c1"># plot_fiber_section is inspired by plotSection matlab function</span>
+<span class="c1"># written by D. Vamvatsikos available at</span>
+<span class="c1"># http://users.ntua.gr/divamva/software.html (plotSection.zip)</span>
+<div class="viewcode-block" id="plot_fiber_section">
+<a class="viewcode-back" href="../../plot_fiber_section.html#opsvis.plot_fiber_section">[docs]</a>
+<span class="k">def</span> <span class="nf">plot_fiber_section</span><span class="p">(</span><span class="n">fib_sec_list</span><span class="p">,</span> <span class="n">fillflag</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                       <span class="n">matcolor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot fiber cross-section.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fib_sec_list (list): list of lists in the format similar to the parameters</span>
+<span class="sd">            for the section, layer, patch, fiber OpenSees commands</span>
+
+<span class="sd">        fillflag (int): 1 - filled fibers with color specified in matcolor</span>
+<span class="sd">            list, 0 - no color, only the outline of fibers</span>
+
+<span class="sd">        matcolor (list): sequence of colors for various material tags</span>
+<span class="sd">            assigned to fibers</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        ::</span>
+
+<span class="sd">            fib_sec_1 = [[&#39;section&#39;, &#39;Fiber&#39;, 1, &#39;-GJ&#39;, 1.0e6],</span>
+<span class="sd">                         [&#39;patch&#39;, &#39;quad&#39;, 1, 4, 1,  0.032, 0.317, -0.311, 0.067, -0.266, 0.005, 0.077, 0.254],  # noqa: E501</span>
+<span class="sd">                         [&#39;patch&#39;, &#39;quad&#39;, 1, 1, 4,  -0.075, 0.144, -0.114, 0.116, 0.075, -0.144, 0.114, -0.116],  # noqa: E501</span>
+<span class="sd">                         [&#39;patch&#39;, &#39;quad&#39;, 1, 4, 1,  0.266, -0.005,  -0.077, -0.254,  -0.032, -0.317,  0.311, -0.067]  # noqa: E501</span>
+<span class="sd">                         ]</span>
+<span class="sd">            opsv.fib_sec_list_to_cmds(fib_sec_1)</span>
+<span class="sd">            matcolor = [&#39;r&#39;, &#39;lightgrey&#39;, &#39;gold&#39;, &#39;w&#39;, &#39;w&#39;, &#39;w&#39;]</span>
+<span class="sd">            opsv.plot_fiber_section(fib_sec_1, matcolor=matcolor)</span>
+<span class="sd">            plt.axis(&#39;equal&#39;)</span>
+<span class="sd">            # plt.savefig(&#39;fibsec_rc.png&#39;)</span>
+<span class="sd">            plt.show()</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        ``fib_sec_list`` can be reused by means of a python helper function</span>
+<span class="sd">            ``opsvis.fib_sec_list_to_cmds(fib_sec_list_1)``</span>
+
+<span class="sd">    See also:</span>
+<span class="sd">        ``opsvis.fib_sec_list_to_cmds()``</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">invert_xaxis</span><span class="p">()</span>  <span class="c1"># To make z-axis positive to the left</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">fib_sec_list</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;layer&#39;</span><span class="p">:</span>
+            <span class="n">matTag</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;straight&#39;</span><span class="p">:</span>
+                <span class="n">n_bars</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+                <span class="n">As</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">As</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iy</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">)</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iz</span><span class="p">,</span> <span class="n">Jz</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">zi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+                    <span class="n">bar</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">((</span><span class="n">zi</span><span class="p">,</span> <span class="n">yi</span><span class="p">),</span> <span class="n">r</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;circ&#39;</span><span class="p">:</span>
+                <span class="n">n_bars</span><span class="p">,</span> <span class="n">As</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+                <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">arc_radius</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="n">a0_deg</span><span class="p">,</span> <span class="n">a1_deg</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="p">((</span><span class="n">a1_deg</span> <span class="o">-</span> <span class="n">a0_deg</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">360.</span> <span class="ow">and</span> <span class="n">n_bars</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">a1_deg</span> <span class="o">=</span> <span class="n">a0_deg</span> <span class="o">+</span> <span class="mf">360.</span> <span class="o">-</span> <span class="mf">360.</span> <span class="o">/</span> <span class="n">n_bars</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">a0_deg</span><span class="p">,</span> <span class="n">a1_deg</span> <span class="o">=</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">360.</span> <span class="o">-</span> <span class="mf">360.</span> <span class="o">/</span> <span class="n">n_bars</span>
+
+                <span class="n">a0_rad</span><span class="p">,</span> <span class="n">a1_rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a0_deg</span> <span class="o">/</span> <span class="mf">180.</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">a1_deg</span> <span class="o">/</span> <span class="mf">180.</span>
+                <span class="n">r_bar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">As</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+                <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">a0_rad</span><span class="p">,</span> <span class="n">a1_rad</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">)</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">yC</span> <span class="o">+</span> <span class="n">arc_radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">zC</span> <span class="o">+</span> <span class="n">arc_radius</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">zi</span><span class="p">,</span> <span class="n">yi</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span> <span class="n">Y</span><span class="p">):</span>
+                    <span class="n">bar</span> <span class="o">=</span> <span class="n">Circle</span><span class="p">((</span><span class="n">zi</span><span class="p">,</span> <span class="n">yi</span><span class="p">),</span> <span class="n">r_bar</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch&#39;</span> <span class="ow">and</span> <span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quad&#39;</span> <span class="ow">or</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quadr&#39;</span> <span class="ow">or</span>
+                                  <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;rect&#39;</span><span class="p">)):</span>
+            <span class="n">matTag</span><span class="p">,</span> <span class="n">nIJ</span><span class="p">,</span> <span class="n">nJK</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quad&#39;</span> <span class="ow">or</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quadr&#39;</span><span class="p">:</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;rect&#39;</span><span class="p">:</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Iy</span><span class="p">,</span> <span class="n">Kz</span>
+
+            <span class="c1"># check for convexity (vector products)</span>
+            <span class="n">outIJxIK</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jy</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Kz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">Ky</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Jz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span>
+            <span class="n">outIKxIL</span> <span class="o">=</span> <span class="p">(</span><span class="n">Ky</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Lz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">Ly</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Kz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span>
+            <span class="c1"># check if I, J, L points are colinear</span>
+            <span class="n">outIJxIL</span> <span class="o">=</span> <span class="p">(</span><span class="n">Jy</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Lz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">Ly</span><span class="o">-</span><span class="n">Iy</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">Jz</span><span class="o">-</span><span class="n">Iz</span><span class="p">)</span>
+            <span class="c1"># outJKxJL = (Ky-Jy)*(Lz-Jz) - (Ly-Jy)*(Kz-Jz)</span>
+
+            <span class="k">if</span> <span class="n">outIJxIK</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">outIKxIL</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">outIJxIL</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Warning! Patch quad is non-convex or counter-clockwise defined or has at least 3 colinear points in line&#39;</span><span class="p">)</span>  <span class="c1"># noqa: E501</span>
+
+            <span class="n">IJz</span><span class="p">,</span> <span class="n">IJy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iz</span><span class="p">,</span> <span class="n">Jz</span><span class="p">,</span> <span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iy</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">JKz</span><span class="p">,</span> <span class="n">JKy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Jz</span><span class="p">,</span> <span class="n">Kz</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Jy</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">LKz</span><span class="p">,</span> <span class="n">LKy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Lz</span><span class="p">,</span> <span class="n">Kz</span><span class="p">,</span> <span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Ly</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ILz</span><span class="p">,</span> <span class="n">ILy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iz</span><span class="p">,</span> <span class="n">Lz</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">Iy</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fillflag</span><span class="p">:</span>
+                <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nIJ</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+                    <span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">IJz</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">LKz</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">IJy</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">LKy</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">nJK</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nIJ</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nJK</span><span class="p">):</span>
+                        <span class="n">zy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]],</span>
+                                       <span class="p">[</span><span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span>
+                                       <span class="p">[</span><span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]],</span>
+                                       <span class="p">[</span><span class="n">Z</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">k</span><span class="p">]]])</span>
+                        <span class="n">poly</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">zy</span><span class="p">,</span> <span class="n">closed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">matcolor</span><span class="p">[</span><span class="n">matTag</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">poly</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># horizontal lines</span>
+                <span class="k">for</span> <span class="n">az</span><span class="p">,</span> <span class="n">bz</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">by</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">IJz</span><span class="p">,</span> <span class="n">LKz</span><span class="p">,</span> <span class="n">IJy</span><span class="p">,</span> <span class="n">LKy</span><span class="p">):</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">az</span><span class="p">,</span> <span class="n">bz</span><span class="p">],</span> <span class="p">[</span><span class="n">ay</span><span class="p">,</span> <span class="n">by</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="c1"># vertical lines</span>
+                <span class="k">for</span> <span class="n">az</span><span class="p">,</span> <span class="n">bz</span><span class="p">,</span> <span class="n">ay</span><span class="p">,</span> <span class="n">by</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">JKz</span><span class="p">,</span> <span class="n">ILz</span><span class="p">,</span> <span class="n">JKy</span><span class="p">,</span> <span class="n">ILy</span><span class="p">):</span>
+                    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="n">az</span><span class="p">,</span> <span class="n">bz</span><span class="p">],</span> <span class="p">[</span><span class="n">ay</span><span class="p">,</span> <span class="n">by</span><span class="p">],</span> <span class="s1">&#39;b-&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch&#39;</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;circ&#39;</span><span class="p">:</span>
+            <span class="n">matTag</span><span class="p">,</span> <span class="n">nc</span><span class="p">,</span> <span class="n">nr</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">ri</span><span class="p">,</span> <span class="n">re</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+            <span class="n">a0</span><span class="p">,</span> <span class="n">a1</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">item</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+
+            <span class="n">dr</span> <span class="o">=</span> <span class="p">(</span><span class="n">re</span> <span class="o">-</span> <span class="n">ri</span><span class="p">)</span> <span class="o">/</span> <span class="n">nr</span>
+            <span class="n">dth</span> <span class="o">=</span> <span class="p">(</span><span class="n">a1</span> <span class="o">-</span> <span class="n">a0</span><span class="p">)</span> <span class="o">/</span> <span class="n">nc</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nr</span><span class="p">):</span>
+                <span class="n">rj</span> <span class="o">=</span> <span class="n">ri</span> <span class="o">+</span> <span class="n">j</span> <span class="o">*</span> <span class="n">dr</span>
+                <span class="n">rj1</span> <span class="o">=</span> <span class="n">rj</span> <span class="o">+</span> <span class="n">dr</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nc</span><span class="p">):</span>
+                    <span class="n">thi</span> <span class="o">=</span> <span class="n">a0</span> <span class="o">+</span> <span class="n">i</span> <span class="o">*</span> <span class="n">dth</span>
+                    <span class="n">thi1</span> <span class="o">=</span> <span class="n">thi</span> <span class="o">+</span> <span class="n">dth</span>
+                    <span class="n">wedge</span> <span class="o">=</span> <span class="n">Wedge</span><span class="p">((</span><span class="n">zC</span><span class="p">,</span> <span class="n">yC</span><span class="p">),</span> <span class="n">rj1</span><span class="p">,</span> <span class="n">thi</span><span class="p">,</span> <span class="n">thi1</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">dr</span><span class="p">,</span> <span class="n">ec</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span>
+                                  <span class="n">lw</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fc</span><span class="o">=</span><span class="n">matcolor</span><span class="p">[</span><span class="n">matTag</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">wedge</span><span class="p">)</span>
+
+            <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="fib_sec_list_to_cmds">
+<a class="viewcode-back" href="../../fib_sec_list_to_cmds.html#opsvis.fib_sec_list_to_cmds">[docs]</a>
+<span class="k">def</span> <span class="nf">fib_sec_list_to_cmds</span><span class="p">(</span><span class="n">fib_sec_list</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reuses fib_sec_list to define fiber section in OpenSees.</span>
+
+<span class="sd">    At present it is not possible to extract fiber section data from</span>
+<span class="sd">    the OpenSees domain, this function is a workaround. The idea is to</span>
+<span class="sd">    prepare data similar to the one the regular OpenSees commands</span>
+<span class="sd">    (``section(&#39;Fiber&#39;, ...)``, ``fiber()``, ``patch()`` and/or</span>
+<span class="sd">    ``layer()``) require.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        fib_sec_list (list): is a list of fiber section data. First sub-list</span>
+<span class="sd">        also defines the torsional stiffness (GJ).</span>
+
+<span class="sd">    Warning:</span>
+
+<span class="sd">    If you use this function, do not issue the regular OpenSees:</span>
+<span class="sd">    section, Fiber, Patch or Layer commands.</span>
+
+<span class="sd">    See also:</span>
+
+<span class="sd">    ``opsvis.plot_fiber_section()``</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dat</span> <span class="ow">in</span> <span class="n">fib_sec_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">dat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;section&#39;</span><span class="p">:</span>
+            <span class="n">secTag</span><span class="p">,</span> <span class="n">GJ</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">ops</span><span class="o">.</span><span class="n">section</span><span class="p">(</span><span class="s1">&#39;Fiber&#39;</span><span class="p">,</span> <span class="n">secTag</span><span class="p">,</span> <span class="s1">&#39;-GJ&#39;</span><span class="p">,</span> <span class="n">GJ</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;layer&#39;</span><span class="p">:</span>
+            <span class="n">matTag</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">n_bars</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">As</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;straight&#39;</span><span class="p">:</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">ops</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="s1">&#39;straight&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">,</span> <span class="n">As</span><span class="p">,</span> <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;circ&#39;</span><span class="p">:</span>
+                <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">radius</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dat</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+                    <span class="n">begAng</span><span class="p">,</span> <span class="n">endAng</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+                    <span class="n">ops</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">,</span> <span class="n">As</span><span class="p">,</span> <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">radius</span><span class="p">,</span>
+                              <span class="n">begAng</span><span class="p">,</span> <span class="n">endAng</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">ops</span><span class="o">.</span><span class="n">layer</span><span class="p">(</span><span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">n_bars</span><span class="p">,</span> <span class="n">As</span><span class="p">,</span> <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">radius</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;patch&#39;</span><span class="p">:</span>
+            <span class="n">matTag</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">nIJ</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">nJK</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quad&#39;</span> <span class="ow">or</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;quadr&#39;</span><span class="p">:</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">10</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">11</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">12</span><span class="p">]</span>
+                <span class="n">ops</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;quad&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">nIJ</span><span class="p">,</span> <span class="n">nJK</span><span class="p">,</span> <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span><span class="p">,</span>
+                          <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;rect&#39;</span><span class="p">:</span>
+                <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                <span class="n">Jy</span><span class="p">,</span> <span class="n">Jz</span><span class="p">,</span> <span class="n">Ly</span><span class="p">,</span> <span class="n">Lz</span> <span class="o">=</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Iy</span><span class="p">,</span> <span class="n">Kz</span>
+                <span class="n">ops</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;rect&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">nIJ</span><span class="p">,</span> <span class="n">nJK</span><span class="p">,</span> <span class="n">Iy</span><span class="p">,</span> <span class="n">Iz</span><span class="p">,</span> <span class="n">Ky</span><span class="p">,</span> <span class="n">Kz</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">dat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;circ&#39;</span><span class="p">:</span>
+                <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">intRad</span><span class="p">,</span> <span class="n">extRad</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+
+                <span class="n">begAng</span><span class="p">,</span> <span class="n">endAng</span> <span class="o">=</span> <span class="n">dat</span><span class="p">[</span><span class="mi">9</span><span class="p">],</span> <span class="n">dat</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span>
+                <span class="n">ops</span><span class="o">.</span><span class="n">patch</span><span class="p">(</span><span class="s1">&#39;circ&#39;</span><span class="p">,</span> <span class="n">matTag</span><span class="p">,</span> <span class="n">nIJ</span><span class="p">,</span> <span class="n">nJK</span><span class="p">,</span> <span class="n">yC</span><span class="p">,</span> <span class="n">zC</span><span class="p">,</span> <span class="n">intRad</span><span class="p">,</span> <span class="n">extRad</span><span class="p">,</span>
+                          <span class="n">begAng</span><span class="p">,</span> <span class="n">endAng</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Seweryn Kokot.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -8,6 +8,7 @@ from matplotlib.patches import Circle, Polygon, Wedge
 from matplotlib.animation import FuncAnimation
 from matplotlib.path import Path
 import matplotlib.tri as tri
+from math import isclose
 
 from .settings import *
 from .defo import *
@@ -130,7 +131,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
                 or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
                 or ele_classtag == EleClassTag.MVLEM
-                or ele_classtag == EleClassTag.SFI_MVLEM):
+                or ele_classtag == EleClassTag.SFI_MVLEM
+                or ele_classtag == EleClassTag.DispBeamColumn2dThermal
+                or ele_classtag == EleClassTag.ForceBeamColumn2dThermal):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -186,8 +189,7 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
                 ax.text(xt+offset_x, yt+offset_y, f'{ele_tag}', va=va, ha=ha,
                         color='red')
 
-        if (ele_classtag == EleClassTag.truss
-                or ele_classtag == EleClassTag.trussSection):
+        if ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -650,7 +652,11 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
-            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d):
+            ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
+            ele_classtag == EleClassTag.Pipe or
+            ele_classtag == EleClassTag.CurvedPipe or
+            ele_classtag == EleClassTag.DispBeamColumn3dThermal or
+            ele_classtag == EleClassTag.ForceBeamColumn3dThermal):
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -738,8 +744,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
                     dzi = (ecrd_eles[1, 2] - ecrd_eles[0, 2]) * Lgpi / bar_length(ecrd_eles)
                     ax.plot(ecrd_eles[0, 0] + dxi, ecrd_eles[0, 1] + dyi, ecrd_eles[0, 2] + dzi, **fmt_gauss_points)
 
-        elif (ele_classtag == EleClassTag.truss
-              or ele_classtag == EleClassTag.trussSection):
+        elif ele_classtag in [EleClassTag.truss,EleClassTag.trussSection,EleClassTag.CorotTruss]:
 
             nen = 2
             ele_node_tags = ops.eleNodes(ele_tag)
@@ -1360,7 +1365,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
     ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
                     node_supports=node_supports,
                     truss_node_offset=truss_node_offset, ax=ax)
-    # ax.axis('equal')
 
     if not sfac:
         ratio = 0.1
@@ -1377,7 +1381,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
     waa = False
     wab = False
 
-    ### get Ew data
     Ew = get_Ew_data_from_ops_domain()
 
     for ele_tag in ele_tags:
@@ -1388,7 +1391,9 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
-            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d):
+            or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d
+            or ele_class_tag == EleClassTag.DispBeamColumn2dThermal
+            or ele_class_tag == EleClassTag.ForceBeamColumn2dThermal):
 
             # by default no element load
             ele_load_data = []
@@ -1412,29 +1417,16 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
             else:
                 pass
 
-            # step 1: first plot model itself
-            # ax.plot(ecrd[:, 0], ecrd[:, 1], 'k-', solid_capstyle='round', solid_joinstyle='round',
-            #         dash_capstyle='butt', dash_joinstyle='round')
-
-            # step 2
             Lxy = ecrd_eles[1, :] - ecrd_eles[0, :]
             L = np.sqrt(Lxy @ Lxy)
             cosa, cosb = Lxy / L
 
-            # if not sfac:
-            #     sfac = ratio * L
-
             xl = np.linspace(0., L, nep)
             xl2 = np.linspace(0., L, 5)
-            # xl2 = np.logspace(0., 1., nep) * L / nep
             dxs = np.array([0.1, 0.2, 0.3, 0.4])
-            # dxs = np.array([0.15, 0.2, 0.275, 0.375])
             xl3 = np.append(0., np.cumsum(dxs)) * L
 
             one = np.ones(nep)
-            # pl = ops.eleResponse(ele_tag, 'localForces')
-
-            # s_all, xl, nep = section_force_distribution_2d(ex, ey, pl, nep, ele_load_data)
 
             for ele_load_data_i in ele_load_data:
                 ele_load_type = ele_load_data_i[0]
@@ -1445,7 +1437,6 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s = sfac * np.sign(Pt)
 
                     s_0 = np.zeros(2)
-                    # s_0 = [ecrd[0, 0], ecrd[0, 1]]
 
                     s_0[0] = ecrd_eles[0, 0] + a * cosa
                     s_0[1] = ecrd_eles[0, 1] + a * cosb
@@ -1455,38 +1446,24 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                     s_p[0] -= s * cosb
                     s_p[1] += s * cosa
 
-
-                    # plot arrows
                     ax.arrow(s_0[0], s_0[1],
                              s_p[0] - s_0[0], s_p[1] - s_0[1],
-                             # width = 0.01,
                              head_starts_at_zero=True,  # default False
-                             # overhang=0.2,
-                             # lw = 1,
                              head_width=0.1 * sfac, head_length=0.2 * sfac,
                              fc='b', ec='b',
                              length_includes_head=False, shape='full')
                     ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, f'{abs(Pt)}', color='b')
-                    # ax.annotate("", xy=(s_p[0], s_p[1]),
-                    #             xytext=(s_0[0], s_0[1]),
-                    #             arrowprops=dict(arrowstyle="->", color='r', lw=3,
-                    #                             connectionstyle="arc3"))
 
                 elif ele_load_type == '-beamUniform':
 
                     n_ele_load_data = len(ele_load_data_i)
 
-                    # constant uniform element load
                     if n_ele_load_data == 3:
-                        # eload_type, Wy, Wx = ele_load_data[0], ele_load_data[1], ele_load_data[2]
                         Wy, Wx = ele_load_data_i[1], ele_load_data_i[2]
                         text_string = f'q = {abs(Wy):.3g}, {abs(Wx):.3g}'
 
-                        # s = sfac * Wy * one
                         s = sfac * one * np.sign(Wy)
-                        # plt.text(sum(ecrd[:, 0])/2, sum(ecrd[:, 1])/2, f'q = {Wy}, {Wx}', va='bottom', ha='center', color='r')
 
-                    # triangular or trapezoidal element load
                     elif n_ele_load_data == 7:
                         wta, waa, aL, bL, wtb, wab = ele_load_data_i[1:7]
                         text_string = f'q = {abs(wta)}, {abs(waa)}, {aL}, {bL}, {abs(wtb)}, {abs(wab)}'
@@ -1508,10 +1485,7 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                             indx += 1
 
-                    s = s * sfac
-
                     s_0 = np.zeros((nep, 2))
-                    # s_0[0, :] = [ex[0], ey[0]]
                     s_0[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
 
                     s_0[1:, 0] = s_0[0, 0] + xl[1:] * cosa
@@ -1519,56 +1493,51 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
                     s_p = np.copy(s_0)
 
-                    s_p[:, 0] -= s * cosb
-                    s_p[:, 1] += s * cosa
-                    # plt.axis('equal')
+                    s_p[:, 0] += s * cosb
+                    s_p[:, 1] -= s * cosa
 
-                    # reference perpendicular lines
+                    # for i in np.arange(nep):
+                    #     ax.arrow(s_0[i, 0], s_0[i, 1],
+                    #              s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],
+                    #              head_width=0.1*sfac, head_length=0.2*sfac,
+                    #              head_starts_at_zero=True,  # default False
+                    #              fc='r', ec='r',
+                    #              length_includes_head=True, shape='full')
                     for i in np.arange(nep):
-                        ax.arrow(s_0[i, 0], s_0[i, 1],
-                                 s_p[i, 0] - s_0[i, 0], s_p[i, 1] - s_0[i, 1],
+                        ax.arrow(s_p[i, 0], s_p[i, 1],
+                                 s_0[i, 0] - s_p[i, 0], s_0[i, 1] - s_p[i, 1],
                                  # width = 0.005,
-                                 # lw = 2,
-                                 head_width=0.1*sfac, head_length=0.2*sfac,
-                                 head_starts_at_zero=True,  # default False
+                                 lw=1,
+                                 head_width=0.1 * sfac, head_length=0.2 * sfac,
+                                 # head_starts_at_zero=True,  # default False
                                  # overhang=0.5,
                                  fc='r', ec='r',
-                                 length_includes_head=True, shape='full')
-                        # ax.annotate("", xy=(s_p[i, 0], s_p[i, 1]),
-                        #             xytext=(s_0[i, 0], s_0[i, 1]),
-                        #             arrowprops=dict(arrowstyle="->", color='r', lw=1,
-                        #                             connectionstyle="arc3"))
+                                 length_includes_head=True, shape='full',
+                                 joinstyle='round')
 
-                    # connecting beg-end line - redundant ?
-                    # plt.plot([s_p[0, 0], s_p[-1, 0]],[s_p[0, 1], s_p[-1, 1]], 'r')
-                    ax.text(sum(ecrd_eles[:, 0])/2, sum(ecrd_eles[:, 1])/2, text_string, va='bottom', ha='center', color='r')
+                    plt.plot([s_p[0, 0], s_p[-1, 0]],
+                             [s_p[0, 1], s_p[-1, 1]], 'r', lw=1)
+                    ax.text(s_p[int((nep - 1) / 3), 0],
+                            s_p[int((nep - 1) / 3), 1],
+                            text_string, va='bottom', ha='center', color='r')
 
                     if Wx != 0:
-                        # for i, xl in enumerate(xl2[:-1]):
-                        #     plt.arrow(sa[i, 0], sa[i, 1],
-                        #               sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                        #               width = 0.01,
-                        #               # lw = 1,
-                        #               # head_width=0.02, head_length=0.05,
-                        #               # head_starts_at_zero=True,  # default False
-                        #               # overhang=0.5,
-                        #               fc='m', ec='m',
-                        #               length_includes_head=True, shape='full')
 
                         if Wx < 0:
                             ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
                                       -1 * (s_0[1:, 0] - s_0[:-1, 0]),
                                       -1 * (s_0[1:, 1] - s_0[:-1, 1]),
-                                      scale_units='xy', angles='xy', scale=0.8, color='m')
+                                      scale_units='xy', angles='xy', scale=0.8,
+                                      color='m')
                         else:
                             ax.quiver(s_0[:-1, 0], s_0[:-1, 1],
                                       s_0[1:, 0] - s_0[:-1, 0],
                                       s_0[1:, 1] - s_0[:-1, 1],
-                                      scale_units='xy', angles='xy', scale=0.8, color='m')
+                                      scale_units='xy', angles='xy', scale=0.8,
+                                      color='m')
 
                     if waa != 0 or wab != 0:
                         sa = np.zeros((5, 2))
-                        # sa[0, :] = [ex[0], ey[0]]
                         sa[0, :] = [ecrd_eles[0, 0], ecrd_eles[0, 1]]
                         sa[1:, 0] = sa[0, 0] + xl3[1:] * cosa
                         sa[1:, 1] = sa[0, 1] + xl3[1:] * cosb
@@ -1576,84 +1545,53 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                         for i, xl in enumerate(xl3[:-1]):
                             ax.arrow(sa[i, 0], sa[i, 1],
                                      sa[i+1, 0]-sa[i, 0], sa[i+1, 1]-sa[i, 1],
-                                     # width = 0.05,
-                                     width = 0.01*L,
-                                     # lw = 1,
-                                     # head_width=0.02, head_length=0.05,
-                                     # head_starts_at_zero=True,  # default False
-                                     # overhang=0.5,
+                                     width=0.01*L,
                                      fc='m', ec='m',
                                      length_includes_head=True, shape='full')
-
-                        # ax.quiver(sa[:-1, 0], sa[:-1, 1],
-                        #            sa[1:, 0]-sa[:-1, 0], sa[1:, 1]-sa[:-1, 1],
-                        #            scale_units='xy', angles='xy', scale=0.8, color='g')
-
-                        # ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
-                        #          fmt_secforce, solid_capstyle='round',
-                        #          solid_joinstyle='round', dash_capstyle='butt',
-                        #          dash_joinstyle='round')
-                        # plot arrows
-                        # ax.annotate("",
-                        #              xy=(s_p[i, 0], s_p[i, 1]), xycoords='data',
-                        #              xytext=(s_0[i, 0], s_0[i, 1]), textcoords='data',
-                        #              arrowprops=dict(arrowstyle="->", color='r', lw=2,
-                        #                              connectionstyle="arc3"))
 
     for node_tag in node_tags:
         nd_crd = ops.nodeCoord(node_tag)
 
-        # 2. nodal loads 2d
         nodal_loads = ops.nodeUnbalance(node_tag)
         nodal_loads_idx = np.nonzero(nodal_loads)
 
         if nodal_loads_idx[0].size:
             for kier in nodal_loads_idx[0]:
-                # horizontal or vertical nodal force (load)
                 if kier == 0 or kier == 1:
+                    kolor = 'b'
                     if kier == 0:
                         kier2 = np.sign(nodal_loads[kier])
-                        if kier2 > 0:
-                            pos_or_neg = '+'
-                        elif kier2 < 0:
-                            pos_or_neg = '-'
-                        dx = sfac*np.sign(kier2)
-                        dy = 0.
+                        dx, dy = sfac * np.sign(kier2), 0.
 
                     elif kier == 1:
                         kier2 = np.sign(nodal_loads[kier])
-                        if kier2 > 0:
-                            pos_or_neg = '+'
-                        elif kier2 < 0:
-                            pos_or_neg = '-'
-                        dx = 0.
-                        dy = sfac*np.sign(kier2)
+                        dx, dy = 0., sfac * np.sign(kier2)
 
-                    ax.arrow(nd_crd[0], nd_crd[1],
+                    ax.arrow(nd_crd[0] - dx, nd_crd[1] - dy,
                              dx, dy,
-                             # width = 0.01,
-                             # head_starts_at_zero=True,  # default False
-                             # overhang=0.2,
                              lw=3,
-                             head_width=0.1*sfac, head_length=0.2*sfac,
-                             fc='b', ec='b',
-                             length_includes_head=True, shape='full')
-                    ax.text(nd_crd[0]+dx, nd_crd[1]+dy, f' {abs(nodal_loads[kier]):.5g}', color='b')
+                             head_width=0.1 * sfac, head_length=0.2 * sfac,
+                             fc=kolor, ec=kolor,
+                             length_includes_head=True, shape='full',
+                             joinstyle='round')
+                    ax.text(nd_crd[0] - dx, nd_crd[1] - dy,
+                            f' {abs(nodal_loads[kier]):.5g}', color=kolor)
 
-                # concentrated bending moment
                 elif kier == 2:
+                    kolor = 'r'
                     kier2 = np.sign(nodal_loads[kier])
+                    nodal_load_str = f'{abs(nodal_loads[kier]):.5g}'
                     if kier2 > 0:
-                        pos_or_neg = 'anti-clockwise'
-                        # marker_type=r'$\circlearrowleft$'
-                        marker_type=r'$\curvearrowleft$'
+                        marker_type = r'$\curvearrowleft$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {nodal_load_str}',
+                                color=kolor, va='top', ha='right')
                     elif kier2 < 0:
-                        pos_or_neg = 'clockwise'
-                        # marker_type=r'$\circlearrowright$'
-                        marker_type=r'$\curvearrowright$'
+                        marker_type = r'$\curvearrowright$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {nodal_load_str}',
+                                color=kolor, va='top', ha='left')
 
-                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=35, color='b')
-                    ax.text(nd_crd[0], nd_crd[1], f'{abs(nodal_loads[kier]):.5g}', color='b', va='bottom', ha='left')
+                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30,
+                            color=kolor)
 
     ax.axis('equal')
     ax.grid(False)
@@ -1712,7 +1650,9 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
         if (ele_class_tag == EleClassTag.ElasticBeam3d
             or ele_class_tag == EleClassTag.ForceBeamColumn3d
-            or ele_class_tag == EleClassTag.DispBeamColumn3d):
+            or ele_class_tag == EleClassTag.DispBeamColumn3d
+            or ele_class_tag == EleClassTag.DispBeamColumn3dThermal
+            or ele_class_tag == EleClassTag.ForceBeamColumn3dThermal):
 
             # by default no element load
             ele_load_data = []
@@ -2081,8 +2021,236 @@ def get_Ew_data_from_ops_domain_3d():
         else:
             print(f'\nWarning! ele_load_type:\n{ele_load_type} - Unknown element load Error')
 
-
     return Ew
+
+
+def plot_reactions_2d(sfac, fig_wi_he,
+                      fig_lbrt, fmt_model_loads,
+                      truss_node_offset, ax):
+    """Display support reactions of the 2d models.
+    This is a local function: use plot_reactions()
+    """
+
+    if not ax:
+        if fig_wi_he:
+            fig_wi, fig_he = fig_wi_he
+            fig, ax = plt.subplots(figsize=(fig_wi / 2.54, fig_he / 2.54))
+        else:
+            fig, ax = plt.subplots()
+
+        if fig_lbrt:
+            fleft, fbottom, fright, ftop = fig_lbrt
+            fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
+
+    ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
+                    node_supports=False,
+                    truss_node_offset=truss_node_offset, ax=ax)
+
+    if not sfac:
+        ratio = 0.1
+        min_x, max_x = ax.get_xlim()
+        min_y, max_y = ax.get_ylim()
+        xsfac = ratio * abs(max_x - min_x)
+        ysfac = ratio * abs(max_y - min_y)
+        sfac = max(xsfac, ysfac)
+
+    fixed_nodes = ops.getFixedNodes()
+
+    for node_tag in fixed_nodes:
+        nd_crd = ops.nodeCoord(node_tag)
+
+        fixed_dofs = ops.getFixedDOFs(node_tag)
+
+        for dof in fixed_dofs:
+            reaction = ops.nodeReaction(node_tag, dof)
+
+            if not isclose(reaction, 0., abs_tol=1e-9):
+
+                if dof in [1, 2]:
+                    kolor = 'b'
+                    reac_sign = np.sign(reaction)
+
+                    if dof == 1:
+                        dx = sfac * reac_sign
+                        dy = 0.
+                        ha_my = 'center'
+
+                    elif dof == 2:
+                        reac_sign = np.sign(reaction)
+                        dx = 0.
+                        dy = sfac * reac_sign
+                        ha_my = 'left'
+
+                    if reac_sign > 0:
+                        x0, y0 = nd_crd[0] - dx, nd_crd[1] - dy
+                        x0t, y0t = x0, y0
+                    else:
+                        x0, y0 = nd_crd[0], nd_crd[1]
+                        x0t, y0t = x0 + dx, y0 + dy
+
+                    ax.arrow(x0, y0,
+                             dx, dy,
+                             lw=3,
+                             head_width=0.1 * sfac, head_length=0.2 * sfac,
+                             fc=kolor, ec=kolor,
+                             length_includes_head=True, shape='full',
+                             joinstyle='round')
+                    ax.text(x0t, y0t,
+                            f' {abs(reaction):.5g}', color=kolor, va='bottom', ha=ha_my)
+
+                elif dof == 3:
+                    kolor = 'r'
+                    kier2 = np.sign(reaction)
+                    reaction_str = f'{abs(reaction):.5g}'
+                    if kier2 > 0:
+                        marker_type = r'$\curvearrowleft$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                                color=kolor, va='top', ha='right')
+
+                    elif kier2 < 0:
+                        marker_type = r'$\curvearrowright$'
+                        ax.text(nd_crd[0], nd_crd[1], f'\n  {reaction_str}',
+                                color=kolor, va='top', ha='left')
+
+                    ax.plot(nd_crd[0], nd_crd[1], marker=marker_type, markersize=30,
+                            color=kolor)
+
+    ax.axis('equal')
+    ax.grid(False)
+
+    return ax
+
+
+def plot_reactions_3d(sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
+                      truss_node_offset, local_axes, ax):
+    """Display support reactions of the 3d models.
+    This is a local function: use plot_reactions()
+    """
+
+    if not ax:
+        if fig_wi_he:
+            fig_wi, fig_he = fig_wi_he
+
+            fig = plt.figure(figsize=(fig_wi / 2.54, fig_he / 2.54))
+
+        else:
+            fig = plt.figure()
+
+        if fig_lbrt:
+            fleft, fbottom, fright, ftop = fig_lbrt
+            fig.subplots_adjust(left=fleft, bottom=fbottom, right=fright, top=ftop)
+
+        ax = fig.add_subplot(111, projection=Axes3D.name)
+
+    ax = plot_model(node_labels=0, element_labels=0, fmt_model=fmt_model_loads,
+                    node_supports=False, local_axes=local_axes, ax=ax)
+
+    if not sfac:
+        ratio = 0.15  # initial scale 10% of the max dimension
+        min_x, max_x = ax.get_xlim()
+        min_y, max_y = ax.get_ylim()
+        min_z, max_z = ax.get_zlim()
+        xsfac = ratio * abs(max_x - min_x)
+        ysfac = ratio * abs(max_y - min_y)
+        zsfac = ratio * abs(max_z - min_z)
+        sfac = max(xsfac, ysfac, zsfac)
+
+    fixed_nodes = ops.getFixedNodes()
+
+    for node_tag in fixed_nodes:
+        nd_crd = ops.nodeCoord(node_tag)
+
+        fixed_dofs = ops.getFixedDOFs(node_tag)
+
+        for dof in fixed_dofs:
+            reaction = ops.nodeReaction(node_tag, dof)
+            dx, dy, dz = 0., 0., 0.
+
+            if not isclose(reaction, 0., abs_tol=1e-9):
+
+                if dof in [1, 2, 3]:
+                    kolor = 'b'
+
+                    if dof == 1:
+                        dx = sfac * np.sign(reaction)
+                        # xcomp = 1
+
+                    elif dof == 2:
+                        dy = sfac * np.sign(reaction)
+                        # ycomp = 1
+
+                    elif dof == 3:
+                        dz = sfac * np.sign(reaction)
+                        # zcomp = 1
+
+                    nn = 1.0  # additional scaling for arrows
+                    ax.arrow3D(*nd_crd, nn * dx, nn * dy, nn * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
+
+                    ax.text(nd_crd[0] + dx,
+                            nd_crd[1] + dy,
+                            nd_crd[2] + dz,
+                            f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+
+                if dof in [4, 5, 6]:
+                    kolor = 'g'
+
+                    if dof == 4:
+                        dx = sfac * np.sign(reaction)
+
+                    elif dof == 5:
+                        dy = sfac * np.sign(reaction)
+
+                    elif dof == 6:
+                        dz = sfac * np.sign(reaction)
+
+                    nn = 0.5  # additional scaling for arrows
+                    ax.arrow3D(nd_crd[0] + dx,
+                               nd_crd[1] + dy,
+                               nd_crd[2] + dz,
+                               nn * 2 * dx,
+                               nn * 2 * dy,
+                               nn * 2 * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
+                    ax.arrow3D(nd_crd[0] + 1.5 * dx,
+                               nd_crd[1] + 1.5 * dy,
+                               nd_crd[2] + 1.5 * dz,
+                               nn * 2 * dx,
+                               nn * 2 * dy,
+                               nn * 2 * dz,
+                               mutation_scale=10, ec=kolor, fc=kolor)
+
+                    ax.text(nd_crd[0] + 3 * dx,
+                            nd_crd[1] + 3 * dy,
+                            nd_crd[2] + 3 * dz,
+                            f'{abs(reaction):.5g}', va='bottom', ha='center', color=kolor)
+
+    return ax
+
+
+def plot_reactions(sfac=False, fig_wi_he=False,
+                   fig_lbrt=False, fmt_model_loads=fmt_model_loads,
+                   truss_node_offset=0, local_axes=False, ax=False):
+    """Display support reactions of 2d and 3d models.
+    """
+    ndim = ops.getNDM()[0]
+    ops.reactions()
+
+    if ndim == 2:
+        ax = plot_reactions_2d(sfac, fig_wi_he,
+                               fig_lbrt, fmt_model_loads,
+                               truss_node_offset, ax)
+
+    elif ndim == 3:
+        ax = plot_reactions_3d(sfac, fig_wi_he,
+                               fig_lbrt, fmt_model_loads,
+                               truss_node_offset,
+                               local_axes, ax)
+
+    else:
+        print(f'\nWarning! ndim: {ndim} not supported yet.')
+
+    return ax
 
 
 def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
