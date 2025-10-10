@@ -876,7 +876,8 @@ def plot_mesh_2d(nds_crd, eles_conn, lw=0.4, ec='k'):
             plt.fill(x, y, edgecolor=ec, lw=lw, fill=False)
 
 
-def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50, sfac=False):
+def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50,
+                   fig_wi_he=False, fig_lbrt=False, sfac=False, ax=False):
     """
     Plot stress distribution of a 2d elements of a 2d model.
 
@@ -922,10 +923,10 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50, sfac=False)
         nds_crd[i] = ops.nodeCoord(node_tag)
 
     for i, node_tag in enumerate(node_tags):
-        nds_uxy[i] = ops.nodeDisp(node_tag)
+        nds_uxy[i] = ops.nodeDisp(node_tag)[:2]
 
     if not sfac:
-        sfac = opsvdefo.defo_scale(0)
+        sfac = opsvdefo.defo_scale(0, node_tags, ratio=0.05)
     else:
         sfac = 0.
 
@@ -1109,7 +1110,8 @@ def quad8n_val_at_center(vals):
     return val_c1
 
 
-def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
+def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50,
+                fig_wi_he=False, fig_lbrt=False, sfac=False, nu=0., ax=False):
     """Plot stress distribution of the model.
 
     Args:
@@ -1138,13 +1140,17 @@ def plot_stress(stress_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     ndim = ops.getNDM()[0]
 
     if ndim == 2:
-        _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu)
+        ax = _plot_stress_2d(stress_str, mesh_outline, cmap, levels,
+                             fig_wi_he, fig_lbrt, sfac, nu, ax)
 
     else:
         print(f'\nWarning! ndim: {ndim} not implemented yet.')
 
+    return ax
 
-def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
+
+def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50,
+                fig_wi_he=False, fig_lbrt=False, sfac=False, nu=0., ax=False):
     """Plot strain distribution of the model.
 
     Args:
@@ -1169,21 +1175,32 @@ def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50, nu=0.):
     ndim = ops.getNDM()[0]
 
     if ndim == 2:
-        _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu)
+        ax = _plot_strain_2d(strain_str, mesh_outline, cmap, levels,
+                             fig_wi_he, fig_lbrt, sfac, nu, ax)
 
     else:
         print(f'\nWarning! ndim: {ndim} not implemented yet.')
 
+    return ax
 
-def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu):
+
+def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu, fig_wi_he,
+                    fig_lbrt, sfac, ax):
     """See documentation for plot_stress command"""
 
     nds_val = sig_component_per_node(stress_str, nu)
-    plot_stress_2d(nds_val, mesh_outline, cmap, levels)
+    ax = plot_stress_2d(nds_val, mesh_outline, cmap, levels,
+                        fig_wi_he, fig_lbrt, sfac, ax)
+
+    return ax
 
 
-def _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu):
+def _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu, fig_wi_he,
+                    fig_lbrt, sfac, ax):
     """See documentation for plot_strain command"""
 
     nds_val = eps_component_per_node(strain_str, nu)
-    plot_stress_2d(nds_val, mesh_outline, cmap, levels)
+    ax = plot_stress_2d(nds_val, mesh_outline, cmap, levels,
+                        fig_wi_he, fig_lbrt, sfac, ax)
+
+    return ax

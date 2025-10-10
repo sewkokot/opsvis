@@ -12,12 +12,8 @@ from .settings import *
 from . import model as opsvmodel
 
 
-def defo_scale(nep):
+def defo_scale(nep, node_tags, ratio=0.1):
     ndim = ops.getNDM()[0]
-
-    ratio = 0.1
-
-    node_tags = ops.getNodeTags()
 
     if ndim == 1:
         min_crds = np.array([np.inf, -1.])
@@ -52,7 +48,7 @@ def defo_scale(nep):
             max_u[1] = max(max_u[1], np.abs(u[1]))
 
         max_u_abs = max(max_u)
-        max_u_abs = max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep)
+        # max_u_abs = max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep)
 
     elif ndim == 3:
         min_crds = np.array([np.inf, np.inf, np.inf])
@@ -1016,9 +1012,10 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     element ends.
     """
     ndim = ops.getNDM()[0]
+    node_tags = ops.getNodeTags()
 
     if not sfac:
-        sfac = defo_scale(nep)
+        sfac = defo_scale(nep, node_tags)
 
     if ndim == 2:
         ax = _plot_defo_mode_2d(0, sfac, nep, unDefoFlag, fmt_defo,
@@ -1038,7 +1035,7 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
     else:
         print(f'\nWarning! ndim: {ndim} not supported yet.')
 
-    return sfac
+    return sfac, ax
 
 
 def plot_mode_shape(modeNo, sfac=False, nep=17, unDefoFlag=1,
