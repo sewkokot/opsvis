@@ -927,8 +927,6 @@ def plot_stress_2d(nds_val, mesh_outline=1, cmap='turbo', levels=50,
 
     if not sfac:
         sfac = opsvdefo.defo_scale(0, node_tags, ratio=0.05)
-    else:
-        sfac = 0.
 
     nds_crd = nds_crd + sfac * nds_uxy
 
@@ -1184,8 +1182,8 @@ def plot_strain(strain_str, mesh_outline=1, cmap='turbo', levels=50,
     return ax
 
 
-def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu, fig_wi_he,
-                    fig_lbrt, sfac, ax):
+def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, fig_wi_he,
+                    fig_lbrt, sfac, nu, ax):
     """See documentation for plot_stress command"""
 
     nds_val = sig_component_per_node(stress_str, nu)
@@ -1195,8 +1193,8 @@ def _plot_stress_2d(stress_str, mesh_outline, cmap, levels, nu, fig_wi_he,
     return ax
 
 
-def _plot_strain_2d(strain_str, mesh_outline, cmap, levels, nu, fig_wi_he,
-                    fig_lbrt, sfac, ax):
+def _plot_strain_2d(strain_str, mesh_outline, cmap, levels, fig_wi_he,
+                    fig_lbrt, sfac, nu, ax):
     """See documentation for plot_strain command"""
 
     nds_val = eps_component_per_node(strain_str, nu)

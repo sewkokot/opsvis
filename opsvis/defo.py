@@ -152,7 +152,6 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                 for i, ele_node_tag in enumerate(ele_node_tags):
                     ed[i, :] = ops.nodeDisp(ele_node_tag)
 
-
             # fix for a sdof system, or specify sfac explicitly
             if np.isclose(sfac, 0.0):
                 sfac = 1.0
