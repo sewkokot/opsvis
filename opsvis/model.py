@@ -410,6 +410,32 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
             if element_labels:
                 ax.text(xt, yt, f'{ele_tag}', va='top', ha='left',
                         color='red')
+                        
+## MASONRY PANEL 12 NODES
+        elif (ele_classtag == EleClassTag.MasonPan12 ):
+            nen= 12
+            ele_node_tags = ops.eleNodes(ele_tag)
+            ecrd = np.zeros((nen,2))
+            for i, ele_node_tag in enumerate(ele_node_tags):
+                ecrd[i,:]=ops.nodeCoord(ele_node_tag)
+            xt=(ecrd[3,0]-ecrd[0,0])/2
+            yt=(ecrd[9,1]-ecrd[0,1])/2
+            ax.plot([ecrd[9, 0], ecrd[3, 0]],
+                    [ecrd[9,1],ecrd[3,1]], **fmt_model_truss)    
+            ax.plot([ecrd[10, 0], ecrd[2, 0]],
+                    [ecrd[10,1],ecrd[2,1]], **fmt_model_truss)                         
+            ax.plot([ecrd[8, 0], ecrd[4, 0]],
+                    [ecrd[8,1],ecrd[4,1]], **fmt_model_truss)  
+            ax.plot([ecrd[0, 0], ecrd[6, 0]],
+                    [ecrd[0,1],ecrd[6,1]], **fmt_model_truss) 
+            ax.plot([ecrd[1, 0], ecrd[5, 0]],
+                    [ecrd[1,1],ecrd[5 ,1]], **fmt_model_truss)      
+            ax.plot([ecrd[11, 0], ecrd[7, 0]],
+                    [ecrd[11,1],ecrd[7,1]], **fmt_model_truss)
+            if element_labels:
+                va = 'center'
+                ha = 'center'
+                ax.text(xt, yt, f'Panel: {ele_tag}', va=va, ha=ha, color='red')                    
 
     if node_supports:
         _plot_supports(node_tags, ax)
