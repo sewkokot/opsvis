@@ -54,9 +54,6 @@ opsv.fib_sec_list_to_cmds(fib_sec_1)
 ops.beamIntegration('Lobatto', beam_integ_tag, sec_tag, nip)
 
 ops.geomTransf('Linear', transf_tag)
-# ops.element('forceBeamColumn', 101, 100, 101, transf_tag, beam_integ_tag)
-# ops.element('forceBeamColumn', 111, 110, 111, transf_tag, beam_integ_tag)
-
 ops.element('elasticBeamColumn', 101, 100, 101, A, Ec, Iz, 1)
 ops.element('elasticBeamColumn', 111, 110, 111, A, Ec, Iz, 1)
 
