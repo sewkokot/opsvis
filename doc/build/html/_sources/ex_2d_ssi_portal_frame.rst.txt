@@ -7,13 +7,14 @@ Soil-structure interaction: 2d Portal Frame
 
 Example ``.py`` file can be downloaded :download:`here </examples/demo_ssi_portal_frame.py>`:
 
-.. image:: /img/ssi_portal_frame_1-model.png
-.. image:: /img/ssi_portal_frame_1-load.png
-.. image:: /img/ssi_portal_frame_1-defo.png
-.. image:: /img/ssi_portal_frame_1-sxx.png
-.. image:: /img/ssi_portal_frame_1-syy.png
-.. image:: /img/ssi_portal_frame_1-sxy.png
-.. image:: /img/ssi_portal_frame_1-vmis.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-model.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-load.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-defo.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-sxx.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-syy.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-sxy.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-vmis.png
+.. image:: /img/demo_ssi_portal_frame_fiber_section-bending-moments.png
 
 .. literalinclude:: /examples/demo_ssi_portal_frame.py
    :linenos:
