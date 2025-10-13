@@ -350,7 +350,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                              ref_vert_lines=True,
                              end_max_values=True,
                              node_supports=True, ax=False,
-                             alt_model_plot=1):
+                             alt_model_plot=1,
+                             number_format='.5g'):
     """Display section forces diagram for 2d beam column model.
 
     This function plots a section forces diagram for 2d beam column elements
@@ -562,23 +563,24 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
                     if not isclose(ss_beg, 0., abs_tol=1e-9):
                         ax.text(s_p[0, 0], s_p[0, 1],
-                                f'{ss_beg:.5g}', va=va, ha=ha)
+                                f'{ss_beg:{number_format}}', va=va, ha=ha)
 
                     if not isclose(ss_end, 0., abs_tol=1e-9):
                         ax.text(s_p[-1, 0], s_p[-1, 1],
-                                f'{ss_end:.5g}', va=va, ha=ha)
+                                f'{ss_end:{number_format}}', va=va, ha=ha)
 
                     if minVal_ind != 0 and minVal_ind != nep - 1:
                         ax.text(s_p[minVal_ind, 0], s_p[minVal_ind, 1],
-                                f'{ss[minVal_ind]:.5g}', va=va, ha=ha)
+                                f'{ss[minVal_ind]:{number_format}}', va=va, ha=ha)
 
                     if maxVal_ind != 0 and maxVal_ind != nep - 1:
                         ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1],
-                                f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
-        elif(ele_class_tag==EleClassTag.MasonPan12):
-            nn=12
+                                f'{ss[maxVal_ind]:{number_format}}', va=va, ha=ha)
+
+        elif (ele_class_tag == EleClassTag.MasonPan12):
+            nn = 12
             ele_node_tags = ops.eleNodes(ele_tag)
-            ecrd = np.zeros((nn, 2))      
+            ecrd = np.zeros((nn, 2))
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ecrd[i, :] = ops.nodeCoord(ele_node_tag)
 
@@ -587,38 +589,38 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             cosa1, cosb1 = Lxy1 / L1
             Lxy2 = np.array([ecrd[2,0]-ecrd[10,0], ecrd[2,1]-ecrd[10,1]])
             L2 = np.sqrt(Lxy2 @ Lxy2)
-            cosa2, cosb2 = Lxy2 / L2        
+            cosa2, cosb2 = Lxy2 / L2
             Lxy3 = np.array([ecrd[4,0]-ecrd[8,0], ecrd[4,1]-ecrd[8,1]])
             L3 = np.sqrt(Lxy3 @ Lxy3)
-            cosa3, cosb3 = Lxy3 / L3        
+            cosa3, cosb3 = Lxy3 / L3
             Lxy4 = np.array([ecrd[6,0]-ecrd[0,0], ecrd[6,1]-ecrd[0,1]])
             L4 = np.sqrt(Lxy4 @ Lxy4)
-            cosa4, cosb4 = Lxy4 / L4        
+            cosa4, cosb4 = Lxy4 / L4
             Lxy5 = np.array([ecrd[5,0]-ecrd[1,0], ecrd[5,1]-ecrd[1,1]])
             L5 = np.sqrt(Lxy5 @ Lxy5)
-            cosa5, cosb5 = Lxy5 / L5        
+            cosa5, cosb5 = Lxy5 / L5
             Lxy6 = np.array([ecrd[7,0]-ecrd[11,0], ecrd[7,1]-ecrd[11,1]])
             L6 = np.sqrt(Lxy6 @ Lxy6)
-            cosa6, cosb6 = Lxy6 / L6        
-      
+            cosa6, cosb6 = Lxy6 / L6
+
             Lx=ecrd[3,0]-ecrd[0,0]
             Ly=ecrd[6,1]-ecrd[3,1]
 
             pl = ops.eleResponse(ele_tag, 'localForces')
-        
+
             N_1 = pl[0]
             N_2 = pl[1]
             N_3 = pl[2]
             N_4 = pl[3]
             N_5 = pl[4]
             N_6 = pl[5]
-   
+
 #           nep=2
             xl1 = np.linspace(0., L1, nep)
             one = np.ones(nep)
             N1 = -1.*(N_1 * one)
 #         s_all = np.column_stack((N1,0,0))
-          
+
             xl2 = np.linspace(0., L2, nep)
             one = np.ones(nep)
             N2 = -1.*(N_2 * one)
@@ -633,26 +635,25 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             one = np.ones(nep)
             N4 = -1.*(N_4 * one)
 #         s_all = np.column_stack((N4,0,0))
-          
+
             xl5 = np.linspace(0., L5, nep)
             one = np.ones(nep)
             N5 = -1.*(N_5 * one)
-#         s_all = np.column_stack((N5,0,0))          
- 
+#         s_all = np.column_stack((N5,0,0))
+
             xl6 = np.linspace(0., L6, nep)
             one = np.ones(nep)
             N6 = -1.*(N_6 * one)
-#         s_all = np.column_stack((N6,0,0))        
+#         s_all = np.column_stack((N6,0,0))
 
-         
+
          #if sf_type == 'N' or sf_type == 'axial':
          #    s = s_all[:, 0]
 
             minVal = min(minVal, np.min(pl))
             maxVal = max(maxVal, np.max(pl))
-            
+
             tau=N_1*cosa1*cosb1+N_2*cosa2*cosb2+N_3*cosa3*cosb3-N_4*cosa4*cosb4-N_5*cosa5*cosb5-N_6*cosa6*cosb6
-            
 
          #s = s*sfac
 
@@ -660,37 +661,36 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
             s_0[0, 0] = ecrd[9,0]
             s_0[0, 1] = ecrd[9,1]
-            s_0[0, 2] = ecrd[10,0]         
-            s_0[0, 3] = ecrd[10,1]         
-            s_0[0, 4] = ecrd[8,0]         
-            s_0[0, 5] = ecrd[8,1]             
-            s_0[0, 6] = ecrd[0,0]         
+            s_0[0, 2] = ecrd[10,0]
+            s_0[0, 3] = ecrd[10,1]
+            s_0[0, 4] = ecrd[8,0]
+            s_0[0, 5] = ecrd[8,1]
+            s_0[0, 6] = ecrd[0,0]
             s_0[0, 7] = ecrd[0,1]
-            s_0[0, 8] = ecrd[1,0]         
+            s_0[0, 8] = ecrd[1,0]
             s_0[0, 9] = ecrd[1,1]
-            s_0[0, 10] = ecrd[11,0]         
-            s_0[0, 11] = ecrd[11,1]                    
+            s_0[0, 10] = ecrd[11,0]
+            s_0[0, 11] = ecrd[11,1]
             s_0[1:, 0] = s_0[0, 0] + xl1[1:] * cosa1
             s_0[1:, 1] = s_0[0, 1] + xl1[1:] * cosb1
             s_0[1:, 2] = s_0[0, 2] + xl2[1:] * cosa2
-            s_0[1:, 3] = s_0[0, 3] + xl2[1:] * cosb2         
+            s_0[1:, 3] = s_0[0, 3] + xl2[1:] * cosb2
             s_0[1:, 4] = s_0[0, 4] + xl3[1:] * cosa3
-            s_0[1:, 5] = s_0[0, 5] + xl3[1:] * cosb3  
+            s_0[1:, 5] = s_0[0, 5] + xl3[1:] * cosb3
             s_0[1:, 6] = s_0[0, 6] + xl4[1:] * cosa4
-            s_0[1:, 7] = s_0[0, 7] + xl4[1:] * cosb4         
+            s_0[1:, 7] = s_0[0, 7] + xl4[1:] * cosb4
             s_0[1:, 8] = s_0[0, 8] + xl5[1:] * cosa5
-            s_0[1:, 9] = s_0[0, 9] + xl5[1:] * cosb5         
+            s_0[1:, 9] = s_0[0, 9] + xl5[1:] * cosb5
             s_0[1:, 10] = s_0[0, 10] + xl6[1:] * cosa6
-            s_0[1:, 11] = s_0[0, 11] + xl6[1:]* cosb6         
-         
-       
+            s_0[1:, 11] = s_0[0, 11] + xl6[1:]* cosb6
+
             s_p = np.copy(s_0)
             s_p[:, 0] -= N1*sfac * cosb1
             s_p[:, 1] += N1*sfac * cosa1
             s_p[:, 2] -= N2*sfac * cosb2
-            s_p[:, 3] += N2*sfac * cosa2        
+            s_p[:, 3] += N2*sfac * cosa2
             s_p[:, 4] -= N3*sfac * cosb3
-            s_p[:, 5] += N3*sfac * cosa3         
+            s_p[:, 5] += N3*sfac * cosa3
             s_p[:, 6] -= N4*sfac * cosb4
             s_p[:, 7] += N4*sfac * cosa4
             s_p[:, 8] -= N5*sfac * cosb5
@@ -699,25 +699,22 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
             s_p[:, 11] += N6*sfac * cosa6
 
             plt.axis('equal')
-         
+
                      # model
             ax.plot([ecrd[0,0], ecrd[6,0]],[ecrd[0,1],ecrd[6,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
                     dash_capstyle='butt', dash_joinstyle='round')
             ax.plot([ecrd[1,0], ecrd[5,0]],[ecrd[1,1],ecrd[5,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
-                    dash_capstyle='butt', dash_joinstyle='round')            
+                    dash_capstyle='butt', dash_joinstyle='round')
             ax.plot([ecrd[11,0], ecrd[7,0]],[ecrd[11,1],ecrd[7,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
-                    dash_capstyle='butt', dash_joinstyle='round')            
+                    dash_capstyle='butt', dash_joinstyle='round')
             ax.plot([ecrd[9,0], ecrd[3,0]],[ecrd[9,1],ecrd[3,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
-                    dash_capstyle='butt', dash_joinstyle='round')            
+                    dash_capstyle='butt', dash_joinstyle='round')
             ax.plot([ecrd[10,0], ecrd[2,0]],[ecrd[10,1],ecrd[2,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
-                    dash_capstyle='butt', dash_joinstyle='round')            
+                    dash_capstyle='butt', dash_joinstyle='round')
             ax.plot([ecrd[8,0], ecrd[4,0]],[ecrd[8,1],ecrd[4,1]], 'k-', solid_capstyle='round', solid_joinstyle='round',
-                    dash_capstyle='butt', dash_joinstyle='round')          
-            
+                    dash_capstyle='butt', dash_joinstyle='round')
 
-
-            if sf_type == 'N' or sf_type == 'axial':        
-
+            if sf_type == 'N' or sf_type == 'axial':
 
                 if N_1>0:
                     va='top'
@@ -726,7 +723,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color1='r'
-                    fmt_secforce1a=fmt_secforce_compression  
+                    fmt_secforce1a=fmt_secforce_compression
 
                 if N_2>0:
                     va='top'
@@ -735,8 +732,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color2='r'
-                    fmt_secforce2a=fmt_secforce_compression 
-               
+                    fmt_secforce2a=fmt_secforce_compression
+
                 if N_3>0:
                     va='top'
                     fmt_color3='b'
@@ -744,8 +741,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color3='r'
-                    fmt_secforce3a=fmt_secforce_compression 
-               
+                    fmt_secforce3a=fmt_secforce_compression
+
                 if N_4>0:
                     va='top'
                     fmt_color4='b'
@@ -753,8 +750,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color4='r'
-                    fmt_secforce4a=fmt_secforce_compression 
-               
+                    fmt_secforce4a=fmt_secforce_compression
+
                 if N_5>0:
                     va='top'
                     fmt_color5='b'
@@ -762,8 +759,8 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color5='r'
-                    fmt_secforce5a=fmt_secforce_compression 
-               
+                    fmt_secforce5a=fmt_secforce_compression
+
                 if N_6>0:
                     va='top'
                     fmt_color6='b'
@@ -771,19 +768,16 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                 else:
                     va='bottom'
                     fmt_color6='r'
-                    fmt_secforce6a=fmt_secforce_compression 
+                    fmt_secforce6a=fmt_secforce_compression
 
-             
-
-             # section force curve
+                # section force curve
                 ax.plot(s_p[:, 0], s_p[:, 1], **fmt_secforce1a)
-                ax.plot(s_p[:, 2], s_p[:, 3], **fmt_secforce2a)            
-                ax.plot(s_p[:, 4], s_p[:, 5],**fmt_secforce3a)            
+                ax.plot(s_p[:, 2], s_p[:, 3], **fmt_secforce2a)
+                ax.plot(s_p[:, 4], s_p[:, 5], **fmt_secforce3a)
                 ax.plot(s_p[:, 6], s_p[:, 7], **fmt_secforce4a)
                 ax.plot(s_p[:, 8], s_p[:, 9], **fmt_secforce5a)
-                ax.plot(s_p[:, 10], s_p[:, 11], **fmt_secforce6a)            
+                ax.plot(s_p[:, 10], s_p[:, 11], **fmt_secforce6a)
 
-          
             # reference perpendicular lines
                 for i in np.arange(nep):
                     ax.plot([s_0[i, 0], s_p[i, 0]], [s_0[i, 1], s_p[i, 1]],
@@ -793,33 +787,33 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
                     if sf_type == 'N' or sf_type == 'axial':
                         ax.text(s_p[int(nep / 2), 0], s_p[int(nep / 2), 1],
                             f'{abs(N_1):.1f}', va=va, ha=ha, color=fmt_color1)
-          
+
                     ax.plot([s_0[i, 2], s_p[i, 2]], [s_0[i, 3], s_p[i, 3]],
-                        **fmt_secforce2)   
+                        **fmt_secforce2)
                     ha = 'center'
                     va = 'center'
                     if sf_type == 'N' or sf_type == 'axial':
                         ax.text(s_p[int(nep / 2), 2], s_p[int(nep / 2), 3],
                             f'{abs(N_2):.1f}', va=va, ha=ha, color=fmt_color2)
-               
+
                     ax.plot([s_0[i, 4], s_p[i, 4]], [s_0[i, 5], s_p[i, 5]],
-                        **fmt_secforce2)                    
+                        **fmt_secforce2)
                     ha = 'center'
                     va = 'center'
                     if sf_type == 'N' or sf_type == 'axial':
                         ax.text(s_p[int(nep / 2), 4], s_p[int(nep / 2), 5],
                             f'{abs(N_3):.1f}', va=va, ha=ha, color=fmt_color3)
-                        
+
                     ax.plot([s_0[i, 6], s_p[i, 6]], [s_0[i, 7], s_p[i, 7]],
-                        **fmt_secforce2)                    
+                        **fmt_secforce2)
                     ha = 'center'
                     va = 'center'
                     if sf_type == 'N' or sf_type == 'axial':
                         ax.text(s_p[int(nep / 2), 6], s_p[int(nep / 2), 7],
-                            f'{abs(N_4):.1f}', va=va, ha=ha, color=fmt_color4)               
-               
+                            f'{abs(N_4):.1f}', va=va, ha=ha, color=fmt_color4)
+
                     ax.plot([s_0[i, 8], s_p[i, 8]], [s_0[i, 9], s_p[i, 9]],
-                        **fmt_secforce2)    
+                        **fmt_secforce2)
                     ha = 'center'
                     va = 'center'
                     if sf_type == 'N' or sf_type == 'axial':
@@ -836,7 +830,7 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
             elif sf_type == 'V' or sf_type == 'shear' or sf_type=='T':  
                     ax.text(Lx/3,Ly*2/3,f'Shear= {tau:{8}.{3}}',color='r')                
-                
+
 
     if node_supports:
         node_tags = ops.getNodeTags()
@@ -1129,8 +1123,7 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
                     if maxVal_ind != 0 and maxVal_ind != nep - 1:
                         ax.text(s_p[maxVal_ind, 0], s_p[maxVal_ind, 1], s_p[maxVal_ind, 2],
                                 f'{ss[maxVal_ind]:.5g}', va=va, ha=ha)
-  
-            
+
     if node_supports:
         node_tags = ops.getNodeTags()
         ax = model._plot_supports(node_tags, ax)
