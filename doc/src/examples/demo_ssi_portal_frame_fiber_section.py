@@ -73,7 +73,6 @@ ops.load(101, Px, -Py, 0.)
 
 ops.eleLoad('-ele', 121, '-type', '-beamUniform', Wy)
 
-ops.algorithm('Linear')
 ops.analysis('Static')
 ops.analyze(1)
 
