@@ -11,6 +11,7 @@ Welcome to Opsvis documentation!
    :caption: Contents:
 
    GettingStarted
+   Gallery
    plot_model
    plot_defo
    plot_load
