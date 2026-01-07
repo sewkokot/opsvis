@@ -57,7 +57,6 @@ following import: ::
 	sfac = opsv.plot_defo()
 
 Commands
-========
 
 The main commands for visualizing various aspects of an OpenSees
 model are as follows:
