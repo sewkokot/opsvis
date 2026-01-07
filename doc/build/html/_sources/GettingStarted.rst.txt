@@ -9,16 +9,15 @@ if you are already using OpenSeesPy.
 
 Under Windows do the following steps:
 
-1. download and install Anaconda distribution from
-  `<https://www.anaconda.com/download>`_
+1. download and install Anaconda distribution from `<https://www.anaconda.com/download>`_
 
   Please check the current Python (e.g. 3.12) version required for
   OpenSeesPy (e. g. 3.7.0.4). More details can be found in `OpenSeesPy documentation <https://openseespydoc.readthedocs.io>`_
 
 2. After installing Anaconda, run its Powershell Prompt and type ::
 
-   pip install openseespy
-   pip install opsvis
+    pip install openseespy
+    pip install opsvis
 
 3. Launch Spyder from Anaconda
 
