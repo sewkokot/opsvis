@@ -2,10 +2,8 @@
  Getting Started
 ================
 
-Getting started in OpenSeesPy and opsvis
-
-To get started in OpenSeesPy and opsvis is straightforward especially
-if you are already using OpenSeesPy.
+Getting started in OpenSeesPy and opsvis is straightforward especially
+if you are already using OpenSeesPy
 
 Under Windows do the following steps:
 

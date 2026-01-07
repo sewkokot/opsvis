@@ -1,7 +1,6 @@
-
-==========
+===============
  plot_reactions
-==========
+===============
 
 .. automodule:: opsvis
    :noindex:
