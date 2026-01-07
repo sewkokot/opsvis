@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Welcome to Opsvis documentation! &mdash; opsvis 1.3.3 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=f5127f15" />
 
   
@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="plot_model" href="plot_model.html" /> 
+    <link rel="next" title="Getting Started" href="GettingStarted.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -43,6 +43,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_model.html">plot_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_defo.html">plot_defo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_load.html">plot_load</a></li>
@@ -91,6 +92,10 @@
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="GettingStarted.html">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="GettingStarted.html#commands">Commands</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="plot_model.html">plot_model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_defo.html">plot_defo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="plot_load.html">plot_load</a></li>
@@ -131,52 +136,8 @@ principal stresses.</p></li>
 learning OpenSees in civil engineering education. Additionally, Opsvis
 provides visualization features that can support advanced research
 applications.</p>
-</section>
-<section id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">opsvis</span></code></p>
-</section>
-<section id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
-<p>To use Opsvis in your OpenSeesPy scripts, begin your <code class="docutils literal notranslate"><span class="pre">.py</span></code> file with the
-following import:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">openseespy.opensees</span> <span class="k">as</span> <span class="nn">ops</span>
-<span class="kn">import</span> <span class="nn">opsvis</span> <span class="k">as</span> <span class="nn">opsv</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-
-<span class="c1"># ... your OpenSeesPy model and analysis commands ...</span>
-<span class="n">opsv</span><span class="o">.</span><span class="n">plot_model</span><span class="p">()</span>
-<span class="n">opsv</span><span class="o">.</span><span class="n">plot_load</span><span class="p">()</span>
-<span class="n">opsv</span><span class="o">.</span><span class="n">plot_reactions</span><span class="p">()</span>
-<span class="n">sfac</span> <span class="o">=</span> <span class="n">opsv</span><span class="o">.</span><span class="n">plot_defo</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="commands">
-<h1>Commands<a class="headerlink" href="#commands" title="Link to this heading"></a></h1>
-<p>The main commands for visualizing various aspects of an OpenSees
-model are as follows:</p>
-<ol class="arabic simple">
-<li><p><a class="reference internal" href="plot_model.html"><span class="doc">plot_model</span></a></p></li>
-<li><p><a class="reference internal" href="plot_defo.html"><span class="doc">plot_defo</span></a></p></li>
-<li><p><a class="reference internal" href="plot_load.html"><span class="doc">plot_load</span></a></p></li>
-<li><p><a class="reference internal" href="plot_mode_shape.html"><span class="doc">plot_mode_shape</span></a></p></li>
-<li><p><a class="reference internal" href="section_force_diagram_2d.html"><span class="doc">section_force_diagram_2d</span></a></p></li>
-<li><p><a class="reference internal" href="section_force_diagram_3d.html"><span class="doc">section_force_diagram_3d</span></a></p></li>
-<li><p><a class="reference internal" href="plot_stress.html"><span class="doc">plot_stress</span></a></p></li>
-<li><p><a class="reference internal" href="plot_strain.html"><span class="doc">plot_strain</span></a></p></li>
-<li><p><a class="reference internal" href="plot_stress_2d.html"><span class="doc">plot_stress_2d</span></a></p></li>
-<li><p><a class="reference internal" href="plot_extruded_model_rect_section_3d.html"><span class="doc">plot_extruded_model_rect_section_3d</span></a></p></li>
-<li><p><a class="reference internal" href="anim_defo.html"><span class="doc">anim_defo</span></a></p></li>
-<li><p><a class="reference internal" href="anim_mode.html"><span class="doc">anim_mode</span></a></p></li>
-<li><p><a class="reference internal" href="plot_fiber_section.html"><span class="doc">plot_fiber_section</span></a></p></li>
-</ol>
-<p>You can also make use of the following helper functions:</p>
-<ol class="arabic simple">
-<li><p><a class="reference internal" href="fib_sec_list_to_cmds.html"><span class="doc">fib_sec_list_to_cmds</span></a></p></li>
-<li><p><a class="reference internal" href="sig_out_per_node.html"><span class="doc">sig_out_per_node</span></a></p></li>
-</ol>
-<p>Check out the <a class="reference internal" href="examples.html"><span class="doc">Examples</span></a> page for usage demonstrations.</p>
+<p>Check out the <a class="reference internal" href="GettingStarted.html"><span class="doc">Getting Started</span></a> page on how to get started in
+OpenSeesPy and Opsvis.</p>
 </section>
 <section id="notes">
 <h1>Notes:<a class="headerlink" href="#notes" title="Link to this heading"></a></h1>
@@ -191,7 +152,7 @@ written by D. Vamvatsikos available at
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="plot_model.html" class="btn btn-neutral float-right" title="plot_model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="GettingStarted.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
