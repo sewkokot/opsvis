@@ -10,6 +10,7 @@ Welcome to Opsvis documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   GettingStarted
    plot_model
    plot_defo
    plot_load
@@ -52,56 +53,9 @@ learning OpenSees in civil engineering education. Additionally, Opsvis
 provides visualization features that can support advanced research
 applications.
 
+Check out the :doc:`GettingStarted` page on how to get started in
+OpenSeesPy and Opsvis.
 
-Installation
-============
-
-``pip install opsvis``
-
-
-Usage
-=====
-
-To use Opsvis in your OpenSeesPy scripts, begin your ``.py`` file with the
-following import: ::
-
-	import openseespy.opensees as ops
-	import opsvis as opsv
-	import matplotlib.pyplot as plt
-
-	# ... your OpenSeesPy model and analysis commands ...
-	opsv.plot_model()
-	opsv.plot_load()
-	opsv.plot_reactions()
-	sfac = opsv.plot_defo()
-
-
-Commands
-========
-
-The main commands for visualizing various aspects of an OpenSees
-model are as follows:
-
-#. :doc:`plot_model`
-#. :doc:`plot_defo`
-#. :doc:`plot_load`
-#. :doc:`plot_mode_shape`
-#. :doc:`section_force_diagram_2d`
-#. :doc:`section_force_diagram_3d`
-#. :doc:`plot_stress`
-#. :doc:`plot_strain`
-#. :doc:`plot_stress_2d`
-#. :doc:`plot_extruded_model_rect_section_3d`
-#. :doc:`anim_defo`
-#. :doc:`anim_mode`
-#. :doc:`plot_fiber_section`
-
-You can also make use of the following helper functions:
-
-#. :doc:`fib_sec_list_to_cmds`
-#. :doc:`sig_out_per_node`
-
-Check out the :doc:`examples` page for usage demonstrations.
 
 Notes:
 ======
