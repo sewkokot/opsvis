@@ -57,6 +57,7 @@ applications.
 Check out the :doc:`GettingStarted` page on how to get started in
 OpenSeesPy and Opsvis.
 
+If you use opsvis, please cite `opsvis: pre-, post-processing and visualization Python module for OpenSeesPy", SoftwareX, 34, June 2026, 102615 <https://www.sciencedirect.com/science/article/pii/S2352711026001081>`_.
 
 Notes:
 ======
