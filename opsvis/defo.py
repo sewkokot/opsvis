@@ -167,6 +167,9 @@ def _plot_defo_mode_2d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         # beam/frame element plot_defo
         elif (ele_classtag == EleClassTag.ElasticBeam2d
               or ele_classtag == EleClassTag.ForceBeamColumn2d
+              or ele_classtag == EleClassTag.ForceBeamColumnCBDI2d
+              or ele_classtag == EleClassTag.MixedBeamColumn2d
+              or ele_classtag == EleClassTag.GradientInelasticBeamColumn2d
               or ele_classtag == EleClassTag.DispBeamColumn2d
               or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
               or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
@@ -569,6 +572,10 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
         # if (ele_classtag == EleClassTag.truss):
         if (ele_classtag == EleClassTag.ElasticBeam3d
             or ele_classtag == EleClassTag.ForceBeamColumn3d
+            or ele_classtag == EleClassTag.ForceBeamColumnCBDI3d
+            or ele_classtag == EleClassTag.MixedBeamColumn3d
+            or ele_classtag == EleClassTag.MixedBeamColumnAsym3d
+            or ele_classtag == EleClassTag.GradientInelasticBeamColumn3d
             or ele_classtag == EleClassTag.DispBeamColumn3d
             or ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d
             or ele_classtag == EleClassTag.DispBeamColumn3dThermal
@@ -592,9 +599,7 @@ def _plot_defo_mode_3d(modeNo, sfac, nep, unDefoFlag, fmt_defo, fmt_undefo,
                     ed[i, :] = ops.nodeDisp(ele_node_tag)
 
             # eo = Eo[i, :]
-            g = np.vstack((ops.eleResponse(ele_tag, 'xlocal'),
-                           ops.eleResponse(ele_tag, 'ylocal'),
-                           ops.eleResponse(ele_tag, 'zlocal')))
+            g = opsvmodel.ele_local_axes_3d(ele_tag, ecrd)
 
             if unDefoFlag:
                 plt.plot(ecrd[:, 0], ecrd[:, 1], ecrd[:, 2], **fmt_undefo)
@@ -1305,6 +1310,9 @@ def max_u_abs_from_beam_defo_interp_2d(max_u_abs, nep):
 
         if (ele_classtag == EleClassTag.ElasticBeam2d or
             ele_classtag == EleClassTag.ForceBeamColumn2d or
+            ele_classtag == EleClassTag.ForceBeamColumnCBDI2d or
+            ele_classtag == EleClassTag.MixedBeamColumn2d or
+            ele_classtag == EleClassTag.GradientInelasticBeamColumn2d or
             ele_classtag == EleClassTag.DispBeamColumn2d or
             ele_classtag == EleClassTag.DispBeamColumn2dThermal or
             ele_classtag == EleClassTag.ForceBeamColumn2dThermal):
@@ -1355,21 +1363,23 @@ def max_u_abs_from_beam_defo_interp_3d(max_u_abs, nep):
 
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
+            ele_classtag == EleClassTag.ForceBeamColumnCBDI3d or
+            ele_classtag == EleClassTag.MixedBeamColumn3d or
+            ele_classtag == EleClassTag.MixedBeamColumnAsym3d or
+            ele_classtag == EleClassTag.GradientInelasticBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3dThermal or
             ele_classtag == EleClassTag.ForceBeamColumn3dThermal):
 
             ele_node_tags = ops.eleNodes(ele_tag)
 
-            g = np.vstack((ops.eleResponse(ele_tag, 'xlocal'),
-                           ops.eleResponse(ele_tag, 'ylocal'),
-                           ops.eleResponse(ele_tag, 'zlocal')))
-
             ecrd = np.zeros((nen, 3))
             ed = np.zeros((nen, ndf))
 
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ecrd[i, :] = ops.nodeCoord(ele_node_tag)
+
+            g = opsvmodel.ele_local_axes_3d(ele_tag, ecrd)
 
             for i, ele_node_tag in enumerate(ele_node_tags):
                 ed[i, :] = ops.nodeDisp(ele_node_tag)
