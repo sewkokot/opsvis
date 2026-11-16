@@ -972,7 +972,10 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
               fmt_undefo=fmt_undefo, fmt_defo_faces=fmt_defo_faces,
               fmt_undefo_faces=fmt_undefo_faces, interpFlag=1, endDispFlag=0,
               fmt_nodes=fmt_nodes, Eo=0, az_el=az_el,
-              fig_wi_he=False, fig_lbrt=False, node_supports=True, ax=False):
+              fig_wi_he=False, fig_lbrt=False, node_supports=True,
+              node_val_display=False, node_val_display_node_tags=False,
+              node_val_display_rotations=True,
+              ax=False):
     """Plot deformed shape of the structure.
 
     Args:
@@ -1022,6 +1025,30 @@ def plot_defo(sfac=False, nep=17, unDefoFlag=1, fmt_defo=fmt_defo,
                                 fmt_undefo_faces, interpFlag,
                                 endDispFlag, fmt_nodes, fig_wi_he,
                                 fig_lbrt, node_supports, ax)
+
+        if node_val_display:
+            if not node_val_display_node_tags:
+                node_val_display_node_tags = node_tags
+
+            for node_tag in node_val_display_node_tags:
+                u = np.array(ops.nodeDisp(node_tag))
+                crd = np.array(ops.nodeCoord(node_tag))
+                # ut = f'{u[0]:.3g}; {u[1]:.3g}'
+                xy = crd + sfac * u[:2]
+                if np.size(u) > 2:
+                    if node_val_display_rotations:
+                        ut = f'{u[0]:.2e},\n{u[1]:.2e},\n{u[2]:.3e}'
+
+                    else:
+                        ut = f'{u[0]:.2e},\n{u[1]:.2e}'
+
+                else:
+                    ut = f'{u[0]:.2e},\n{u[1]:.2e}'
+
+                ax.text(xy[0], xy[1],
+                        ut,
+                        ha='center', va='bottom',
+                        fontsize=8)
 
     elif ndim == 3:
         ax = _plot_defo_mode_3d(0, sfac, nep, unDefoFlag, fmt_defo,
