@@ -436,6 +436,9 @@ def section_force_diagram_2d(sf_type, sfac=1., nep=17,
 
         if (ele_class_tag == EleClassTag.ElasticBeam2d
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
+            or ele_class_tag == EleClassTag.ForceBeamColumnCBDI2d
+            or ele_class_tag == EleClassTag.MixedBeamColumn2d
+            or ele_class_tag == EleClassTag.GradientInelasticBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
             or ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
@@ -948,16 +951,17 @@ def section_force_diagram_3d(sf_type, sfac=1., nep=17,
 
         if (ele_class_tag == EleClassTag.ElasticBeam3d
             or ele_class_tag == EleClassTag.ForceBeamColumn3d
+            or ele_class_tag == EleClassTag.ForceBeamColumnCBDI3d
+            or ele_class_tag == EleClassTag.MixedBeamColumn3d
+            or ele_class_tag == EleClassTag.MixedBeamColumnAsym3d
+            or ele_class_tag == EleClassTag.GradientInelasticBeamColumn3d
             or ele_class_tag == EleClassTag.DispBeamColumn3d
             or ele_class_tag in [EleClassTag.truss, EleClassTag.trussSection]
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn3d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam3d):
 
             # eo = Eo[i, :]
-            xloc = ops.eleResponse(ele_tag, 'xlocal')
-            yloc = ops.eleResponse(ele_tag, 'ylocal')
-            zloc = ops.eleResponse(ele_tag, 'zlocal')
-            g = np.vstack((xloc, yloc, zloc))
+            g = model.ele_local_axes_3d(ele_tag, ecrd)
 
             # rigid offsets for 3d
             ele_offsets = np.array(ops.eleResponse(ele_tag, 'offsets'))

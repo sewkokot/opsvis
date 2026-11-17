@@ -68,8 +68,15 @@ class EleClassTag:
     DispBeamColumn3dThermal = 130    
     ForceBeamColumn2d = 73
     ForceBeamColumn3d = 74
+    ForceBeamColumnCBDI2d = 77
+    ForceBeamColumnCBDI3d = 78
     ForceBeamColumn2dThermal = 171
     ForceBeamColumn3dThermal = 172    
+    MixedBeamColumn2d = 30766
+    MixedBeamColumn3d = 30765
+    MixedBeamColumnAsym3d = 30767
+    GradientInelasticBeamColumn2d = 192
+    GradientInelasticBeamColumn3d = 193
     TimoshenkoBeamColumn2d = 63
     TimoshenkoBeamColumn3d = 631
     ElasticTimoshenkoBeam2d = 145

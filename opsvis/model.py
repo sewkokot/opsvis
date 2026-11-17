@@ -127,6 +127,9 @@ def _plot_model_2d(node_labels, element_labels, offset_nd_label, axis_off,
 
         if (ele_classtag == EleClassTag.ElasticBeam2d
                 or ele_classtag == EleClassTag.ForceBeamColumn2d
+                or ele_classtag == EleClassTag.ForceBeamColumnCBDI2d
+                or ele_classtag == EleClassTag.MixedBeamColumn2d
+                or ele_classtag == EleClassTag.GradientInelasticBeamColumn2d
                 or ele_classtag == EleClassTag.DispBeamColumn2d
                 or ele_classtag == EleClassTag.TimoshenkoBeamColumn2d
                 or ele_classtag == EleClassTag.ElasticTimoshenkoBeam2d
@@ -651,6 +654,10 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
 
         if (ele_classtag == EleClassTag.ElasticBeam3d or
             ele_classtag == EleClassTag.ForceBeamColumn3d or
+            ele_classtag == EleClassTag.ForceBeamColumnCBDI3d or
+            ele_classtag == EleClassTag.MixedBeamColumn3d or
+            ele_classtag == EleClassTag.MixedBeamColumnAsym3d or
+            ele_classtag == EleClassTag.GradientInelasticBeamColumn3d or
             ele_classtag == EleClassTag.DispBeamColumn3d or
             ele_classtag == EleClassTag.ElasticTimoshenkoBeam3d or
             ele_classtag == EleClassTag.Pipe or
@@ -721,10 +728,7 @@ def _plot_model_3d(node_labels, element_labels, offset_nd_label,
 
             if local_axes:
                 # eo = Eo[i, :]
-                xloc = ops.eleResponse(ele_tag, 'xlocal')
-                yloc = ops.eleResponse(ele_tag, 'ylocal')
-                zloc = ops.eleResponse(ele_tag, 'zlocal')
-                g = np.vstack((xloc, yloc, zloc))
+                g = ele_local_axes_3d(ele_tag, ecrd_eles)
                 L = bar_length(ecrd_eles)
                 alen = 0.1 * L
 
@@ -1389,6 +1393,9 @@ def plot_loads_2d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
         if (ele_class_tag == EleClassTag.ElasticBeam2d
             or ele_class_tag == EleClassTag.ForceBeamColumn2d
+            or ele_class_tag == EleClassTag.ForceBeamColumnCBDI2d
+            or ele_class_tag == EleClassTag.MixedBeamColumn2d
+            or ele_class_tag == EleClassTag.GradientInelasticBeamColumn2d
             or ele_class_tag == EleClassTag.DispBeamColumn2d
             or ele_class_tag == EleClassTag.TimoshenkoBeamColumn2d
             or ele_class_tag == EleClassTag.ElasticTimoshenkoBeam2d
@@ -1650,6 +1657,10 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
 
         if (ele_class_tag == EleClassTag.ElasticBeam3d
             or ele_class_tag == EleClassTag.ForceBeamColumn3d
+            or ele_class_tag == EleClassTag.ForceBeamColumnCBDI3d
+            or ele_class_tag == EleClassTag.MixedBeamColumn3d
+            or ele_class_tag == EleClassTag.MixedBeamColumnAsym3d
+            or ele_class_tag == EleClassTag.GradientInelasticBeamColumn3d
             or ele_class_tag == EleClassTag.DispBeamColumn3d
             or ele_class_tag == EleClassTag.DispBeamColumn3dThermal
             or ele_class_tag == EleClassTag.ForceBeamColumn3dThermal):
@@ -1678,10 +1689,7 @@ def plot_loads_3d(nep, sfac, fig_wi_he, fig_lbrt, fmt_model_loads,
                 pass
 
             # step 2
-            xloc = ops.eleResponse(ele_tag, 'xlocal')
-            yloc = ops.eleResponse(ele_tag, 'ylocal')
-            zloc = ops.eleResponse(ele_tag, 'zlocal')
-            g = np.vstack((xloc, yloc, zloc))
+            g = ele_local_axes_3d(ele_tag, ecrd_eles)
 
             G, L = rot_transf_3d(ecrd_eles, g)
 
@@ -2335,10 +2343,7 @@ def plot_extruded_shapes_3d(ele_shapes, az_el=az_el,
                 dash_joinstyle='round')
 
         # eo = Eo[i, :]
-        xloc = ops.eleResponse(ele_tag, 'xlocal')
-        yloc = ops.eleResponse(ele_tag, 'ylocal')
-        zloc = ops.eleResponse(ele_tag, 'zlocal')
-        g = np.vstack((xloc, yloc, zloc))
+        g = ele_local_axes_3d(ele_tag, ecrd)
 
         G, L = rot_transf_3d(ecrd, g)
 
@@ -2524,6 +2529,64 @@ def rot_transf_2d(ecrd):
                   [0., 0., 0., 0., 0., 1.]])
 
     return G, L, cosa, cosb
+
+
+# set to True after the first warning about missing local axes responses
+_ele_local_axes_warned = False
+
+
+def ele_local_axes_3d(ele_tag, ecrd):
+    """Return the 3x3 matrix whose rows are the element local x, y, z axes.
+
+    The local axes are normally taken from the coordinate transformation of
+    the element through the 'xlocal', 'ylocal', 'zlocal' element responses.
+    A few beam-column elements (e.g. MixedBeamColumnAsym3d,
+    GradientInelasticBeamColumn3d) do not forward these requests to their
+    coordinate transformation object. For such elements the local axes are
+    recovered from the element geometry using a default vector in the local
+    x-z plane. The element axis (local x) is then still correct, however the
+    orientation of the local y and z axes about the element axis can differ
+    from the vecxz vector given in the geomTransf command.
+
+    Args:
+        ele_tag (int): element tag
+
+        ecrd (ndarray): (2, 3) array with the coordinates of the element nodes
+
+    Returns:
+        g (ndarray): (3, 3) array, rows are the local x, y and z unit vectors
+    """
+    global _ele_local_axes_warned
+
+    xloc = ops.eleResponse(ele_tag, 'xlocal')
+    yloc = ops.eleResponse(ele_tag, 'ylocal')
+    zloc = ops.eleResponse(ele_tag, 'zlocal')
+
+    if len(xloc) == 3 and len(yloc) == 3 and len(zloc) == 3:
+        return np.vstack((xloc, yloc, zloc))
+
+    if not _ele_local_axes_warned:
+        _ele_local_axes_warned = True
+        print(f'\nWarning! Element {ele_tag} does not return the xlocal, ylocal, zlocal responses.')
+        print('Warning! Local axes are recovered from the element geometry assuming a default vecxz vector.')
+
+    # local x axis along the element
+    xa = ecrd[1, :] - ecrd[0, :]
+    xa = xa / np.sqrt(xa @ xa)
+
+    # default vector in the local x-z plane (vecxz of the geomTransf command)
+    vecxz = np.array([0., 0., 1.])
+    # local y = vecxz x x, local z = x x y (as in OpenSees CrdTransf3d)
+    ya = np.cross(vecxz, xa)
+    if np.sqrt(ya @ ya) < 1.e-8:
+        # the element is parallel to the global Z axis (e.g. a column)
+        vecxz = np.array([1., 0., 0.])
+        ya = np.cross(vecxz, xa)
+
+    ya = ya / np.sqrt(ya @ ya)
+    za = np.cross(xa, ya)
+
+    return np.vstack((xa, ya, za))
 
 
 def rot_transf_3d(ecrd, g):
